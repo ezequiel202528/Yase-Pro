@@ -4,9 +4,9 @@
  * - Realiza consultas (SELECT) e exclusões (DELETE).
  */
 
-const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // Sua chave completa aqui
-const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co";
+// const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // Sua chave completa aqui
+// const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function loadItens() {
     try {

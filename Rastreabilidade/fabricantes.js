@@ -1,134 +1,187 @@
-async function openFabricanteModal() {
-    document.getElementById('modalFabricante').classList.remove('hidden');
-    cancelarEdicao(); // Garante que começa em modo cadastro
-    await fetchFabricantes(); 
-}
+// Usamos 'var' para evitar erros de redeclaração no console
+var idFabEdicaoGlobal = null;
 
-function closeFabricanteModal() {
-    document.getElementById('modalFabricante').classList.add('hidden');
-}
+// --- 1. BUSCA NOME DINÂMICO (EXIBE DENTRO DO INPUT) ---
+async function X_BUSCAR_POR_ID(id) {
+    const input = document.getElementById("X_input_id");
+    const badge = document.getElementById("badgeNomeFabricante");
 
-// Adiciona busca automática enquanto digita
-document.addEventListener('DOMContentLoaded', () => {
-    const n = document.getElementById('searchFabNome');
-    const a = document.getElementById('searchFabApelido');
-    if(n) n.oninput = fetchFabricantes;
-    if(a) a.oninput = fetchFabricantes;
-});
-
-async function fetchFabricantes() {
-    const nome = document.getElementById('searchFabNome').value;
-    const apelido = document.getElementById('searchFabApelido').value;
-    try {
-        let q = _supabase.from('fabricantes').select('*').order('nome', { ascending: true });
-        if (nome) q = q.ilike('nome', `%${nome}%`);
-        if (apelido) q = q.ilike('apelido', `%${apelido}%`);
-        const { data, error } = await q;
-        if (error) throw error;
-        renderFabricantesModal(data);
-    } catch (e) { console.error(e.message); }
-}
-
-function renderFabricantesModal(lista) {
-    const tbody = document.getElementById('listaFabricantesModal');
-    tbody.innerHTML = lista.map(f => `
-        <tr class="hover:bg-indigo-50/50 transition-all group cursor-pointer">
-            <td onclick="selectFabricante('${f.nome}', '${f.id}')" class="p-3 text-slate-400 font-mono text-[10px]">${f.id}</td>
-            <td onclick="selectFabricante('${f.nome}', '${f.id}')" class="p-3 font-bold text-slate-700 uppercase text-xs">${f.nome}</td>
-            <td onclick="selectFabricante('${f.nome}', '${f.id}')" class="p-3 text-slate-500 uppercase text-xs">${f.apelido || '-'}</td>
-            <td class="p-3 text-right space-x-2">
-                <button onclick="prepararEdicao('${f.id}', '${f.nome}', '${f.apelido}')" class="text-blue-500 hover:scale-110"><i class="fa-solid fa-pen-to-square"></i></button>
-                <button onclick="deletarFabricante('${f.id}', '${f.nome}')" class="text-red-300 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function prepararEdicao(id, nome, apelido) {
-    const modal = document.getElementById('modalFabricante');
-    modal.dataset.editingId = id;
-    document.getElementById('searchFabNome').value = nome;
-    document.getElementById('searchFabApelido').value = apelido;
-    document.getElementById('btnSalvarFab').innerText = "Salvar Alteração";
-    document.getElementById('btnSalvarFab').classList.replace('bg-indigo-600', 'bg-amber-500');
-    document.getElementById('btnCancelarEdit').classList.remove('hidden');
-}
-
-function cancelarEdicao() {
-    const modal = document.getElementById('modalFabricante');
-    delete modal.dataset.editingId;
-    document.getElementById('searchFabNome').value = "";
-    document.getElementById('searchFabApelido').value = "";
-    document.getElementById('btnSalvarFab').innerText = "Cadastrar";
-    document.getElementById('btnSalvarFab').classList.remove('bg-amber-500');
-    document.getElementById('btnSalvarFab').classList.add('bg-indigo-600');
-    document.getElementById('btnCancelarEdit').classList.add('hidden');
-    fetchFabricantes();
-}
-
-async function cadastrarFabricante() {
-    const modal = document.getElementById('modalFabricante');
-    const id = modal.dataset.editingId;
-    const nome = document.getElementById('searchFabNome').value.toUpperCase().trim();
-    const apelido = document.getElementById('searchFabApelido').value.toUpperCase().trim();
-
-    if (!nome) return alert("Nome obrigatório");
-
-    const { error } = id 
-        ? await _supabase.from('fabricantes').update({ nome, apelido }).eq('id', id)
-        : await _supabase.from('fabricantes').insert([{ nome, apelido }]);
-
-    if (error) alert(error.message);
-    else cancelarEdicao();
-}
-
-async function deletarFabricante(id, nome) {
-    solicitarConfirmacao({
-        titulo: "Excluir Fabricante",
-        mensagem: `Você deseja apagar <b>${nome.toUpperCase()}</b>? Isso pode afetar os extintores cadastrados com este código.`,
-        corBtn: "bg-red-500 hover:bg-red-600 shadow-red-200",
-        textoBtn: "Sim, Excluir",
-        icone: "fa-industry",
-        callback: async () => {
-            const { error } = await _supabase.from('fabricantes').delete().eq('id', id);
-            if (error) alert("Erro ao excluir: " + error.message);
-            else await fetchFabricantes();
-        }
-    });
-}
-
-// 1. Função para buscar o nome quando você digita o ID manualmente
-async function buscarFabricantePorCodigo(id) {
-    const display = document.getElementById('nomeFabricanteDisplay');
+    // Se o input estiver vazio, limpa o badge e o padding
     if (!id) {
-        display.innerText = '';
+        if (badge) badge.classList.add("hidden");
+        if (input) input.style.paddingLeft = "0.75rem"; // pl-3 original
         return;
     }
 
     try {
         const { data, error } = await _supabase
-            .from('fabricantes')
-            .select('nome')
-            .eq('id', id)
+            .from("fabricantes")
+            .select("nome")
+            .eq("id", id)
             .single();
 
-        if (data) {
-            display.innerText = data.nome;
+        if (data && !error) {
+            badge.innerText = data.nome;
+            badge.classList.remove("hidden");
+            
+            // Calcula o espaço necessário para o nome não cobrir o número digitado
+            // Aguarda um pequeno tempo para o badge renderizar e obter a largura real
+            setTimeout(() => {
+                const larguraBadge = badge.offsetWidth;
+                input.style.paddingLeft = (larguraBadge + 12) + "px";
+            }, 10);
         } else {
-            display.innerText = 'NÃO ACHOU';
+            if (badge) badge.classList.add("hidden");
+            if (input) input.style.paddingLeft = "0.75rem";
         }
     } catch (e) {
-        display.innerText = '';
+        if (badge) badge.classList.add("hidden");
     }
 }
 
-// 2. Função para quando você clica na linha da tabela no Modal
-window.selectFabricante = function(nome, id) {
-    const inputId = document.getElementById('fabricante_id');
-    const display = document.getElementById('nomeFabricanteDisplay');
+// --- 2. PREPARAR EDIÇÃO (ACIONADO PELO LÁPIS NO MODAL) ---
+function prepararEdicaoFabricante(id, nome, apelido) {
+    idFabEdicaoGlobal = id;
+
+    // Preenche os campos do formulário no modal
+    document.getElementById("busca_fab_nome").value = nome;
+    document.getElementById("busca_fab_apelido").value = apelido;
+
+    // Atualiza o input de Cód externo e mostra o badge com o nome
+    const inputId = document.getElementById("X_input_id");
+    const badge = document.getElementById("badgeNomeFabricante");
+
+    if (inputId && badge) {
+        inputId.value = id;
+        badge.innerText = nome;
+        badge.classList.remove("hidden");
+        
+        // Ajusta o padding dinamicamente
+        setTimeout(() => {
+            inputId.style.paddingLeft = (badge.offsetWidth + 12) + "px";
+        }, 20);
+    }
+
+    // Altera o botão do modal para modo ATUALIZAR
+    const btnSalvar = document.getElementById("btnSalvarFabricante");
+    if (btnSalvar) {
+        btnSalvar.innerHTML = '<i class="fa-solid fa-rotate"></i> ATUALIZAR';
+        btnSalvar.className = "bg-amber-500 border border-amber-600 px-6 py-1.5 text-[10px] font-black text-white hover:bg-amber-600 transition-all uppercase rounded-sm";
+    }
     
-    if (inputId) inputId.value = id;
-    if (display) display.innerText = nome;
+    document.getElementById("btnCancelarEdicaoFab")?.classList.remove("hidden");
+}
+
+// --- 3. CANCELAR / RESETAR INTERFACE ---
+function cancelarEdicaoFabricante() {
+    idFabEdicaoGlobal = null;
     
-    closeFabricanteModal();
-};
+    const inputId = document.getElementById("X_input_id");
+    const badge = document.getElementById("badgeNomeFabricante");
+
+    if (inputId) {
+        inputId.value = "";
+        inputId.style.paddingLeft = "0.75rem";
+    }
+    if (badge) badge.classList.add("hidden");
+
+    document.getElementById("busca_fab_nome").value = "";
+    document.getElementById("busca_fab_apelido").value = "";
+
+    const btnSalvar = document.getElementById("btnSalvarFabricante");
+    if (btnSalvar) {
+        btnSalvar.innerHTML = '+ Salvar Fabricante';
+        btnSalvar.className = "bg-slate-100 border border-slate-400 px-6 py-1.5 text-[10px] font-black text-slate-700 hover:bg-emerald-600 hover:text-white transition-all uppercase rounded-sm";
+    }
+    
+    document.getElementById("btnCancelarEdicaoFab")?.classList.add("hidden");
+}
+
+// --- 4. SALVAR OU ATUALIZAR NO BANCO ---
+async function cadastrarNovoFabricante() {
+    const nome = document.getElementById("busca_fab_nome").value.trim().toUpperCase();
+    const apelido = document.getElementById("busca_fab_apelido").value.trim().toUpperCase();
+
+    if (!nome) return alert("O nome é obrigatório.");
+
+    try {
+        if (idFabEdicaoGlobal) {
+            const { error } = await _supabase.from("fabricantes").update({ nome, apelido }).eq('id', idFabEdicaoGlobal);
+            if (error) throw error;
+        } else {
+            const { error } = await _supabase.from("fabricantes").insert([{ nome, apelido }]);
+            if (error) throw error;
+        }
+
+        cancelarEdicaoFabricante();
+        await carregarFabricantesNaTabela();
+    } catch (err) {
+        alert("Erro: " + err.message);
+    }
+}
+
+// --- 5. EXCLUIR COM SEU MODAL UNIVERSAL ---
+async function deletarFabricante(id) {
+    solicitarConfirmacao({
+        titulo: "EXCLUIR FABRICANTE",
+        mensagem: `Deseja remover o fabricante ID: ${id}?`,
+        icone: "fa-trash-can",
+        corBtn: "bg-red-500 hover:bg-red-600",
+        textoBtn: "Excluir",
+        callback: async () => {
+            try {
+                const { error } = await _supabase.from("fabricantes").delete().eq('id', id);
+                if (error) throw error;
+                await carregarFabricantesNaTabela();
+            } catch (e) {
+                alert("Erro ao excluir: Item pode estar vinculado.");
+            }
+        }
+    });
+}
+
+// --- 6. FUNÇÕES DE CARREGAMENTO E MODAL ---
+async function carregarFabricantesNaTabela(filtro = "") {
+    const tbody = document.getElementById("listaFabricantesModal");
+    if (!tbody) return;
+
+    try {
+        let query = _supabase.from("fabricantes").select("*").order("id", { ascending: true });
+        if (filtro) query = query.ilike("nome", `%${filtro}%`);
+
+        const { data, error } = await query;
+        if (error) throw error;
+
+        tbody.innerHTML = data.map(fab => `
+            <tr class="border-b border-slate-200 hover:bg-slate-50">
+                <td class="p-2 border-r border-slate-200 text-center font-bold text-indigo-600">${fab.id}</td>
+                <td class="p-2 border-r border-slate-200 uppercase font-bold">${fab.nome}</td>
+                <td class="p-2 border-r border-slate-200 uppercase text-slate-500 text-[10px]">${fab.apelido || ""}</td>
+                <td class="p-2 text-center">
+                    <div class="flex justify-center gap-2">
+                        <button onclick="prepararEdicaoFabricante(${fab.id}, '${fab.nome}', '${fab.apelido || ''}')" class="text-blue-500 hover:scale-125 transition-all">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deletarFabricante(${fab.id})" class="text-red-400 hover:scale-125 transition-all">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join("");
+    } catch (e) { console.error(e); }
+}
+
+async function X_ABRIR_FAB() {
+    document.getElementById("modalFabricante").classList.remove("hidden");
+    await carregarFabricantesNaTabela();
+}
+
+function fecharModalFab() {
+    document.getElementById("modalFabricante").classList.add("hidden");
+    cancelarEdicaoFabricante();
+}
+
+function filtrarFabricantes() {
+    carregarFabricantesNaTabela(document.getElementById("busca_fab_nome").value);
+}

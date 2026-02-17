@@ -1,292 +1,268 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>YaSe PRO - Gestão de Rastreabilidade</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <!-- Estilos customizados assumidos no diretório relativo -->
-    <link rel="stylesheet" href="Rastreabilidade/style.css">
-    <style>
-      body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-      aside { width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background: #0f172a; color: white; padding: 24px; display: flex; flex-direction: column; }
-      main { margin-left: 260px; padding: 32px; }
-      .section-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); margin-bottom: 24px; border: 1px solid #e2e8f0; }
-      .label-mini { display: block; font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-      .input-field { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #1e293b; transition: all 0.2s; }
-      .input-field:focus { outline: none; border-color: #6366f1; ring: 2px; ring-color: #6366f1/20; }
-      .btn-primary { background: #6366f1; color: white; padding: 10px 20px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.025em; transition: all 0.2s; border: none; cursor: pointer; }
-      .btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
-      .btn-ghost { padding: 10px; color: #64748b; border-radius: 8px; transition: all 0.2s; }
-      .btn-ghost:hover { background: #f1f5f9; color: #6366f1; }
-      .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; }
-      .modal-overlay.active { display: flex; }
-    </style>
-  </head>
-  <body>
-    <!-- Barra Lateral -->
-    <aside>
-      <div class="mb-10 flex items-center gap-3">
-        <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
-          <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
-        </div>
-        <div>
-          <h1 class="text-xl font-extrabold tracking-tight">YaSe <span class="text-amber-500">PRO</span></h1>
-          <p class="text-[9px] text-slate-400 font-bold tracking-widest uppercase">Sistema de Rastreio</p>
-        </div>
-      </div>
+import React, { useState } from 'react';
+import { 
+  Plus, Save, Trash2, Printer, FileText, CheckCircle, 
+  AlertTriangle, Settings, ChevronDown, ChevronUp, MapPin, 
+  ShieldCheck, Activity, Package
+} from 'lucide-react';
 
-      <nav class="space-y-2 flex-1">
-        <a href="Rastreio.html" class="flex items-center gap-3 p-3 bg-indigo-600 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-900/20"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
-        <a href="Vinculacao.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-sm"><i class="fa-solid fa-link"></i> Vinculação</a>
-        <a href="AnexoOeP.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-sm"><i class="fa-solid fa-file-export"></i> Gerador de Anexos O e P</a>
-        <a href="Remessa.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-sm"><i class="fa-solid fa-truck-ramp-box"></i> Remessas</a>
-      </nav>
-
-     
-    </aside>
-
-    <main>
-      <!-- Cabeçalho de OS -->
-      <div class="section-card flex flex-wrap items-end gap-6 border-l-4 border-l-indigo-500">
-        <div class="flex-1 min-w-[200px]">
-          <label class="label-mini">Número da OS</label>
-          <div class="flex items-center gap-2 relative">
-            <input type="text" id="os_number" class="input-field text-lg text-indigo-600 font-black pr-10 uppercase" placeholder="Ex: 2024-001" />
-            <button id="btnBuscarOS" class="absolute right-2 text-slate-400 hover:text-indigo-600 transition-colors">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
+const App = () => {
+  const [activeTab, setActiveTab] = useState('identificacao');
+  
+  return (
+    <div className="flex h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden">
+      {/* Sidebar Lateral */}
+      <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col">
+        <div className="p-6 flex items-center gap-2">
+          <div className="bg-orange-500 p-2 rounded-lg">
+            <ShieldCheck size={24} className="text-white" />
           </div>
+          <h1 className="text-xl font-bold tracking-tight">YaSe <span className="text-orange-500">PRO</span></h1>
         </div>
-        <div class="flex-[2] min-w-[300px]">
-          <label class="label-mini">Cliente / Razão Social</label>
-          <input type="text" id="cliente_nome" class="input-field bg-slate-50 cursor-not-allowed" placeholder="Aguardando OS..." readonly />
-        </div>
-        <div class="flex-shrink-0 flex gap-2">
-            <button id="btnNovaOS" class="h-[42px] px-4 border-2 border-dashed border-slate-200 rounded-lg text-[10px] font-black text-slate-400 hover:border-indigo-400 hover:text-indigo-600 transition-all uppercase tracking-tighter">
-                <i class="fa-solid fa-plus-circle mr-1"></i> Nova OS
-            </button>
-            <div id="statusOS" class="h-[42px] flex items-center px-4 bg-slate-50 text-slate-400 rounded-lg font-bold text-[10px] border border-slate-100 uppercase tracking-widest">
-                <span class="w-2 h-2 bg-slate-300 rounded-full mr-2"></span> Offline
-            </div>
-        </div>
-      </div>
-
-      <!-- Formulário Técnico Principal -->
-      <form id="formExtintor" class="opacity-50 pointer-events-none transition-opacity duration-300">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          <!-- Identificação -->
-          <div class="section-card">
-            <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
-              <i class="fa-solid fa-fingerprint text-indigo-500"></i> Identificação
-            </h2>
-            <div class="space-y-4">
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="label-mini">Fabricante</label>
-                  <input type="text" id="fabricante" class="input-field" placeholder="Ex: MOCELIN" required>
-                </div>
-                <div>
-                  <label class="label-mini">Nr. Cilindro</label>
-                  <input type="text" id="numero" class="input-field" placeholder="000000" required>
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="label-mini">Ano Fab.</label>
-                  <input type="text" id="ano" class="input-field" placeholder="AAAA">
-                </div>
-                <div>
-                  <label class="label-mini">Último Reteste</label>
-                  <input type="text" id="reteste" class="input-field" placeholder="AAAA">
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="label-mini">Tipo Carga</label>
-                  <select id="tipo" class="input-field">
-                    <option value="">Selecione...</option>
-                    <option>PQS-ABC</option>
-                    <option>PQS-BC</option>
-                    <option>ÁGUA-AP</option>
-                    <option>CO2</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="label-mini">Capacidade</label>
-                  <select id="capacidade" class="input-field">
-                    <option value="">Selecione...</option>
-                    <option>04 kg</option>
-                    <option>06 kg</option>
-                    <option>12 kg</option>
-                    <option>10 L</option>
-                  </select>
-                </div>             
-              </div>
-            </div>
-          </div>
-
-          <!-- Nível e Rastreio -->
-          <div class="section-card">
-            <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
-              <i class="fa-solid fa-wrench text-indigo-500"></i> Nível e Rastreio
-            </h2>
-            <div class="space-y-4">
-              <div>
-                <label class="label-mini">Manutenção</label>
-                <div class="grid grid-cols-3 gap-2">
-                  <label class="border p-2 rounded-lg cursor-pointer flex flex-col items-center hover:bg-slate-50">
-                    <input type="radio" name="nivel" value="1" id="nivel1"> <span class="text-[9px] font-black">NÍVEL 1</span>
-                  </label>
-                  <label class="border p-2 rounded-lg cursor-pointer flex flex-col items-center bg-indigo-50 border-indigo-200">
-                    <input type="radio" name="nivel" value="2" checked id="nivel2"> <span class="text-[9px] font-black">NÍVEL 2</span>
-                  </label>
-                  <label class="border p-2 rounded-lg cursor-pointer flex flex-col items-center hover:bg-slate-50">
-                    <input type="radio" name="nivel" value="3" id="nivel3"> <span class="text-[9px] font-black">NÍVEL 3</span>
-                  </label>
-                </div>
-              </div>
-              <div>
-                <label class="label-mini">Selo Inmetro Anterior</label>
-                <input type="text" id="seloAnterior" class="input-field" placeholder="Opcional...">
-              </div>
-              <div>
-                <label class="label-mini">Resultado do Ensaio</label>
-                <div class="flex gap-4 p-2 bg-slate-50 rounded-lg mb-2">
-                  <label class="flex items-center gap-2 text-[10px] font-bold text-emerald-600 cursor-pointer">
-                    <input type="radio" name="status-de-aprovacao" id="aprovado" value="aprovado" checked> APROVADO
-                  </label>
-                  <label class="flex items-center gap-2 text-[10px] font-bold text-purple-600 cursor-pointer">
-                    <input type="radio" name="status-de-aprovacao" value="reprovado"> REPROVADO
-                  </label>
-                  <label class="flex items-center gap-2 text-[10px] font-bold text-red-600 cursor-pointer">
-                    <input type="radio" name="status-de-aprovacao" value="novo"> NOVO
-                  </label>
-                </div>
-                <div>
-                  <label class="label-mini">Observação do Ensaio</label>
-                  <input type="text" id="obsEnsaio" class="input-field" placeholder="Motivo da reprovação ou obs...">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Ações e Pesagem -->
-          <div class="section-card">
-            <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
-              <i class="fa-solid fa-plus text-indigo-500"></i> Ações Técnicas
-            </h2>
-            <div class="space-y-3">
-              <button type="submit" class="btn-primary w-full">
-                <i class="fa-solid fa-plus mr-2"></i> REGISTRAR ITEM
-              </button>
-              <button type="button" id="btnAbrirChecklist" class="w-full py-2 border border-dashed rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:border-indigo-400 hover:text-indigo-600 transition-all">
-                <i class="fa-solid fa-list-check mr-2"></i> Checklist Acessórios
-              </button>
-              <div class="pt-4 border-t">
-                 <p class="text-[9px] text-slate-400 font-bold leading-tight">Os cálculos de Próxima Recarga e Reteste são feitos automaticamente após o registro.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-
-      <!-- Tabela de Itens -->
-      <section class="section-card overflow-hidden !p-0">
-        <div class="p-4 border-b flex justify-between items-center bg-slate-50">
-          <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Itens registrados nesta OS</h3>
-          <span class="text-[10px] font-bold bg-white px-2 py-1 rounded border">Contagem: <span id="totalItens" class="text-indigo-600">0</span></span>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse" id="tabelaItens">
-            <thead class="bg-slate-50 text-[9px] uppercase font-black text-slate-400 border-b">
-              <tr>
-                <th class="p-4">Fabricante</th>
-                <th class="p-4">Cilindro</th>
-                <th class="p-4">Tipo/Capac.</th>
-                <th class="p-4">Ano Fab</th>
-                <th class="p-4">Ult. Reteste</th>
-                <th class="p-4">Prox. Reteste</th>  
-                <th class="p-4">Nível</th>  
-                <th class="p-4 text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody class="text-[11px] font-bold text-slate-700">
-              <tr>
-                <td colspan="8" class="p-10 text-center text-slate-400 font-medium italic">Selecione uma OS para listar os itens.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-
-    <!-- Modal para Criar Nova OS -->
-    <div id="modalNovaOS" class="modal-overlay">
-      <div class="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl relative">
-        <button id="btnFecharNovaOS" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
-          <i class="fa-solid fa-times text-xl"></i>
-        </button>
         
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
-            <i class="fa-solid fa-file-circle-plus text-lg"></i>
+        <nav className="flex-1 px-4 py-4 space-y-2">
+          <button className="w-full flex items-center gap-3 px-4 py-3 bg-indigo-600 rounded-xl text-white font-medium">
+            <Plus size={18} /> Novo Registro
+          </button>
+          <div className="pt-4 space-y-1">
+            <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Gestão de OS</p>
+            <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-800 mt-2">
+              <p className="text-xs text-slate-400">Trabalhando na OS:</p>
+              <p className="text-lg font-bold text-orange-400">#1619</p>
+              <p className="text-xs text-slate-500 mt-1">Cliente: National Brase</p>
+            </div>
           </div>
-          <div>
-            <h3 class="text-sm font-black uppercase tracking-widest text-slate-800">Nova Ordem de Serviço</h3>
-            <p class="text-[10px] text-slate-500 font-bold">Preencha os dados para iniciar o registro</p>
+        </nav>
+        
+        <div className="p-4 border-t border-slate-800">
+          <div className="flex items-center gap-3 p-2">
+            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 text-xs">OP</div>
+            <div>
+              <p className="text-sm font-medium">Operador Nível 2</p>
+              <p className="text-xs text-green-500 flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online
+              </p>
+            </div>
           </div>
         </div>
+      </aside>
 
-        <form id="formNovaOS" class="space-y-4">
+      {/* Main Content */}
+      <main className="flex-1 overflow-y-auto bg-slate-50 text-slate-900">
+        {/* Header Superior */}
+        <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex justify-between items-center">
           <div>
-            <label class="label-mini">Número da OS</label>
-            <input type="text" id="new_os_number" class="input-field text-indigo-600 font-bold" placeholder="Ex: 2024-001" required />
+            <h2 className="text-2xl font-bold text-slate-800">Rastreabilidade de Itens</h2>
+            <p className="text-sm text-slate-500 font-medium">Controle Técnico e Logístico de Extintores</p>
           </div>
-          <div>
-            <label class="label-mini">Nome do Cliente / Razão Social</label>
-            <input type="text" id="new_cliente_nome" class="input-field" placeholder="Digite o nome completo" required />
+          <div className="flex gap-3">
+            <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+              <Printer size={18} /> Imprimir Etiquetas
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20">
+              <FileText size={18} /> Gerar Relatório Técnico
+            </button>
           </div>
-          <div class="pt-4">
-            <button type="submit" class="btn-primary w-full py-3">CRIAR E ABRIR OS</button>
+        </header>
+
+        <div className="p-8 space-y-8">
+          {/* Grid de Formulários (Baseado na sua UI atual mas expandido) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Bloco 1: Identificação & Localização (Habilitado com as novas hierarquias) */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-indigo-100 p-2 rounded-lg text-indigo-600"><MapPin size={18} /></div>
+                <h3 className="font-bold text-slate-700">Identificação & Local</h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-500 uppercase">Cód. de Barras / Rastreio</label>
+                  <input type="text" className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="Escaneie ou digite..." />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Setor (Novo)</label>
+                    <input type="text" className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl" placeholder="Ex: Bloco A" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Ponto (Novo)</label>
+                    <input type="text" className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl" placeholder="Ex: Hall 2" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Fabricante</label>
+                    <select className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                      <option>Selecione...</option>
+                      <option>MOCELIN</option>
+                      <option>RESIL</option>
+                      <option>YANES</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Norma Fab. (Novo)</label>
+                    <input type="text" className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl" placeholder="Ex: NBR 15808" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bloco 2: Dados de Selagem e Acessórios (Fusão do seu com o Cadex) */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-orange-100 p-2 rounded-lg text-orange-600"><Package size={18} /></div>
+                <h3 className="font-bold text-slate-700">Checklist & Selagem</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase">Selo Anterior (Novo)</label>
+                    <input type="text" className="w-full mt-1 p-3 bg-slate-50 border border-slate-200 border-dashed rounded-xl" placeholder="9456..." />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase font-orange-500">Novo Selo</label>
+                    <input type="text" className="w-full mt-1 p-3 bg-orange-50 border border-orange-200 rounded-xl font-bold" placeholder="Digite o novo selo" />
+                  </div>
+                </div>
+                
+                {/* Checklist de Acessórios (O "Pulo do Gato" do Cadex) */}
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <p className="text-xs font-bold text-slate-500 uppercase mb-3">Checklist de Troca de Peças</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Pistola', 'Válvula', 'Manômetro', 'Difusor', 'O-ring', 'Mola'].map(item => (
+                      <label key={item} className="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
+                        <span className="text-sm text-slate-600 group-hover:text-slate-900">{item}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-medium text-amber-600 bg-amber-50 p-2 rounded-lg">
+                  <AlertTriangle size={14} />
+                  <span>Substitua peças apenas se necessário.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bloco 3: Ensaios e Status (A parte técnica "pesada") */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-blue-100 p-2 rounded-lg text-blue-600"><Activity size={18} /></div>
+                <h3 className="font-bold text-slate-700">Ensaios & Medições</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase">Perda de Massa (%)</p>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-xl font-black text-slate-800">2.4</span>
+                      <span className="text-xs font-bold text-green-600">Dentro da Norma</span>
+                    </div>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase">Teste Hidro.</p>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-xl font-black text-slate-800">2026</span>
+                      <span className="text-xs font-bold text-slate-500">Próximo</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testes Normativos Checklist (Novo) */}
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-slate-500 uppercase">Inspeção Técnica</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    <div className="flex items-center justify-between p-2 bg-green-50 border border-green-200 rounded-lg">
+                      <span className="text-xs font-medium text-green-800">Condutividade Elétrica</span>
+                      <span className="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full uppercase">OK</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                      <span className="text-xs font-medium text-slate-600">Estanqueidade (Válvula)</span>
+                      <button className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full uppercase">Realizar</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button className="flex-1 py-3 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl font-bold text-sm hover:bg-emerald-100 transition-all flex items-center justify-center gap-2">
+                    <CheckCircle size={16} /> APROVAR
+                  </button>
+                  <button className="flex-1 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold text-sm hover:bg-red-100 transition-all">
+                    REPROVAR
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </form>
-      </div>
+
+          {/* Seção da Tabela com visual Premium e as novas colunas */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+              <h3 className="font-bold text-slate-700 flex items-center gap-2">
+                <FileText size={18} className="text-slate-400" />
+                Itens Processados na OS <span className="text-indigo-600 ml-1">#1619</span>
+              </h3>
+              <div className="text-xs font-bold text-slate-500 px-3 py-1 bg-white border border-slate-200 rounded-full">
+                Total de Itens: 178
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Cód. Rastreio</th>
+                    <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Fabricante</th>
+                    <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Cilindro / Selo</th>
+                    <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Setor / Ponto</th>
+                    <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Nível</th>
+                    <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {[
+                    { id: 'EBBCBF70', fab: 'MOCELIN', cil: '21332', selo: '9463', setor: 'DEPÓSITO', ponto: 'G2', nivel: 'NV 3', status: 'Aprovado' },
+                    { id: '27FF3EF4', fab: 'YANES', cil: '0012', selo: '9462', setor: 'ADMIN', ponto: 'HALL', nivel: 'NV 2', status: 'Aprovado' },
+                    { id: '08AF6767', fab: 'RESIL', cil: '2144', selo: '9461', setor: 'COZINHA', ponto: 'FOGÃO', nivel: 'NV 3', status: 'Aprovado' },
+                  ].map((item, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <span className="text-xs font-mono font-bold text-indigo-600">{item.id}</span>
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-700 text-sm">{item.fab}</td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-slate-800">{item.cil}</div>
+                        <div className="text-[10px] text-orange-500 font-bold">SELO: {item.selo}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-xs text-slate-600">{item.setor}</div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase">{item.ponto}</div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="text-[10px] font-bold px-2 py-1 bg-slate-100 rounded text-slate-600">{item.nivel}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
+                          <CheckCircle size={14} /> {item.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="p-2 text-slate-400 hover:text-indigo-600"><Settings size={16} /></button>
+                          <button className="p-2 text-slate-400 hover:text-red-500"><Trash2 size={16} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
+  );
+};
 
-    <!-- Modal de Acessórios -->
-    <div id="modalAcessorios" class="modal-overlay">
-      <div class="bg-white p-6 rounded-2xl w-full max-w-lg shadow-2xl relative">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xs font-black uppercase tracking-widest text-slate-800">Checklist de Componentes</h3>
-          <button id="btnFecharModalX" class="text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-times"></i></button>
-        </div>
-        <div class="grid grid-cols-2 gap-4 mb-8">
-          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Válvula</label>
-          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Mangueira</label>
-          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Manômetro</label>
-          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Lacre</label>
-          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Pintura</label>
-          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Etiqueta</label>
-        </div>
-        <button id="btnConcluirInspecao" class="btn-primary w-full">CONCLUIR INSPEÇÃO</button>
-      </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="Rastreabilidade/novaOS.js"></script>
-    <script src="Rastreabilidade/usuarioLogado.js"></script>
-    <script type="module" src="Rastreabilidade/main.js"></script>
-    
-
-  </body>
-</html>
+export default App;

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YaSe PRO - Gerador de Anexos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .tab-active { background-color: white; color: #4f46e5; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .tab-inactive { color: #64748b; }
+        .tab-inactive:hover { color: #334155; }
+        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 min-h-screen flex">
+
+    <!-- Barra Lateral -->
+    <aside class="w-72 bg-slate-900 text-white p-6 flex flex-col fixed h-full z-40">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight">YaSe <span class="text-amber-500">PRO</span></h1>
+                <p class="text-[9px] text-slate-400 font-bold tracking-widest uppercase">Sistema de Rastreio</p>
+            </div>
+        </div>
+
+        <nav class="space-y-2 flex-1">
+            <a href="#" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all font-bold text-sm">
+                <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+            </a>
+            <a href="#" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all font-bold text-sm">
+                <i class="fa-solid fa-link w-5"></i> Vinculação
+            </a>
+            <a href="#" class="flex items-center gap-3 p-3 bg-indigo-600 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-900/20">
+                <i class="fa-solid fa-file-export w-5"></i> Gerador de Anexos
+            </a>
+            <a href="#" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all font-bold text-sm">
+                <i class="fa-solid fa-truck-ramp-box w-5"></i> Remessas
+            </a>
+        </nav>
+
+        <div class="mt-auto pt-6 border-t border-slate-800">
+            <div class="bg-slate-800/50 p-4 rounded-2xl">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] font-black">OP</div>
+                    <div class="overflow-hidden">
+                        <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Operador Logado</p>
+                        <p class="text-xs font-bold text-white truncate">João Silva Santos</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                        <i class="fa-solid fa-location-dot text-[10px]"></i>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Unidade</p>
+                        <p class="text-xs font-bold text-white">001 - Matriz</p>
+                    </div>
+                </div>
+            </div>
+            <button class="w-full mt-4 flex items-center justify-center gap-2 text-[10px] font-black text-slate-500 hover:text-red-400 transition-colors uppercase tracking-widest">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair do Sistema
+            </button>
+        </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 ml-72 p-10">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Gerador de Anexos</h2>
+                <p class="text-slate-500 text-sm font-medium">Selecione o relatório oficial do INMETRO para exportação</p>
+            </div>
+            <div class="flex bg-slate-200/50 p-1 rounded-xl">
+                <button onclick="switchTab('P')" id="btnTabP" class="px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all tab-active">
+                    Anexo P
+                </button>
+                <button onclick="switchTab('O')" id="btnTabO" class="px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all tab-inactive">
+                    Anexo O
+                </button>
+            </div>
+        </div>
+
+        <!-- Card de Aviso -->
+        <div class="bg-amber-50 border-l-4 border-amber-500 rounded-2xl p-6 mb-8 shadow-sm relative overflow-hidden">
+            <div class="flex gap-4">
+                <div class="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-600 flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-amber-800 font-black text-sm uppercase tracking-widest mb-2">Aviso Importante</h3>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-amber-700/80 text-xs font-bold leading-relaxed">
+                        <li>• Extintores Reprovados não são exibidos</li>
+                        <li>• Extintores Novos não são exibidos</li>
+                        <li>• Serviços de Pesagem CO2 (Não necessitam Selo)</li>
+                        <li>• Serviços de Inspeção</li>
+                    </ul>
+                    <p class="mt-4 text-[11px] text-amber-800/60 font-medium italic">
+                        * A soma dos selos inutilizados é calculada automaticamente conforme o período selecionado.
+                    </p>
+                </div>
+                <div class="ml-auto">
+                    <button class="flex items-center gap-2 bg-amber-500 text-slate-900 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-400 transition-all">
+                        <i class="fa-solid fa-circle-play"></i> Saiba Mais
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário Principal -->
+        <div class="grid grid-cols-12 gap-6">
+            
+            <!-- Filtros de Busca -->
+            <div class="col-span-12 lg:col-span-4 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2 tracking-widest">
+                    <i class="fa-solid fa-filter text-indigo-500 text-[10px]"></i> Filtros de Busca
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Filtrar Resultados Por</label>
+                        <select class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all appearance-none">
+                            <option>Número de Selo</option>
+                            <option>Data Encerramento</option>
+                            <option>Data Selagem</option>
+                            <option>Data Selagem (Casa da Moeda)</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">De (Selo/Data)</label>
+                            <input type="text" placeholder="Início..." class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Até (Selo/Data)</label>
+                            <input type="text" placeholder="Fim..." class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conteúdo Dinâmico (Anexo P) -->
+            <div id="contentP" class="col-span-12 lg:col-span-8 grid grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2 tracking-widest">
+                        <i class="fa-solid fa-calendar text-indigo-500 text-[10px]"></i> Período do Relatório
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Data Inicial</label>
+                            <input type="date" value="2026-01-01" class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Data Final</label>
+                            <input type="date" value="2026-01-30" class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-indigo-500 transition-all">
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-50">
+                        <p class="text-[10px] text-slate-400 font-semibold leading-tight">Defina a base para selos utilizados e inutilizados.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                    <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2 tracking-widest">
+                        <i class="fa-solid fa-layer-group text-indigo-500 text-[10px]"></i> Exibição
+                    </h2>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                            <input type="checkbox" class="w-4 h-4 rounded accent-indigo-600">
+                            <span class="text-xs font-bold text-slate-600">Mostra Estoque BC e ABC</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                            <input type="checkbox" class="w-4 h-4 rounded accent-indigo-600">
+                            <span class="text-xs font-bold text-slate-600">Mostrar Número do Lote</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conteúdo Dinâmico (Anexo O) -->
+            <div id="contentO" class="col-span-12 lg:col-span-8 hidden">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 h-full">
+                    <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2 tracking-widest">
+                        <i class="fa-solid fa-file-lines text-indigo-500 text-[10px]"></i> Dados de Impressão (Anexo O)
+                    </h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">1º Lote (Início / Fim)</label>
+                                <div class="flex gap-2">
+                                    <input class="flex-1 h-10 px-3 bg-amber-50 border border-amber-200 rounded-lg text-xs font-bold focus:outline-none" placeholder="000">
+                                    <input class="flex-1 h-10 px-3 bg-amber-50 border border-amber-200 rounded-lg text-xs font-bold focus:outline-none" placeholder="999">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">2º Lote (Início / Fim)</label>
+                                <div class="flex gap-2">
+                                    <input class="flex-1 h-10 px-3 bg-amber-50 border border-amber-200 rounded-lg text-xs font-bold focus:outline-none" placeholder="000">
+                                    <input class="flex-1 h-10 px-3 bg-amber-50 border border-amber-200 rounded-lg text-xs font-bold focus:outline-none" placeholder="999">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Estoque Inicial (Início / Fim)</label>
+                                <div class="flex gap-2">
+                                    <input class="flex-1 h-10 px-3 bg-amber-50 border border-amber-200 rounded-lg text-xs font-bold focus:outline-none" placeholder="000">
+                                    <input class="flex-1 h-10 px-3 bg-amber-50 border border-amber-200 rounded-lg text-xs font-bold focus:outline-none" placeholder="999">
+                                </div>
+                            </div>
+                            <div class="p-4 bg-indigo-50 rounded-xl">
+                                <p class="text-[10px] font-bold text-indigo-700 leading-tight">
+                                    <i class="fa-solid fa-circle-info mr-1"></i>
+                                    Alterações na NF devem ser feitas no relatório ou na Ordem de Serviço original.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rodapé de Ações -->
+            <div class="col-span-12 flex flex-wrap justify-between items-center mt-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100 gap-6">
+                <button class="flex items-center gap-2 text-xs font-black text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">
+                    <i class="fa-solid fa-magnifying-glass"></i> Recuperar Parâmetros Gravados
+                </button>
+                <div class="flex gap-4">
+                    <button class="px-8 py-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all">
+                        Visualizar
+                    </button>
+                    <button id="btnGerar" class="px-10 py-3 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-900/20 hover:bg-indigo-700 transition-all flex items-center gap-2">
+                        Gerar Anexo P <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function switchTab(tab) {
+            const btnP = document.getElementById('btnTabP');
+            const btnO = document.getElementById('btnTabO');
+            const contentP = document.getElementById('contentP');
+            const contentO = document.getElementById('contentO');
+            const btnGerar = document.getElementById('btnGerar');
+
+            if (tab === 'P') {
+                btnP.className = 'px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all tab-active';
+                btnO.className = 'px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all tab-inactive';
+                contentP.classList.remove('hidden');
+                contentO.classList.add('hidden');
+                btnGerar.innerHTML = 'Gerar Anexo P <i class="fa-solid fa-chevron-right ml-1"></i>';
+            } else {
+                btnO.className = 'px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all tab-active';
+                btnP.className = 'px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all tab-inactive';
+                contentO.classList.remove('hidden');
+                contentP.classList.add('hidden');
+                btnGerar.innerHTML = 'Gerar Anexo O <i class="fa-solid fa-chevron-right ml-1"></i>';
+            }
+        }
+    </script>
+</body>
+</html>

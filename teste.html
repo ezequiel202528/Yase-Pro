@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YaSe PRO - Gestão de Rastreabilidade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Estilos customizados assumidos no diretório relativo -->
+    <link rel="stylesheet" href="Rastreabilidade/style.css">
+    <style>
+      body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+      aside { width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background: #0f172a; color: white; padding: 24px; display: flex; flex-direction: column; }
+      main { margin-left: 260px; padding: 32px; }
+      .section-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); margin-bottom: 24px; border: 1px solid #e2e8f0; }
+      .label-mini { display: block; font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+      .input-field { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 600; color: #1e293b; transition: all 0.2s; }
+      .input-field:focus { outline: none; border-color: #6366f1; ring: 2px; ring-color: #6366f1/20; }
+      .btn-primary { background: #6366f1; color: white; padding: 10px 20px; border-radius: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.025em; transition: all 0.2s; border: none; cursor: pointer; }
+      .btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
+      .btn-ghost { padding: 10px; color: #64748b; border-radius: 8px; transition: all 0.2s; }
+      .btn-ghost:hover { background: #f1f5f9; color: #6366f1; }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; }
+      .modal-overlay.active { display: flex; }
+    </style>
+  </head>
+  <body>
+    <!-- Barra Lateral -->
+    <aside>
+      <div class="mb-10 flex items-center gap-3">
+        <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
+          <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight">YaSe <span class="text-amber-500">PRO</span></h1>
+          <p class="text-[9px] text-slate-400 font-bold tracking-widest uppercase">Sistema de Rastreio</p>
+        </div>
+      </div>
+
+      <nav class="space-y-2 flex-1">
+        <a href="Rastreio.html" class="flex items-center gap-3 p-3 bg-indigo-600 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-900/20"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+        <a href="Vinculacao.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-sm"><i class="fa-solid fa-link"></i> Vinculação</a>
+        <a href="AnexoOeP.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-sm"><i class="fa-solid fa-file-export"></i> Gerador de Anexos O e P</a>
+        <a href="Remessa.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-sm"><i class="fa-solid fa-truck-ramp-box"></i> Remessas</a>
+      </nav>
+
+     
+    </aside>
+
+    <main>
+      <!-- Cabeçalho de OS -->
+      <div class="section-card flex flex-wrap items-end gap-6 border-l-4 border-l-indigo-500">
+        <div class="flex-1 min-w-[200px]">
+          <label class="label-mini">Número da OS</label>
+          <div class="flex items-center gap-2 relative">
+            <input type="text" id="os_number" class="input-field text-lg text-indigo-600 font-black pr-10 uppercase" placeholder="Ex: 2024-001" />
+            <button id="btnBuscarOS" class="absolute right-2 text-slate-400 hover:text-indigo-600 transition-colors">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </div>
+        </div>
+        <div class="flex-[2] min-w-[300px]">
+          <label class="label-mini">Cliente / Razão Social</label>
+          <input type="text" id="cliente_nome" class="input-field bg-slate-50 cursor-not-allowed" placeholder="Aguardando OS..." readonly />
+        </div>
+        <div class="flex-shrink-0 flex gap-2">
+            <button id="btnNovaOS" class="h-[42px] px-4 border-2 border-dashed border-slate-200 rounded-lg text-[10px] font-black text-slate-400 hover:border-indigo-400 hover:text-indigo-600 transition-all uppercase tracking-tighter">
+                <i class="fa-solid fa-plus-circle mr-1"></i> Nova OS
+            </button>
+            <div id="statusOS" class="h-[42px] flex items-center px-4 bg-slate-50 text-slate-400 rounded-lg font-bold text-[10px] border border-slate-100 uppercase tracking-widest">
+                <span class="w-2 h-2 bg-slate-300 rounded-full mr-2"></span> Offline
+            </div>
+        </div>
+      </div>
+
+      <!-- Formulário Técnico Principal -->
+      <form id="formExtintor" class="opacity-50 pointer-events-none transition-opacity duration-300">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Identificação -->
+          <div class="section-card">
+            <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-fingerprint text-indigo-500"></i> Identificação
+            </h2>
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="label-mini">Fabricante</label>
+                  <input type="text" id="fabricante" class="input-field" placeholder="Ex: MOCELIN" required>
+                </div>
+                <div>
+                  <label class="label-mini">Nr. Cilindro</label>
+                  <input type="text" id="numero" class="input-field" placeholder="000000" required>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="label-mini">Ano Fab.</label>
+                  <input type="text" id="ano" class="input-field" placeholder="AAAA">
+                </div>
+                <div>
+                  <label class="label-mini">Último Reteste</label>
+                  <input type="text" id="reteste" class="input-field" placeholder="AAAA">
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="label-mini">Tipo Carga</label>
+                  <select id="tipo" class="input-field">
+                    <option value="">Selecione...</option>
+                    <option>PQS-ABC</option>
+                    <option>PQS-BC</option>
+                    <option>ÁGUA-AP</option>
+                    <option>CO2</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="label-mini">Capacidade</label>
+                  <select id="capacidade" class="input-field">
+                    <option value="">Selecione...</option>
+                    <option>04 kg</option>
+                    <option>06 kg</option>
+                    <option>12 kg</option>
+                    <option>10 L</option>
+                  </select>
+                </div>             
+              </div>
+            </div>
+          </div>
+
+          <!-- Nível e Rastreio -->
+          <div class="section-card">
+            <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-wrench text-indigo-500"></i> Nível e Rastreio
+            </h2>
+            <div class="space-y-4">
+              <div>
+                <label class="label-mini">Manutenção</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <label class="border p-2 rounded-lg cursor-pointer flex flex-col items-center hover:bg-slate-50">
+                    <input type="radio" name="nivel" value="1" id="nivel1"> <span class="text-[9px] font-black">NÍVEL 1</span>
+                  </label>
+                  <label class="border p-2 rounded-lg cursor-pointer flex flex-col items-center bg-indigo-50 border-indigo-200">
+                    <input type="radio" name="nivel" value="2" checked id="nivel2"> <span class="text-[9px] font-black">NÍVEL 2</span>
+                  </label>
+                  <label class="border p-2 rounded-lg cursor-pointer flex flex-col items-center hover:bg-slate-50">
+                    <input type="radio" name="nivel" value="3" id="nivel3"> <span class="text-[9px] font-black">NÍVEL 3</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label class="label-mini">Selo Inmetro Anterior</label>
+                <input type="text" id="seloAnterior" class="input-field" placeholder="Opcional...">
+              </div>
+              <div>
+                <label class="label-mini">Resultado do Ensaio</label>
+                <div class="flex gap-4 p-2 bg-slate-50 rounded-lg mb-2">
+                  <label class="flex items-center gap-2 text-[10px] font-bold text-emerald-600 cursor-pointer">
+                    <input type="radio" name="status-de-aprovacao" id="aprovado" value="aprovado" checked> APROVADO
+                  </label>
+                  <label class="flex items-center gap-2 text-[10px] font-bold text-purple-600 cursor-pointer">
+                    <input type="radio" name="status-de-aprovacao" value="reprovado"> REPROVADO
+                  </label>
+                  <label class="flex items-center gap-2 text-[10px] font-bold text-red-600 cursor-pointer">
+                    <input type="radio" name="status-de-aprovacao" value="novo"> NOVO
+                  </label>
+                </div>
+                <div>
+                  <label class="label-mini">Observação do Ensaio</label>
+                  <input type="text" id="obsEnsaio" class="input-field" placeholder="Motivo da reprovação ou obs...">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ações e Pesagem -->
+          <div class="section-card">
+            <h2 class="text-xs font-black text-slate-800 uppercase mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-plus text-indigo-500"></i> Ações Técnicas
+            </h2>
+            <div class="space-y-3">
+              <button type="submit" class="btn-primary w-full">
+                <i class="fa-solid fa-plus mr-2"></i> REGISTRAR ITEM
+              </button>
+              <button type="button" id="btnAbrirChecklist" class="w-full py-2 border border-dashed rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:border-indigo-400 hover:text-indigo-600 transition-all">
+                <i class="fa-solid fa-list-check mr-2"></i> Checklist Acessórios
+              </button>
+              <div class="pt-4 border-t">
+                 <p class="text-[9px] text-slate-400 font-bold leading-tight">Os cálculos de Próxima Recarga e Reteste são feitos automaticamente após o registro.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- Tabela de Itens -->
+      <section class="section-card overflow-hidden !p-0">
+        <div class="p-4 border-b flex justify-between items-center bg-slate-50">
+          <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Itens registrados nesta OS</h3>
+          <span class="text-[10px] font-bold bg-white px-2 py-1 rounded border">Contagem: <span id="totalItens" class="text-indigo-600">0</span></span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse" id="tabelaItens">
+            <thead class="bg-slate-50 text-[9px] uppercase font-black text-slate-400 border-b">
+              <tr>
+                <th class="p-4">Fabricante</th>
+                <th class="p-4">Cilindro</th>
+                <th class="p-4">Tipo/Capac.</th>
+                <th class="p-4">Ano Fab</th>
+                <th class="p-4">Ult. Reteste</th>
+                <th class="p-4">Prox. Reteste</th>  
+                <th class="p-4">Nível</th>  
+                <th class="p-4 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody class="text-[11px] font-bold text-slate-700">
+              <tr>
+                <td colspan="8" class="p-10 text-center text-slate-400 font-medium italic">Selecione uma OS para listar os itens.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal para Criar Nova OS -->
+    <div id="modalNovaOS" class="modal-overlay">
+      <div class="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl relative">
+        <button id="btnFecharNovaOS" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
+          <i class="fa-solid fa-times text-xl"></i>
+        </button>
+        
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
+            <i class="fa-solid fa-file-circle-plus text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-black uppercase tracking-widest text-slate-800">Nova Ordem de Serviço</h3>
+            <p class="text-[10px] text-slate-500 font-bold">Preencha os dados para iniciar o registro</p>
+          </div>
+        </div>
+
+        <form id="formNovaOS" class="space-y-4">
+          <div>
+            <label class="label-mini">Número da OS</label>
+            <input type="text" id="new_os_number" class="input-field text-indigo-600 font-bold" placeholder="Ex: 2024-001" required />
+          </div>
+          <div>
+            <label class="label-mini">Nome do Cliente / Razão Social</label>
+            <input type="text" id="new_cliente_nome" class="input-field" placeholder="Digite o nome completo" required />
+          </div>
+          <div class="pt-4">
+            <button type="submit" class="btn-primary w-full py-3">CRIAR E ABRIR OS</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de Acessórios -->
+    <div id="modalAcessorios" class="modal-overlay">
+      <div class="bg-white p-6 rounded-2xl w-full max-w-lg shadow-2xl relative">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xs font-black uppercase tracking-widest text-slate-800">Checklist de Componentes</h3>
+          <button id="btnFecharModalX" class="text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-times"></i></button>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Válvula</label>
+          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Mangueira</label>
+          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Manômetro</label>
+          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Lacre</label>
+          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Pintura</label>
+          <label class="flex items-center gap-3 text-xs font-bold text-slate-600"><input type="checkbox" class="w-4 h-4 rounded accent-indigo-600"> Etiqueta</label>
+        </div>
+        <button id="btnConcluirInspecao" class="btn-primary w-full">CONCLUIR INSPEÇÃO</button>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="Rastreabilidade/novaOS.js"></script>
+    <script src="Rastreabilidade/usuarioLogado.js"></script>
+    <script type="module" src="Rastreabilidade/main.js"></script>
+    
+
+  </body>
+</html>

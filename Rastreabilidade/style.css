@@ -1,0 +1,167 @@
+/* 1. ESTRUTURA GLOBAL */
+html, body {
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    background-color: #f8fafc;
+}
+
+aside {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #0f172a;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+}
+
+main {
+    margin-left: 260px;
+    padding: 15px 25px; /* Reduzido levemente para ganhar espaço */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* 2. CARDS E SEÇÕES */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 10px 14px !important; 
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.section-title {
+    font-size: 12px; /* Aumentado de 11px */
+    font-weight: 800;
+    color: #475569; /* Tom mais escuro para contraste */
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+/* 3. INPUTS E LABELS (FONTES MAIORES) */
+.label-mini {
+    display: block;
+    font-size: 11px; /* Aumentado de 9px */
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 4px 12px !important; /* Padding ajustado para a letra maior */
+    height: 35px !important; /* Aumentado de 32px para acomodar fonte 14px */
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 14px !important; /* Aumentado de 12px */
+    font-weight: 600;
+    color: #1e293b;
+    background: #fcfdfe;
+    transition: all 0.2s;
+}
+
+/* 4. BOTÕES E COMPONENTES */
+.btn-level {
+    flex: 1;
+    padding: 8px !important;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 11px; /* Aumentado de 10px */
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    background: white;
+    color: #64748b;
+}
+
+.btn-level.active {
+    background: #eef2ff;
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.radio-group { gap: 10px; }
+.radio-item { font-size: 12px; font-weight: 700; } /* Aumentado de 10px */
+.checkbox-item { font-size: 13px; font-weight: 700; } /* Aumentado de 11px */
+.checkbox-item input { width: 16px; height: 16px; }
+
+/* 5. TABELA COM CABEÇALHO FIXO E SCROLL */
+.max-h-\[400px\] {
+    max-height: calc(100vh - 435px) !important; 
+    overflow-y: auto !important;
+    position: relative;
+}
+
+thead.bg-slate-50 {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: #f8fafc;
+    box-shadow: 0 1px 0 #e2e8f0;
+}
+
+thead th {
+    font-size: 11px !important;
+    background-color: #f8fafc;
+    white-space: nowrap;
+    padding: 12px 8px !important;
+    color: #64748b;
+}
+
+#itensList td {
+    font-size: 13px !important; /* Dados da tabela maiores para leitura rápida */
+    padding: 10px 8px !important;
+    text-align: center;
+}
+
+/* 6. ESTILO DA BARRA DE ROLAGEM */
+.max-h-\[400px\]::-webkit-scrollbar {
+    width: 6px;
+}
+.max-h-\[400px\]::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+.max-h-\[400px\]::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+.max-h-\[400px\]::-webkit-scrollbar-thumb:hover {
+    background: #6366f1;
+}
+/* Cores específicas para o campo de Resultado */
+.btn-status-apr.active {
+    background: #ecfdf5 !important;
+    border-color: #10b981 !important;
+    color: #10b981 !important;
+}
+
+.btn-status-rep.active {
+    background: #fef2f2 !important;
+    border-color: #ef4444 !important;
+    color: #ef4444 !important;
+}
+
+.btn-status-novo.active {
+    background: #fffbeb !important;
+    border-color: #f59e0b !important;
+    color: #f59e0b !important;
+}
+
+th, td{
+  text-align: center;
+}

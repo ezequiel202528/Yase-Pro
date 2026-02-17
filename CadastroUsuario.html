@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Novo Usuário - YaSe PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      body { font-family: "Plus Jakarta Sans", sans-serif; background: radial-gradient(circle at top right, #1e293b, #0f172a); height: 100vh; overflow: hidden; }
+      .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+      .sidebar { width: 280px; background: rgba(15, 23, 42, 0.8); border-right: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+      .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #94a3b8; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; margin-bottom: 4px; font-weight: 500; }
+      .nav-link.active { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
+      .login-input { background: rgba(15, 23, 42, 0.6) !important; border: 1px solid rgba(255, 255, 255, 0.1); color: white !important; transition: all 0.3s; }
+      .login-input:focus { border-color: #fbbf24; box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1); outline: none; }
+      .shimmer { position: relative; overflow: hidden; }
+      .shimmer::after { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent); transform: rotate(45deg); animation: shimmer 3s infinite; }
+      @keyframes shimmer { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+      select.login-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; }
+    </style>
+  </head>
+  <body class="flex">
+    <aside class="sidebar h-screen flex flex-col p-6 z-20">
+      <div class="mb-10">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+            <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-extrabold text-white tracking-tight leading-none">YaSe <span class="text-amber-500">PRO</span></h1>
+            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Enterprise</span>
+          </div>
+        </div>
+        <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-6"></div>
+      </div>
+      <nav class="flex-1 space-y-2">
+        <a href="EntrarSistema.html" class="nav-link group">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-amber-500/10">
+            <i class="fa-solid fa-right-to-bracket text-sm"></i>
+          </div>
+          <span>Voltar ao Login</span>
+        </a>
+        <a href="#" class="nav-link group active">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-user-plus text-sm"></i></div>
+          <span>Novo Cadastro</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col items-center justify-center relative overflow-y-auto py-10">
+      <div class="glass-card w-full max-w-[520px] p-10 rounded-[32px] relative z-10 shimmer">
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-black text-white mb-2 tracking-tight">Novo Usuário</h2>
+          <p id="instrucao-conexao" class="text-slate-400 text-sm italic">Verificando ligação...</p>
+        </div>
+
+        <form id="cadastroForm" class="space-y-4">
+          <div>
+            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Nome Completo</label>
+            <input type="text" id="campo_nome" required class="login-input w-full h-12 px-4 rounded-xl text-sm" placeholder="João Silva" />
+          </div>
+          <div>
+            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Código (ID)</label>
+            <input type="text" id="campo_codigo" required class="login-input w-full h-12 px-4 rounded-xl text-sm" placeholder="OPER-01" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Senha</label>
+              <input type="password" id="campo_senha" required class="login-input w-full h-12 px-4 rounded-xl text-sm" />
+            </div>
+            <div>
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Confirmar</label>
+              <input type="password" id="campo_confirmar" required class="login-input w-full h-12 px-4 rounded-xl text-sm" />
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Permissão</label>
+            <select id="campo_nivel" class="login-input w-full h-12 px-4 rounded-xl text-sm appearance-none">
+              <option value="Operador">Operador de Pátio</option>
+              <option value="Gerente">Gerente de Unidade</option>
+            </select>
+          </div>
+          <div id="statusMsg" class="hidden text-center text-[11px] font-bold py-3 rounded-xl border border-white/5"></div>
+          <button type="submit" id="btnCadastrar" class="w-full h-14 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-2xl font-black text-sm shadow-xl transition-all">
+            CADASTRAR USUÁRIO
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      // === CHAVES CONFIGURADAS COM SUCESSO ===
+      const URL_SB = 'https://gzojpxgpgjapsegerscb.supabase.co';
+      const KEY_SB = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s';
+
+      let sb = null;
+      const txtStatus = document.getElementById('instrucao-conexao');
+
+      function init() {
+        try {
+          sb = supabase.createClient(URL_SB, KEY_SB);
+          txtStatus.innerText = "✅ Sistema Pronto para Cadastro";
+          txtStatus.className = "text-emerald-400 text-sm";
+        } catch (e) {
+          console.error(e);
+          txtStatus.innerText = "❌ Erro ao ligar ao Banco de Dados.";
+        }
+      }
+
+      init();
+
+      document.getElementById('cadastroForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnCadastrar');
+        const msg = document.getElementById('statusMsg');
+
+        if (!sb) return alert("Erro de inicialização do Supabase!");
+
+        const senha = document.getElementById('campo_senha').value;
+        const conf = document.getElementById('campo_confirmar').value;
+
+        if (senha !== conf) {
+            msg.innerText = "As senhas não coincidem!";
+            msg.className = "text-red-400 bg-red-500/10 py-3 rounded-xl block";
+            msg.classList.remove('hidden');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "A GUARDAR...";
+
+        try {
+          const { error } = await sb.from('usu_arios').insert([{
+            nome_completo: document.getElementById('campo_nome').value,
+            codigo_id: document.getElementById('campo_codigo').value,
+            senha: senha,
+            nivel_permissao: document.getElementById('campo_nivel').value
+          }]);
+
+          if (error) throw error;
+
+          msg.innerText = "✅ Usuário criado com sucesso!";
+          msg.className = "text-emerald-400 bg-emerald-500/10 py-3 rounded-xl block";
+          msg.classList.remove('hidden');
+          document.getElementById('cadastroForm').reset();
+        } catch (err) {
+          console.error(err);
+          msg.innerText = "Erro: " + (err.message || "Falha na ligação");
+          msg.className = "text-red-400 bg-red-500/10 py-3 rounded-xl block";
+          msg.classList.remove('hidden');
+        } finally {
+          btn.disabled = false;
+          btn.innerText = "CADASTRAR USUÁRIO";
+        }
+      });
+    </script>
+  </body>
+</html>

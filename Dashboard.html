@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YaSe PRO - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body { font-family: "Plus Jakarta Sans", sans-serif; background: #000; color: white; min-height: 100vh; overflow-x: hidden; }
+        .glass-card { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(251, 191, 36, 0.1); }
+        .accent-text { color: #fbbf24; }
+        .btn-menu { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(251, 191, 36, 0.05); }
+        .btn-menu:hover { transform: translateY(-5px); border-color: #fbbf24; background: #fbbf24; color: #000; }
+        .btn-menu:hover i { color: #000; }
+        .hidden-access { display: none !important; }
+        
+        /* Background animado sutil */
+        .bg-glow {
+            position: fixed; top: 0; right: 0; width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.05) 0%, rgba(0,0,0,0) 70%);
+            z-index: -1; pointer-events: none;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+    <div class="bg-glow"></div>
+
+    <!-- Header Section -->
+    <header class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+        <div>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 bg-[#fbbf24] rounded-2xl flex items-center justify-center shadow-xl shadow-[#fbbf24]/20">
+                    <i class="fas fa-bolt text-black text-xl"></i>
+                </div>
+                <h1 class="text-3xl font-black tracking-tighter">YaSe <span class="accent-text">PRO</span></h1>
+            </div>
+            <p class="text-neutral-500 font-medium">Bem-vindo ao centro de comando, <span id="userName" class="text-white font-bold italic">...</span></p>
+        </div>
+
+        <div class="flex items-center gap-4 glass-card p-4 rounded-3xl">
+            <div class="text-right border-r border-white/10 pr-4">
+                <p id="unidadeNome" class="text-xs font-black uppercase tracking-widest text-[#fbbf24]">Carregando...</p>
+                <p id="userNivel" class="text-[10px] text-neutral-500 font-bold uppercase tracking-tighter italic">Nível de Acesso</p>
+            </div>
+            <button onclick="logout()" class="w-10 h-10 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors">
+                <i class="fas fa-power-off"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Menu de Blocos (Grid Dinâmico) -->
+    <main class="max-w-7xl mx-auto">
+        <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 mb-8 border-b border-white/5 pb-4">
+            Módulos Disponíveis para sua Unidade
+        </h2>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="menuGrid">
+            
+            <!-- BLOCOS OPERACIONAIS (Sempre visíveis) -->
+            <button onclick="location.href='Remessa.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4">
+                <i class="fas fa-ticket-alt text-3xl accent-text"></i>
+                <div class="text-left">
+                    <p class="font-black text-lg leading-none mb-1">Remessas</p>
+                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Gestão de Selos</p>
+                </div>
+            </button>
+
+            <button onclick="location.href='Vinculacao.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4">
+                <i class="fas fa-link text-3xl accent-text"></i>
+                <div class="text-left">
+                    <p class="font-black text-lg leading-none mb-1">Vinculação</p>
+                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Atribuir Clientes</p>
+                </div>
+            </button>
+
+            <button onclick="location.href='Rastreio_Full.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4">
+                <i class="fas fa-search-location text-3xl accent-text"></i>
+                <div class="text-left">
+                    <p class="font-black text-lg leading-none mb-1">Rastreio Full</p>
+                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Localizar Equip.</p>
+                </div>
+            </button>
+
+            <!-- BLOCOS DE GESTÃO (Apenas Gestores/Gerentes) -->
+            <button onclick="location.href='GestaoOS.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
+                <i class="fas fa-file-invoice text-3xl accent-text"></i>
+                <div class="text-left">
+                    <p class="font-black text-lg leading-none mb-1">Gestão OS</p>
+                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Ordens de Serviço</p>
+                </div>
+            </button>
+
+            <button onclick="location.href='ControleDeCargas.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
+                <i class="fas fa-truck-loading text-3xl accent-text"></i>
+                <div class="text-left">
+                    <p class="font-black text-lg leading-none mb-1">Cargas</p>
+                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Logística e Saída</p>
+                </div>
+            </button>
+
+            <button onclick="location.href='AnexoOeP.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
+                <i class="fas fa-copy text-3xl accent-text"></i>
+                <div class="text-left">
+                    <p class="font-black text-lg leading-none mb-1">Anexo O e P</p>
+                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Relatórios Técnicos</p>
+                </div>
+            </button>
+
+            <button onclick="location.href='CadastroUsuario.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
+                <i class="fas fa-user-shield text-3xl accent-text"></i>
+                <div class="text-left">
+                    <p class="font-black text-lg leading-none mb-1">Equipa</p>
+                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Acessos e Níveis</p>
+                </div>
+            </button>
+
+        </div>
+    </main>
+
+    <script>
+        // Supabase Init (As chaves devem estar aqui conforme corrigido)
+       const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co"; 
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function checkSession() {
+            const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+            
+            if (!userJson) {
+                window.location.href = 'EntrarSistema.html';
+                return;
+            }
+
+            const user = JSON.parse(userJson);
+            const nivel = user.nivel_permissao; // Gestor, Gerente ou Operador
+
+            // Preencher UI
+            document.getElementById('userName').innerText = user.nome_completo;
+            document.getElementById('userNivel').innerText = nivel;
+            
+            // Buscar nome da Unidade
+            const { data: emp } = await sb.from('empresas').select('nome_fantasia').eq('id', user.empresa_id).single();
+            if (emp) document.getElementById('unidadeNome').innerText = emp.nome_fantasia;
+
+            // Lógica de Bloqueio por Nível
+            if (nivel !== 'Gestor' && nivel !== 'Gerente') {
+                const blocosGestao = document.querySelectorAll('.access-gestor');
+                blocosGestao.forEach(bloco => bloco.classList.add('hidden-access'));
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'EntrarSistema.html';
+        }
+
+        window.onload = checkSession;
+    </script>
+</body>
+</html>

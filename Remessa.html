@@ -5,91 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>YaSe PRO - Cadastro de Remessas de Selos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <style>
-      body {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #f8fafc;
-        display: flex;
-        height: 100vh;
-        overflow: hidden;
-      }
-      aside {
-        width: 280px;
-        background-color: #0f172a;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        padding: 1.5rem;
-      }
-      main {
-        flex: 1;
-        overflow-y: auto;
-        padding: 2rem;
-      }
-      .section-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        margin-bottom: 1.5rem;
-      }
-      .label-mini {
-        font-size: 10px;
-        font-weight: 800;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 4px;
-        display: block;
-      }
-      .input-field {
-        width: 100%;
-        background-color: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #1e293b;
-        transition: all 0.2s;
-      }
-      .input-field:focus {
-        outline: none;
-        border-color: #6366f1;
-        background-color: white;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-      }
-      .btn-action {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.625rem 1.25rem;
-        border-radius: 0.75rem;
-        font-size: 0.75rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
-        transition: all 0.2s;
-      }
-      .status-badge {
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 9px;
-        font-weight: 900;
-        text-transform: uppercase;
-      }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="Remessas/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
-    <!-- Barra Lateral -->
     <aside>
       <div class="mb-10 flex items-center gap-3">
         <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
@@ -100,53 +21,38 @@
           <p class="text-[9px] text-slate-400 font-bold tracking-widest uppercase">Sistema de Rastreio</p>
         </div>
       </div>
-
       <nav class="space-y-2 flex-1">
-        <a href="Rastreio.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-sm"><i class="fa-solid fa-chart-pie"></i>Rastreio</a>
+        <a href="Rastreio_Full.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-sm"><i class="fa-solid fa-chart-pie"></i>Rastreio</a>
       </nav>
-
       <div class="mt-auto pt-6 border-t border-slate-800">
-        <div class="bg-slate-800/50 p-4 rounded-2xl">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-black">OP</div>
-            <div class="overflow-hidden">
-              <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Operador</p>
-              <p class="text-xs font-bold text-white truncate">João Silva Santos</p>
-            </div>
-          </div>
-        </div>
+        <div class="bg-slate-800/50 p-4 rounded-2xl text-xs font-bold text-white uppercase tracking-widest text-center">Configurações</div>
       </div>
     </aside>
 
     <main>
-      <!-- Cabeçalho com Ações Estilo Imagem -->
       <div class="flex justify-between items-center mb-6">
         <div>
           <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Remessas de Selos</h2>
           <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Controle e Lote de Selos Inmetro</p>
         </div>
         <div class="flex gap-3">
-          <button class="btn-action bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20">
-            <i class="fa-solid fa-plus"></i> Adicionar
+          <button onclick="salvarLote()" class="btn-action bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-floppy-disk"></i> Gravar Lote
           </button>
-          <button class="btn-action bg-white text-slate-700 border border-slate-200 hover:bg-slate-50">
-            <i class="fa-solid fa-floppy-disk"></i> Salvar
-          </button>
-          <button class="btn-action bg-white text-red-500 border border-red-100 hover:bg-red-50">
-            <i class="fa-solid fa-trash-can"></i> Excluir
+          <button onclick="limparCampos()" class="btn-action bg-white text-red-500 border border-red-100 hover:bg-red-50">
+            <i class="fa-solid fa-eraser"></i> Limpar
           </button>
         </div>
       </div>
 
-      <!-- Formulário de Cadastro (Inspirado no topo da imagem) -->
-      <div class="section-card grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 border-t-4 border-t-indigo-500">
+      <div class="section-card grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 border-t-4 border-t-indigo-500 mb-6">
         <div class="md:col-span-1">
           <label class="label-mini">Data de Recebimento</label>
-          <input type="date" class="input-field" value="2026-01-31">
+          <input type="date" id="data_rec" class="input-field">
         </div>
         <div>
           <label class="label-mini">Tipo de Selo</label>
-          <select class="input-field">
+          <select id="tipo_selo" class="input-field">
             <option>NUMÉRICO</option>
             <option>ALFA-NUMÉRICO</option>
           </select>
@@ -161,33 +67,29 @@
         </div>
         <div>
           <label class="label-mini">Quantidade</label>
-          <input type="number" id="qtd_selos" class="input-field bg-slate-100" readonly placeholder="Calculado...">
+          <input type="number" id="qtd_selos" class="input-field bg-slate-100 font-black text-indigo-600" readonly>
         </div>
         <div>
-          <label class="label-mini">Iniciais (Prefixo)</label>
-          <input type="text" class="input-field" placeholder="Ex: ABC ou 999">
+          <label class="label-mini">Prefixo</label>
+          <input type="text" id="prefixo" class="input-field" placeholder="Ex: ABC">
         </div>
-        <div class="md:col-span-2 lg:col-span-4">
+        <div class="md:col-span-4">
           <label class="label-mini">Num. Solicitação / NF-e</label>
-          <input type="text" class="input-field" placeholder="Identificação da Nota Fiscal ou Pedido Inmetro">
+          <input type="text" id="documento" class="input-field" placeholder="Identificação da Nota Fiscal ou Pedido">
         </div>
-        <div class="md:col-span-2 lg:col-span-2">
+        <div class="md:col-span-2">
             <label class="label-mini">Situação do Lote</label>
-            <select class="input-field">
-              <option>ABERTO</option>
-              <option>FECHADO / ESGOTADO</option>
-              <option>CANCELADO</option>
+            <select id="status_lote" class="input-field">
+              <option value="ABERTO">ABERTO</option>
+              <option value="FECHADO">FECHADO / ESGOTADO</option>
+              <option value="CANCELADO">CANCELADO</option>
             </select>
-          </div>
+        </div>
       </div>
 
-      <!-- Tabela de Remessas (Baseada no Grid da imagem) -->
-      <section class="section-card !p-0 overflow-hidden">
-        <div class="bg-slate-50 p-4 border-b flex justify-between items-center">
-            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Histórico de Lotes</h3>
-            <div class="flex gap-2">
-                <span class="text-[9px] font-bold text-slate-400 italic">* Selos em uso no sistema</span>
-            </div>
+      <section class="section-card !p-0 overflow-hidden mb-6">
+        <div class="bg-slate-50 p-4 border-b">
+            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Histórico de Lotes Gravados</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
@@ -198,86 +100,54 @@
                 <th class="p-4">Selo Inicial</th>
                 <th class="p-4">Selo Final</th>
                 <th class="p-4 text-center">Qtd.</th>
-                <th class="p-4">Iniciais</th>
                 <th class="p-4">Solicitação/NF</th>
                 <th class="p-4">Situação</th>
                 <th class="p-4 text-center">Ações</th>
               </tr>
             </thead>
-            <tbody id="lista-remessas" class="text-[11px] font-bold text-slate-700">
-              <!-- Linha Exemplo 1 -->
-              <tr class="border-b hover:bg-slate-50 transition-colors">
-                <td class="p-4">29/01/2026</td>
-                <td class="p-4"><span class="bg-slate-100 px-2 py-1 rounded">NUMÉRICO</span></td>
-                <td class="p-4 text-indigo-600">10001</td>
-                <td class="p-4 text-indigo-600">20000</td>
-                <td class="p-4 text-center">10.000</td>
-                <td class="p-4">---</td>
-                <td class="p-4 text-slate-400">---</td>
-                <td class="p-4"><span class="status-badge bg-emerald-100 text-emerald-600">ABERTO</span></td>
-                <td class="p-4 text-center">
-                  <button class="text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-pen-to-square"></i></button>
-                </td>
-              </tr>
-              <!-- Linha Exemplo 2 -->
-              <tr class="border-b hover:bg-slate-50 transition-colors bg-blue-50/30">
-                <td class="p-4">22/09/2025</td>
-                <td class="p-4"><span class="bg-slate-100 px-2 py-1 rounded">NUMÉRICO</span></td>
-                <td class="p-4 text-indigo-600">1</td>
-                <td class="p-4 text-indigo-600">10000</td>
-                <td class="p-4 text-center">10.000</td>
-                <td class="p-4">---</td>
-                <td class="p-4 text-slate-400">---</td>
-                <td class="p-4"><span class="status-badge bg-emerald-100 text-emerald-600">ABERTO</span></td>
-                <td class="p-4 text-center">
-                  <button class="text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-pen-to-square"></i></button>
-                </td>
-              </tr>
-               <!-- Linha Exemplo 3 -->
-               <tr class="border-b hover:bg-slate-50 transition-colors">
-                <td class="p-4">09/05/2025</td>
-                <td class="p-4"><span class="bg-slate-100 px-2 py-1 rounded">NUMÉRICO</span></td>
-                <td class="p-4 text-indigo-600">330962669</td>
-                <td class="p-4 text-indigo-600">330972668</td>
-                <td class="p-4 text-center">10.000</td>
-                <td class="p-4">---</td>
-                <td class="p-4 text-slate-400">NF-8829</td>
-                <td class="p-4"><span class="status-badge bg-slate-200 text-slate-600">FECHADO</span></td>
-                <td class="p-4 text-center">
-                  <button class="text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-pen-to-square"></i></button>
-                </td>
-              </tr>
-            </tbody>
+            <tbody id="lista-remessas" class="text-[11px] font-bold text-slate-700"></tbody>
           </table>
         </div>
       </section>
 
-      <div class="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
-        <p class="text-[10px] text-amber-700 font-bold leading-relaxed">
-            <i class="fa-solid fa-circle-info mr-1"></i> DICA: Ao informar as iniciais do selo, o sistema exibirá nos relatórios as iniciais + os 3 últimos caracteres do selo informado no extintor. 
-            Caso deseje que apareçam apenas os caracteres finais, basta utilizar <span class="underline">999</span> como iniciais.
-        </p>
-      </div>
+      <section class="section-card mt-4 bg-slate-50 border border-slate-200 !p-4">
+        <div class="flex flex-col gap-2">
+          <span class="text-[10px] font-black text-purple-600 uppercase tracking-widest">Quantidade Total de Selos (Lotes Abertos)</span>
+          <div class="flex flex-wrap items-end gap-2">
+            <div class="flex flex-col">
+              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Última Remessa</label>
+              <input type="text" id="resumo_data" class="input-field !py-1 !px-2 !text-center w-[100px] bg-slate-100 font-bold" readonly>
+            </div>
+            <span class="text-slate-300 font-bold mb-2">/</span>
+            <div class="flex flex-col">
+              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Total Recebido</label>
+              <input type="text" id="resumo_total" class="input-field !py-1 !px-2 !text-center w-[90px] bg-slate-100 font-bold" readonly>
+            </div>
+            <span class="text-slate-300 font-bold mb-2">-</span>
+            <div class="flex flex-col">
+              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Utilizados</label>
+              <input type="number" id="resumo_utilizados" class="input-field !py-1 !px-2 !text-center w-[80px] text-red-500 font-bold" value="0" oninput="calcularSaldoFinal()">
+            </div>
+            <span class="text-slate-300 font-bold mb-2">-</span>
+            <div class="flex flex-col">
+              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Inutilizados</label>
+              <input type="number" id="resumo_inutilizados" class="input-field !py-1 !px-2 !text-center w-[80px] text-orange-500 font-bold" value="0" oninput="calcularSaldoFinal()">
+            </div>
+            <span class="text-slate-300 font-bold mb-2">=</span>
+            <div class="flex flex-col">
+              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Estoque Atual</label>
+              <input type="text" id="resumo_estoque" class="input-field !py-1 !px-2 !text-center w-[110px] !bg-yellow-300 font-black text-slate-900 shadow-sm" readonly>
+            </div>
+            <button onclick="atualizarResumoLotes()" class="btn-action bg-slate-200 text-slate-700 hover:bg-slate-300 !py-1.5 !px-4 text-[10px] font-black border border-slate-300">
+              ATUALIZAR
+            </button>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <script>
-      // Lógica simples para calcular a quantidade baseada no range de selos
-      const inputInicio = document.getElementById('selo_inicio');
-      const inputFim = document.getElementById('selo_fim');
-      const inputQtd = document.getElementById('qtd_selos');
-
-      function calcularQuantidade() {
-        const inicio = parseInt(inputInicio.value) || 0;
-        const fim = parseInt(inputFim.value) || 0;
-        if (fim >= inicio && inicio > 0) {
-          inputQtd.value = (fim - inicio) + 1;
-        } else {
-          inputQtd.value = 0;
-        }
-      }
-
-      inputInicio.addEventListener('input', calcularQuantidade);
-      inputFim.addEventListener('input', calcularQuantidade);
-    </script>
+    <script src="Rastreabilidade/main.js"></script> 
+    <script src="Remessas/main.js"></script>
+    <script src="Remessas/calculosSelos.js"></script>
   </body>
 </html>

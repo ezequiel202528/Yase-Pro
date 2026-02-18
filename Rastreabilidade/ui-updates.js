@@ -96,3 +96,66 @@ function solicitarConfirmacao({ titulo, mensagem, corBtn, textoBtn, icone, callb
 function fecharConfirmacao() {
     document.getElementById('modalConfirmacao').classList.add('hidden');
 }
+
+/**
+ * Atualiza o Widget de Selos na tela de Rastreio
+ */
+async function atualizarWidgetSelo() {
+    try {
+        // 1. Busca o lote mais antigo que ainda esteja ABERTO (FIFO - First In, First Out)
+        const { data: lote, error } = await _supabase
+            .from('rem_essas')
+            .select('*')
+            .eq('status_lote', 'ABERTO')
+            .order('selo_inicio', { ascending: true })
+            .limit(1)
+            .single();
+
+        const container = document.getElementById('status-selo-container');
+
+        if (error || !lote) {
+            container.classList.add('hidden');
+            return;
+        }
+
+        // 2. Conta quantos selos deste lote já foram usados na tabela itens_os
+        const { count: usados } = await _supabase
+            .from('itens_os')
+            .select('*', { count: 'exact', head: true })
+            .gte('selo_inmetro', lote.selo_inicio)
+            .lte('selo_inmetro', lote.selo_fim);
+
+        // 3. Cálculos
+        const restante = lote.qtd_selos - usados;
+        const proximoSelo = lote.selo_inicio + usados;
+        const porcentagem = (restante / lote.qtd_selos) * 100;
+
+        // 4. Atualiza a Interface
+        container.classList.remove('hidden');
+        document.getElementById('lote_documento').innerText = lote.documento || `Lote ${lote.selo_inicio}`;
+        document.getElementById('proximo_selo_num').innerText = proximoSelo;
+        document.getElementById('qtd_restante_texto').innerText = `${restante} / ${lote.qtd_selos}`;
+        
+        const barra = document.getElementById('barra_progresso_selo');
+        barra.style.width = `${porcentagem}%`;
+
+        // Muda a cor da barra se estiver acabando (menos de 10%)
+        if (porcentagem < 10) {
+            barra.classList.replace('bg-emerald-500', 'bg-red-500');
+        } else {
+            barra.classList.replace('bg-red-500', 'bg-emerald-500');
+        }
+
+        // AUTO-PREENCHIMENTO: Se o campo de selo estiver vazio, sugere o próximo
+        const inputSelo = document.getElementById('selo_inmetro');
+        if (inputSelo && !inputSelo.value) {
+            inputSelo.placeholder = `Sugestão: ${proximoSelo}`;
+        }
+
+    } catch (err) {
+        console.error("Erro ao atualizar widget de selos:", err);
+    }
+}
+
+// Chama a função ao carregar a página
+document.addEventListener('DOMContentLoaded', atualizarWidgetSelo);

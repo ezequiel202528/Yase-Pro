@@ -1,0 +1,11 @@
+
+      body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; display: flex; height: 100vh; overflow: hidden; }
+      aside { width: 280px; background-color: #0f172a; color: white; display: flex; flex-direction: column; padding: 1.5rem; }
+      main { flex: 1; overflow-y: auto; padding: 2rem; }
+      .section-card { background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); margin-bottom: 1.5rem; }
+      .label-mini { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block; }
+      .input-field { width: 100%; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; font-weight: 600; color: #1e293b; transition: all 0.2s; }
+      .input-field:focus { outline: none; border-color: #6366f1; background-color: white; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+      .btn-action { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.625rem 1.25rem; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.025em; transition: all 0.2s; cursor: pointer; }
+      .status-badge { padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 900; text-transform: uppercase; }
+    

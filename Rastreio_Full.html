@@ -144,292 +144,134 @@
 
       </header>
 
-<div class="grid grid-cols-12 gap-3 mb-4">
-    <div class="col-span-12 lg:col-span-3">
-        <div class="card !p-3">
-            <h3 class="section-title !mb-2">
-                <i class="fa-solid fa-fingerprint text-indigo-500"></i> Identificação
-            </h3>
-            <div class="space-y-2">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-4 items-start bg-slate-100 p-1">
+    
+    <div class="card !p-3 shadow-sm border-t-2 border-indigo-500">
+        <h3 class="section-title !mb-2 !text-[10px]">
+            <i class="fa-solid fa-fingerprint text-indigo-500"></i> Identificação
+        </h3>
+        <div class="space-y-2">
+            <div>
+                <label class="label-mini !text-[9px]">Cód. de Barras</label>
+                <input type="text" id="cod_barras" class="input-field h-8 !py-1 !text-[10px]" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
                 <div>
-                    <label class="label-mini">Cód. de Barras</label>
-                    <input type="text" id="cod_barras" class="input-field h-8 !py-1" placeholder="Escaneie ou digite..." />
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="col-span-1">
-                        
-<div class="col-span-1">
-    <label class="label-mini">Fabricante (Cód)</label>
-    <div class="relative flex items-center h-8">
-        <input type="number" id="X_input_id" 
-               class="input-field w-full pl-3 pr-10 h-8 !py-1" 
-               placeholder="ID..." 
-               oninput="X_BUSCAR_POR_ID(this.value)">
-        
-        <span id="badgeNomeFabricante" class="hidden absolute left-12 z-10 bg-amber-500 text-white text-[8px] px-1.5 py-0.5 rounded font-black uppercase pointer-events-none whitespace-nowrap">
-            NOME
-        </span>
-        
-        <button onclick="X_ABRIR_FAB()" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors">
-            <i class="fa-solid fa-magnifying-glass text-xs"></i>
-        </button>
-    </div>
-</div>
-                    </div>
-                    <div class="col-span-1">
-                        <label class="label-mini">Nº Cilindro</label>
-                        <div class="relative flex items-center h-8">
-                            <input type="text" id="nr_cilindro" class="input-field w-full pr-8 h-8 !py-1" placeholder="000000" />
-                            <button type="button" onclick="abrirModalBuscaRapida()" class="absolute right-2 text-indigo-500 hover:text-indigo-700">
-                                <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="label-mini">Ano Fab.</label>
-                        <input type="number" id="ano_fab" class="input-field h-8 !py-1" placeholder="AAAA" />
-                    </div>
-                    <div>
-                        <label class="label-mini">Último Reteste</label>
-                        <input type="text" id="ult_reteste" class="input-field h-8 !py-1" placeholder="AAAA" maxlength="4" onblur="definirNivelPeloReteste(); calcularDatasAutomaticas()">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="label-mini">Tipo</label>
-                        <select id="tipo_carga" class="input-field h-8 !py-1" onchange="definirNivelPeloReteste()">
-                            <option value=""></option>
-                            <option value="PQS">PQS - BC</option>
-                            <option value="PQS">PQS - ABC</option>
-                            <option value="CO2">CO2</option>
-                            <option value="AGUA">Água</option>
-                            <option value="ESP">Espuma</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="label-mini">Capacidade</label>
-                        <div class="flex gap-1 items-center">
-                            <select id="capacidade" class="input-field flex-1 h-8 !py-1">
-                                <option value="">Selecione...</option>
-                                <option value="4KG">4KG</option>
-                                <option value="6KG">6KG</option>
-                                <option value="12KG">12KG</option>
-                                <option value="20KG">20KG</option>
-                                <option value="30KG">30KG</option>
-                                <option value="9L">9L</option>
-                                <option value="10L">10L</option>
-                                <option value="20L">20L</option>
-                                <option value="30L">30L</option>
-                                <option value="50L">50L</option>
-                            </select>
-                            <button type="button" onclick="openCapacidadeModal()" class="shrink-0 bg-slate-100 w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center">
-                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                            </button>
-                        </div>
+                    <label class="label-mini !text-[9px]">Fabricante (Cód)</label>
+                    <div class="relative flex items-center h-8">
+                        <input type="number" id="X_input_id" class="input-field w-full pl-2 pr-8 h-8 !py-1 !text-[10px]" oninput="X_BUSCAR_POR_ID(this.value)">
+                        <span id="badgeNomeFabricante" class="hidden absolute left-10 z-10 bg-amber-500 text-white text-[7px] px-1 rounded font-black uppercase whitespace-nowrap">NOME</span>
+                        <button onclick="X_ABRIR_FAB()" class="absolute right-2 text-slate-400"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
                     </div>
                 </div>
                 <div>
-                   <div class="col-span-1">
-    <label class="label-mini">Norma (NBR)</label>
-    <div class="relative flex items-center h-8">
-        <select id="nbr_select" class="input-field w-full pl-3 pr-10 h-8 !py-1 text-[11px] font-bold uppercase appearance-none">
-            <option value="">Carregando...</option>
-        </select>
-        
-        <button type="button" onclick="X_ABRIR_NBR()" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors">
-            <i class="fa-solid fa-magnifying-glass text-xs"></i>
-        </button>
-    </div>
-</div>
+                    <label class="label-mini !text-[9px]">Nº Cilindro</label>
+                    <div class="relative flex items-center h-8">
+                        <input type="text" id="nr_cilindro" class="input-field w-full pr-8 h-8 !py-1 !text-[10px]" />
+                        <button onclick="abrirModalBuscaRapida()" class="absolute right-2 text-indigo-500"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div><label class="label-mini !text-[9px]">Ano Fab.</label><input type="number" id="ano_fab" class="input-field h-8 !py-1 !text-[10px]"></div>
+                <div><label class="label-mini !text-[9px]">Últ. Reteste</label><input type="text" id="ult_reteste" class="input-field h-8 !py-1 !text-[10px]" onblur="definirNivelPeloReteste(); calcularDatasAutomaticas()"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="label-mini !text-[9px]">Tipo</label>
+                    <select id="tipo_carga" class="input-field h-8 !py-1 !text-[10px]" onchange="definirNivelPeloReteste()">
+                        <option value=""></option>
+                        <option value="PQS">PQS-BC</option>
+                        <option value="PQS">PQS-ABC</option>
+                        <option value="CO2">CO2</option>
+                        <option value="AGUA">Água</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="label-mini !text-[9px]">Capacidade</label>
+                    <div class="flex gap-1 h-8">
+                        <select id="capacidade" class="input-field flex-1 h-8 !py-1 !text-[10px]"><option value="">...</option></select>
+                        <button onclick="openCapacidadeModal()" class="w-8 bg-slate-100 border rounded flex items-center justify-center"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label class="label-mini !text-[9px]">Norma (NBR)</label>
+                <div class="relative flex items-center h-8">
+                    <select id="nbr_select" class="input-field w-full h-8 !py-1 !text-[10px] uppercase"><option value="">Carregando...</option></select>
+                    <button onclick="X_ABRIR_NBR()" class="absolute right-2 text-slate-400"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
                 </div>
             </div>
         </div>
-        <button onclick="registrarItem()" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg shadow-md transition-all flex items-center justify-center gap-2 text-xs">
+        <button onclick="registrarItem()" class="w-full mt-3 bg-indigo-600 text-white font-bold py-2 rounded-lg text-[10px] uppercase shadow-md">
             <i class="fa-solid fa-plus-circle"></i> REGISTRAR ITEM
         </button>
     </div>
 
-    <div class="col-span-12 lg:col-span-3 space-y-3">
-        <div class="card !p-3">
-            <h3 class="section-title !mb-2">
-                <i class="fa-solid fa-microchip text-indigo-500"></i> Dados Técnicos
-            </h3>
+    <div class="space-y-3">
+        <div class="card !p-3 border-t-2 border-indigo-500">
+            <h3 class="section-title !mb-2 !text-[10px]"><i class="fa-solid fa-microchip text-indigo-500"></i> Dados Técnicos</h3>
             <div class="space-y-2">
+                <input type="text" id="lote_nitrogenio" class="input-field h-8 !py-1 !text-[10px]" placeholder="Lote Nitro.">
+                <input type="text" id="ampola_vinculada" class="input-field h-8 !py-1 !text-[10px]" placeholder="Ampola Vinc.">
                 <div>
-                    <label class="label-mini">Lote Nitrogénio</label>
-                    <input type="text" id="lote_nitrogenio" class="input-field h-8 !py-1" placeholder="Lote..." />
+                    <label class="label-mini !text-[9px]">Data Selagem</label>
+                    <input type="date" id="data_selagem" class="input-field h-8 !py-1 !text-[10px]" onchange="calcularDatasAutomaticas()">
                 </div>
-                <div>
-                    <label class="label-mini">Ampola Vinculada</label>
-                    <input type="text" id="ampola_vinculada" class="input-field h-8 !py-1" placeholder="Nº da ampola..." />
-                </div>
-                <div>
-                    <label class="label-mini">Data Selagem</label>
-                    <input type="date" id="data_selagem" class="input-field h-8 !py-1" onchange="calcularDatasAutomaticas()">
-                </div>
-                <div class="pt-1">
-                    <label class="checkbox-item !text-[10px]">
-                        <input type="checkbox" id="realizado_troca" class="w-3 h-3" /> Realizado Troca de Peças
-                    </label>
-                </div>
+                <label class="checkbox-item !text-[10px]">
+                    <input type="checkbox" id="realizado_troca" class="w-3 h-3" /> Realizado Troca de Peças
+                </label>
             </div>
         </div>
-        <div class="card flex flex-col justify-between border-indigo-100 bg-indigo-50/20 !p-3">
-            <h3 class="section-title text-indigo-700 !mb-2"><i class="fa-solid fa-calendar-check"></i> Validades</h3>
+        <div class="card !p-3 bg-indigo-50/20 border border-indigo-100">
             <div class="bg-white p-2 rounded-xl border border-indigo-100 mb-2 space-y-1">
-                <div class="flex justify-between items-center">
-                    <span class="text-[9px] font-black text-slate-400 uppercase">Prox. Recarga</span>
-                    <span id="display_prox_recarga" class="text-xs font-bold text-indigo-600">--/--/----</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-[9px] font-black text-slate-400 uppercase">Prox. Reteste</span>
-                    <span id="display_prox_reteste" class="text-xs font-bold text-red-500">----</span>
-                </div>
+                <div class="flex justify-between items-center"><span class="text-[9px] font-black text-slate-400 uppercase">Prox. Recarga</span><span id="display_prox_recarga" class="text-[10px] font-bold text-indigo-600">--/--/----</span></div>
+                <div class="flex justify-between items-center"><span class="text-[9px] font-black text-slate-400 uppercase">Prox. Reteste</span><span id="display_prox_reteste" class="text-[10px] font-bold text-red-500">----</span></div>
             </div>
-            <label class="label-mini">Observações</label>
-            <textarea id="obs_ensaio" rows="1" class="input-field mb-2 !h-auto !py-1" placeholder="Obs. técnicas..."></textarea>
+            <textarea id="obs_ensaio" rows="1" class="input-field !h-auto !py-1 !text-[10px]" placeholder="Obs. técnicas..."></textarea>
         </div>
     </div>
 
-   <div class="col-span-12 lg:col-span-3 space-y-3">
-    
-    <div class="card !p-3">
-        <h3 class="section-title !mb-2">
-            <i class="fa-solid fa-truck-ramp-box text-indigo-500"></i> Manutenção & Local
-        </h3>
-        <div class="space-y-2">
-            <div>
-                <label class="label-mini">Nível de Manutenção</label>
-                <div class="flex gap-1">
-                    <div class="btn-level active !py-1 !text-[9px]" data-level="1" onclick="setLevel(1)">NV 1</div>
-                    <div class="btn-level !py-1 !text-[9px]" data-level="2" onclick="setLevel(2)">NV 2</div>
-                    <div class="btn-level !py-1 !text-[9px]" data-level="3" onclick="setLevel(3)">NV 3</div>
-                </div>
+    <div class="space-y-3">
+        <div class="card !p-3 border-t-2 border-indigo-500">
+            <h3 class="section-title !mb-2 !text-[10px]"><i class="fa-solid fa-truck-ramp-box text-indigo-500"></i> Manutenção</h3>
+            <div class="flex gap-1 mb-2">
+                <div class="btn-level active !py-1 !text-[9px]" data-level="1" onclick="setLevel(1)">NV 1</div>
+                <div class="btn-level !py-1 !text-[9px]" data-level="2" onclick="setLevel(2)">NV 2</div>
+                <div class="btn-level !py-1 !text-[9px]" data-level="3" onclick="setLevel(3)">NV 3</div>
             </div>
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="label-mini">Selo Inmetro</label>
-                    <input type="text" id="selo_anterior" class="input-field h-8 !py-1" placeholder="Anterior..." />
-                </div>
-                <div>
-                    <label class="label-mini">Pallet</label>
-                    <input type="text" id="pallet" class="input-field h-8 !py-1" placeholder="Nº Pallet" />
-                </div>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+                <input type="text" id="selo_anterior" class="input-field h-8 !py-1 !text-[10px]" placeholder="Selo Ant.">
+                <input type="text" id="pallet" class="input-field h-8 !py-1 !text-[10px]" placeholder="Pallet">
+                <input type="text" id="deposito_galpao" class="input-field h-8 !py-1 !text-[10px]" placeholder="Setor">
+                <input type="text" id="local_extintor" class="input-field h-8 !py-1 !text-[10px]" placeholder="Local">
             </div>
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="label-mini">Depósito/Galpão</label>
-                    <input type="text" id="deposito_galpao" class="input-field h-8 !py-1" placeholder="Setor..." />
-                </div>
-                <div>
-                    <label class="label-mini">Local Extintor</label>
-                    <input type="text" id="local_extintor" class="input-field h-8 !py-1" placeholder="Ex: Hall" />
-                </div>
-            </div>
-            <div>
-                <label class="label-mini">Resultado</label>
-                <div class="flex gap-1" id="groupResultado">
-                    <div class="btn-level btn-status-apr active" onclick="setStatus('APROVADO', this)">APR</div>
-                    <div class="btn-level btn-status-rep" onclick="setStatus('REPROVADO', this)">REP</div>
-                    <div class="btn-level btn-status-novo" onclick="setStatus('NOVO', this)">NOVO</div>
-                </div>
+            <div class="flex gap-1 mb-2" id="groupResultado">
+                <div class="btn-level btn-status-apr active !py-1 !text-[9px]" onclick="setStatus('APROVADO', this)">APR</div>
+                <div class="btn-level btn-status-rep !py-1 !text-[9px]" onclick="setStatus('REPROVADO', this)">REP</div>
                 <input type="hidden" id="resultado_valor" value="APROVADO">
             </div>
+            <button onclick="openAcessoriosModal()" class="w-full bg-amber-50 border-2 border-dashed border-amber-300 text-amber-700 py-2 rounded-xl text-[10px] font-black uppercase">
+                Componentes e Ensaios
+            </button>
         </div>
-    </div>
 
-    <div class="card !p-3 border-l-4 border-amber-500 bg-amber-50/30">
-    <label class="label-mini !text-amber-700 !mb-2 block uppercase font-black italic">Revisão Técnica de Peças</label>
-    <button type="button" onclick="openAcessoriosModal()" class="w-full bg-white border-2 border-dashed border-amber-300 hover:border-amber-500 hover:bg-amber-50 text-amber-700 py-6 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all group shadow-sm">
-        <i class="fa-solid fa-toolbox text-2xl group-hover:scale-110 transition-transform"></i>
-        <span class="text-[11px] font-black uppercase tracking-tight">Componentes e Ensaios</span>
-        <span id="count_acessorios" class="text-[9px] bg-amber-600 text-white px-3 py-1 rounded-full hidden font-bold">0 ITENS</span>
-    </button>
-
-        
-        
-
-      
-           
-        
-    </div>
-</div>
-
-<div class="col-span-12 lg:col-span-3 flex flex-col space-y-4">
-    
-    <div class="card !p-2 border-l-4 border-indigo-500 bg-slate-50/50 shadow-sm">
-        <h3 class="section-title !mb-1.5 !text-[11px] flex items-center gap-2">
-            <i class="fa-solid fa-gauge-high text-indigo-500"></i> Ensaios e Pesagens
-        </h3>
-        
-        <div class="space-y-1.5">
-            <div class="p-1.5 bg-yellow-50/60 border border-yellow-100 rounded-lg">
-                <span class="text-[8px] font-black text-yellow-700 uppercase block mb-1">Pesagem BC</span>
-                <div class="grid grid-cols-2 gap-1">
-                    <input type="number" id="p_vazio_valvula" class="input-field !h-[24px] !text-[10px]" placeholder="P. Vazio V.">
-                    <input type="number" id="p_cheio_valvula" class="input-field !h-[24px] !text-[10px]" placeholder="P. Cheio V.">
-                    <input type="number" id="p_atual" class="input-field !h-[24px] !text-[10px]" placeholder="P. Atual">
-                    <input type="text" id="porcent_dif" class="input-field !h-[24px] !text-[10px] bg-white/50" placeholder="% Dif" readonly>
-                </div>
-            </div>
-
-            <div class="p-1.5 bg-emerald-50/60 border border-emerald-100 rounded-lg">
-                <span class="text-[8px] font-black text-emerald-700 uppercase block mb-1">Perda de Massa</span>
-                <div class="grid grid-cols-3 gap-1">
-                    <input type="number" id="tara_cilindro" class="input-field !h-[24px] !text-[10px]" placeholder="Tara">
-                    <input type="number" id="p_cil_vazio_kg" class="input-field !h-[24px] !text-[10px]" placeholder="P. Cil V.">
-                    <input type="text" id="perda_massa_porcent" class="input-field !h-[24px] !text-[9px] bg-white/50 font-bold" placeholder="% Perda" readonly>
-                </div>
-            </div>
-
-            <div class="p-1.5 bg-blue-50/60 border border-blue-100 rounded-lg">
-                <span class="text-[8px] font-black text-blue-700 uppercase block mb-1">Cubagem</span>
-                <div class="grid grid-cols-4 gap-1">
-                    <input type="number" id="p_vazio_pvc" class="input-field !h-[24px] !text-[9px]" placeholder="PVC kg">
-                    <input type="number" id="p_cheio_pca" class="input-field !h-[24px] !text-[9px]" placeholder="PCA kg">
-                    <input type="number" id="vol_litros" class="input-field !h-[24px] !text-[9px]" placeholder="Vol.">
-                    <input type="number" id="cub_co2" class="input-field !h-[24px] !text-[9px]" placeholder="Cub.">
-                </div>
-            </div>
-
-            <div class="p-1.5 bg-slate-200/60 border border-slate-300 rounded-lg">
-                <span class="text-[8px] font-black text-slate-700 uppercase block mb-1">Teste Hidrostático</span>
-                <div class="grid grid-cols-2 gap-1">
-                    <div class="flex gap-1">
-                        <input type="number" id="dvm_et" class="input-field !h-[24px] !text-[10px] w-1/2" placeholder="DVM">
-                        <input type="number" id="dvp_ep" class="input-field !h-[24px] !text-[10px] w-1/2" placeholder="DVP">
+        <div id="status-selo-container" class="hidden">
+            <div class="bg-[#0f172a] rounded-xl p-3 shadow-xl border-b-4 border-amber-500">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex gap-2">
+                        <div class="w-7 h-7 bg-amber-500 rounded flex items-center justify-center text-slate-900"><i class="fa-solid fa-stamp text-[10px]"></i></div>
+                        <div>
+                            <p class="text-[7px] font-black text-slate-500 uppercase leading-none mb-0.5">Estoque Ativo</p>
+                            <h4 id="lote_documento" class="text-[10px] font-bold text-white leading-none">LOTE 1</h4>
+                        </div>
                     </div>
-                    <div class="flex gap-1">
-                        <input type="text" id="ee_resultado" class="input-field !h-[24px] !text-[9px] bg-white/50 w-1/2" placeholder="EE" readonly>
-                        <input type="text" id="ep_porcentagem" class="input-field !h-[24px] !text-[9px] bg-white/50 w-1/2" placeholder="EP%" readonly>
+                    <div class="text-right">
+                        <p class="text-[7px] font-black text-slate-500 uppercase leading-none mb-0.5">Próximo</p>
+                        <span id="proximo_selo_num" class="text-xs font-black text-amber-500">1</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="status-selo-container" class="hidden">
-        <div class="card !p-3 bg-slate-900 border-slate-800 shadow-xl border-l-4 border-amber-500">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 bg-amber-500 rounded flex items-center justify-center text-slate-900">
-                        <i class="fa-solid fa-stamp text-xs"></i>
-                    </div>
-                    <div>
-                        <p class="text-[8px] font-black text-slate-500 uppercase leading-none mb-0.5">Estoque Ativo</p>
-                        <h4 id="lote_documento" class="text-[10px] font-bold text-white truncate max-w-[80px]">Lote 1</h4>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-[8px] font-black text-slate-500 uppercase leading-none mb-0.5">Próximo</p>
-                    <span id="proximo_selo_num" class="text-xs font-black text-amber-500">1</span>
-                </div>
-            </div>
-
-            <div class="space-y-1">
-                <div class="flex justify-between text-[8px] font-black text-slate-400 uppercase">
+                <div class="flex justify-between text-[7px] font-black text-slate-400 uppercase mb-1">
                     <span>Disponibilidade</span>
                     <span id="qtd_restante_texto" class="text-white">10000 / 10000</span>
                 </div>
@@ -439,8 +281,39 @@
             </div>
         </div>
     </div>
-</div>
-    </div>     
+
+    <div class="card !p-3 border-t-2 border-indigo-500 bg-slate-50/50 flex flex-col gap-2">
+        <h3 class="section-title !mb-1 !text-[10px]"><i class="fa-solid fa-gauge-high text-indigo-500"></i> Ensaios</h3>
+        
+        <div class="p-2 bg-yellow-50/60 border border-yellow-100 rounded-lg">
+            <span class="text-[8px] font-black text-yellow-700 uppercase block mb-1">Pesagem BC</span>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="p_vazio_valvula" class="input-field !h-6 !text-[9px]" placeholder="P. Vazio V.">
+                <input type="number" id="p_cheio_valvula" class="input-field !h-6 !text-[9px]" placeholder="P. Cheio V.">
+                <input type="number" id="p_atual" class="input-field !h-6 !text-[9px]" placeholder="P. Atual">
+                <input type="text" id="porcent_dif" class="input-field !h-6 !text-[9px]" placeholder="% Dif" readonly>
+            </div>
+        </div>
+
+        <div class="p-2 bg-emerald-50/60 border border-emerald-100 rounded-lg">
+            <span class="text-[8px] font-black text-emerald-700 uppercase block mb-1">Perda de Massa</span>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="tara_cilindro" class="input-field !h-6 !text-[9px]" placeholder="Tara">
+                <input type="number" id="p_cil_vazio_kg" class="input-field !h-6 !text-[9px]" placeholder="P. Cil V.">
+                <input type="text" id="perda_massa_porcent" class="input-field !h-6 !text-[9px] col-span-2" placeholder="% Perda" readonly>
+            </div>
+        </div>
+
+        <div class="p-2 bg-blue-50/60 border border-blue-100 rounded-lg">
+            <span class="text-[8px] font-black text-blue-700 uppercase block mb-1">Cubagem / Hidro</span>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="vol_litros" class="input-field !h-6 !text-[9px]" placeholder="Vol.">
+                <input type="number" id="dvm_et" class="input-field !h-6 !text-[9px]" placeholder="DVM">
+                <input type="number" id="dvp_ep" class="input-field !h-6 !text-[9px]" placeholder="DVP">
+                <input type="text" id="ee_resultado" class="input-field !h-6 !text-[9px]" placeholder="EE" readonly>
+            </div>
+        </div>
+    </div>
 </div>
     
 
@@ -774,24 +647,24 @@
 <!--               MODAL CONFIRMAÇÃO           -->
 <!-- ========================================= -->
 
-<div id="modalConfirmacao" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[2000] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm border border-slate-200 overflow-hidden transform transition-all">
+<div id="modalConfirmacao" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[99999] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm border border-slate-200 overflow-hidden transform transition-all animate-in zoom-in duration-200">
         <div class="p-8 text-center">
-            <div id="confirmIconContainer" class="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 ring-8 ring-red-50/50">
-                <i id="confirmIcon" class="fa-solid fa-trash-can text-3xl"></i>
+            <div id="confirmIconContainer" class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 ring-4 ring-red-50">
+                <i id="confirmIcon" class="fa-solid fa-trash-can text-2xl"></i>
             </div>
             
-            <h3 id="confirmTitle" class="text-xl font-black text-slate-800 mb-2">Confirmar Exclusão</h3>
-            <p id="confirmMessage" class="text-slate-500 text-sm leading-relaxed mb-8">
-                Esta ação não poderá ser desfeita.
+            <h3 id="confirmTitle" class="text-lg font-black text-slate-800 mb-1">Confirmar Exclusão</h3>
+            <p id="confirmMessage" class="text-slate-500 text-[11px] font-medium leading-relaxed mb-6">
+                Esta ação não poderá ser desfeita e o registro será removido permanentemente.
             </p>
 
-            <div class="flex gap-3">
-                <button onclick="fecharConfirmacao()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl text-xs uppercase transition-all">
+            <div class="flex gap-2">
+                <button onclick="fecharConfirmacao()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl text-[10px] uppercase transition-all">
                     Cancelar
                 </button>
-                <button id="btnConfirmarAcaoGeral" class="flex-[1.5] bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-2xl text-xs uppercase shadow-lg shadow-red-200 transition-all">
-                    Confirmar
+                <button id="btnConfirmarAcaoGeral" class="flex-[1.5] bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl text-[10px] uppercase shadow-lg shadow-red-200 transition-all">
+                    Sim, Confirmar
                 </button>
             </div>
         </div>

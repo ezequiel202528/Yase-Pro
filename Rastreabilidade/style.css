@@ -1,150 +1,327 @@
-/* RESET E ESTRUTURA */
-    html, body {
-        height: 100vh;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #f1f5f9;
-    }
+/* YaSe PRO - Unified Modern Dark Theme 
+    Integração: Estrutura Responsiva + Estilização Premium
+*/
 
-    .app-container {
-        display: flex;
-        height: 100vh;
-        width: 100vw;
-    }
+/* 1. RESET E ESTRUTURA BASE */
+html, body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Impede scroll na página inteira, foca nos containers */
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #0f172a; /* Azul marinho profundo */
+    color: #f8fafc;
+}
 
-    aside {
-        width: 250px;
-        flex-shrink: 0;
-        background-color: #0f172a;
-        color: white;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        padding: 15px;
-        border-right: 1px solid #1e293b;
-    }
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
 
-    main {
-        flex: 1;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        padding: 10px 25px; /* Reduzido o respiro superior para subir tudo */
-        gap: 10px; 
-        overflow: hidden;
-        box-sizing: border-box;
-    }
+aside {
+    width: 250px;
+    flex-shrink: 0;
+    background-color: #1e293b; 
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    border-right: 1px solid #334155;
+}
 
-    /* CARDS COMPACTOS */
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px; /* Espaço mínimo entre cards */
-        width: 100%;
-        flex-shrink: 0;
-    }
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #0f172a;
+    padding: 16px;
+    overflow: hidden; /* Garante que o flex da tabela funcione */
+}
 
-    .card {
-        background: white;
-        border-radius: 12px;
-        padding: 8px 12px !important; /* Super compacto */
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
+/* 2. CARDS E INPUTS (ESTILO DARK UNIFICADO) */
+.card {
+    background-color: #0f172a !important; 
+    border: 1px solid #334155;
+    border-radius: 12px;
+}
 
-    .section-title {
-        font-size: 9px;
-        font-weight: 800;
-        color: #475569;
-        text-transform: uppercase;
-        margin-bottom: 6px;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
+.input-field, input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%;
+    height: 28px !important;
+    padding: 0 8px !important;
+    font-size: 11px !important;
+    border-radius: 6px;
+    background-color: #0b0f1a !important; /* Fundo interno mais escuro */
+    border: 1px solid #2d3748 !important;
+    color: #e2e8f0 !important;
+    margin-bottom: 4px;
+    transition: border-color 0.2s;
+}
 
-    .input-field {
-        width: 100%;
-        height: 28px !important; /* Inputs bem baixos */
-        padding: 0 8px !important;
-        font-size: 11px !important;
-        border-radius: 6px;
-        border: 1px solid #cbd5e1;
-        margin-bottom: 4px;
-    }
+.input-field:focus, input:focus, select:focus {
+    border-color: #4f46e5 !important;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
 
-    .label-mini {
-        font-size: 8px !important;
-        font-weight: 700;
-        color: #64748b;
-        margin-bottom: 1px;
-        display: block;
-    }
+/* 3. GRUPOS DE ENSAIO TÉCNICO */
+.ensaios-group-yellow { border: 1px solid rgba(234, 179, 8, 0.4); background: #0b0f1a; border-radius: 8px; padding: 8px; margin-bottom: 4px; }
+.ensaios-group-green { border: 1px solid rgba(34, 197, 94, 0.4); background: #0b0f1a; border-radius: 8px; padding: 8px; margin-bottom: 4px; }
+.ensaios-group-blue { border: 1px solid rgba(59, 130, 246, 0.4); background: #0b0f1a; border-radius: 8px; padding: 8px; margin-bottom: 4px; }
 
-    /* TABELA MAXIMIZADA */
-    .table-wrapper {
-        flex: 1; /* Ocupa o máximo de espaço */
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        margin-bottom: 10px;
-    }
+/* 4. TABELA MODERNA RESPONSIVA (INTEGRAÇÃO TOTAL) */
+.table-wrapper {
+    flex: 1; /* Responsividade: ocupa todo o espaço vertical restante */
+    background: #111827; 
+    border-radius: 16px;
+    border: 1px solid #1f2937;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin-top: 10px;
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
+}
 
-    .scrollable-body {
-        flex: 1;
-        overflow-y: auto;
-    }
+.scrollable-body {
+    flex: 1; /* Permite scroll interno mantendo o cabeçalho fixo */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #374151 transparent;
+}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+/* Scrollbar para Webkit (Chrome/Edge/Safari) */
+.scrollable-body::-webkit-scrollbar {
+    width: 6px;
+}
+.scrollable-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+.scrollable-body::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 10px;
+}
 
-    thead {
-        position: sticky;
-        top: 0;
-        background: #f8fafc;
-        z-index: 10;
-    }
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
 
-    th {
-        padding: 8px 5px !important;
-        font-size: 9px !important;
-        font-weight: 800;
-        color: #64748b;
-        text-transform: uppercase;
-        border-bottom: 1px solid #e2e8f0;
-        text-align: center;
-    }
+thead {
+    position: sticky;
+    top: 0;
+    background: #1f2937; 
+    z-index: 10;
+}
 
-    td {
-        padding: 6px 5px !important;
-        font-size: 11px !important;
-        color: #334155;
-        border-bottom: 1px solid #f1f5f9;
-        text-align: center;
-    }
+th {
+    padding: 12px 10px !important;
+    font-size: 10px !important;
+    font-weight: 800;
+    color: #94a3b8; 
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #374151;
+    text-align: center;
+}
 
-    /* BOTÕES PEQUENOS */
-    .btn-level {
-        padding: 3px 0 !important;
-        font-size: 9px !important;
-        border-radius: 4px;
-    }
+td {
+    padding: 10px 8px !important;
+    font-size: 11px !important;
+    color: #ffffff !important; /* Texto branco puro */
+    border-bottom: 1px solid #1f2937;
+    text-align: center;
+    font-weight: 500;
+    background-color: transparent !important; /* <--- ADICIONE ISSO */
+}
 
-    /* MODAL FIX */
-    .modal-fix {
-        position: fixed !important;
-        inset: 0 !important;
-        background: rgba(15, 23, 42, 0.7);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        backdrop-filter: blur(4px);
-    }
+/* Efeito de Hover Suave */
+tbody tr:hover {
+    background-color: #e2e8f0 !important; /* Um cinza bem claro/branco fosco (Slate 200) */
+    transition: background-color 0.2s ease; /* Transição suave para não "piscar" */
+    cursor: pointer;
+}
+
+/* Garante que ao passar o mouse, todos os textos da linha fiquem pretos */
+tbody tr:hover td {
+    color: #0f172a !important; /* Azul marinho quase preto para contraste legível */
+}
+
+/* Caso queira manter o destaque do código de barras mesmo no hover */
+tbody tr:hover td:first-child {
+    color: #b45309 !important; /* Um tom de âmbar mais escuro para não sumir no branco */
+}
+
+/* 5. ELEMENTOS ADICIONAIS */
+.btn-level {
+    padding: 3px 0 !important;
+    font-size: 9px !important;
+    border-radius: 4px;
+    background: #0b0f1a;
+    color: #64748b;
+    border: 1px solid #2d3748;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-level.active {
+    background: #4f46e5;
+    color: #fff;
+    border-color: #6366f1;
+}
+
+.modal-fix {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(10, 15, 26, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(8px);
+}
+
+/* --- CONFIGURAÇÃO LIGHT MODE --- */
+
+/* Cores de fundo e texto principal */
+body.light-mode {
+    background-color: #f1f5f9; /* Slate 100 */
+    color: #1e293b;
+}
+
+body.light-mode main {
+    background-color: #f1f5f9;
+}
+
+/* Ajuste do Aside no modo claro */
+body.light-mode aside {
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    color: #1e293b;
+}
+
+/* Ajuste dos Cards e Inputs */
+body.light-mode .card, 
+body.light-mode .bg-slate-900\/50 {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode input, 
+body.light-mode select, 
+body.light-mode textarea {
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+}
+
+/* Ajuste da Tabela para o modo claro */
+body.light-mode .table-wrapper {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode thead {
+    background: #f8fafc;
+}
+
+body.light-mode th {
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+body.light-mode td {
+    color: #334155 !important;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+body.light-mode tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+body.light-mode tbody tr:hover {
+    background-color: #eef2ff !important; /* Indigo bem clarinho */
+}
+
+
+/* 1. Limpeza de fundos e efeito zebrado */
+.tr-item-tabela {
+    background-color: transparent !important;
+}
+
+tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* 2. Badge de Nível (Sempre Vermelho) */
+.badge-nivel-red {
+    background-color: #ef4444 !important; /* Vermelho fixo */
+    color: #ffffff !important;           /* Texto Branco fixo */
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    border: 1px solid #dc2626;
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+/* 3. Efeito de Hover na Linha */
+.tr-item-tabela:hover {
+    background-color: #f8fafc !important; /* Branco suave ao passar o mouse */
+    cursor: pointer;
+}
+
+/* Transforma textos em preto no hover, EXCETO o badge de nível */
+.tr-item-tabela:hover td,
+.tr-item-tabela:hover td *:not(.badge-nivel-red) {
+    color: #0f172a !important; 
+}
+
+/* Garante que o badge PERMANEÇA vermelho e branco no hover */
+.tr-item-tabela:hover .badge-nivel-red {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    border-color: #dc2626 !important;
+    transform: scale(1.05); /* Leve destaque visual */
+}
+
+
+
+/* Checkbox Compacto */
+.custom-checkbox {
+    appearance: none;
+    width: 11px; /* Ligeiramente menor para caber melhor lado a lado */
+    height: 11px;
+    background-color: #0b0f1a;
+    border: 1px solid #334155;
+    border-radius: 3px;
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+    flex-shrink: 0; /* Impede que o checkbox "achate" se o texto for longo */
+}
+
+.custom-checkbox:checked {
+    border-color: #4f46e5;
+    background-color: rgba(79, 70, 229, 0.2);
+}
+
+.custom-checkbox::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    transform: scale(0);
+    background-color: #4f46e5;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transition: 100ms transform ease-in-out;
+}
+
+.custom-checkbox:checked::before {
+    transform: scale(1);
+}

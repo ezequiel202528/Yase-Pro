@@ -23,45 +23,45 @@ function renderItens(itens) {
     const statusColor = statusResumo === 'REP' ? 'text-red-500' : 'text-emerald-500';
 
     return `
-        <tr class="border-b hover:bg-slate-50 transition-colors text-[11px]">
-            <td class="p-4 font-mono font-black text-indigo-700">${item.id ? item.id.toString().substring(0, 8).toUpperCase() : "-"}</td>
-            <td class="p-4 font-bold text-slate-800">${item.fabricante || "-"}</td>
-            <td class="p-4 font-bold text-slate-500">${item.nbr_id || "N/A"}</td>
-            <td class="p-4 font-medium">${item.nr_cilindro || "-"}</td>
-            
-            <td class="p-4 text-indigo-600 font-bold">
-                ${item.tipo_carga || "-"} / ${item.capacidade || "-"}
-            </td>
+   <tr class="tr-item-tabela transition-all text-[11px]">
+    <td class="p-4 font-mono font-black text-indigo-700">${item.id ? item.id.toString().substring(0, 8).toUpperCase() : "-"}</td>
+    <td class="p-4 font-bold text-slate-800">${item.fabricante || "-"}</td>
+    <td class="p-4 font-bold text-slate-500">${item.nbr_id || "N/A"}</td>
+    <td class="p-4 font-medium">${item.nr_cilindro || "-"}</td>
+    
+    <td class="p-4 text-indigo-600 font-bold">
+        ${item.tipo_carga || "-"} / ${item.capacidade || "-"}
+    </td>
 
-            <td class="p-4 text-center">${item.ano_fab || "-"}</td>
-            <td class="p-4 text-center">${item.ult_reteste || "-"}</td>
-            <td class="p-4 text-red-600 font-black text-center bg-red-50/50">${item.prox_reteste || "---"}</td>
-            <td class="p-4 text-center">${item.data_selagem ? new Date(item.data_selagem + "T12:00:00").toLocaleDateString("pt-BR") : "--/--/----"}</td>
-            <td class="p-4 text-indigo-700 font-black text-center bg-indigo-50/50">${item.prox_recarga ? new Date(item.prox_recarga + "T12:00:00").toLocaleDateString("pt-BR") : "--/--/----"}</td>
-            
-            <td class="p-4 text-center italic text-slate-400">---</td> <td class="p-4 text-center font-medium text-slate-600">
-                ${item.operador || "-"}
-            </td>
+    <td class="p-4 text-center">${item.ano_fab || "-"}</td>
+    <td class="p-4 text-center">${item.ult_reteste || "-"}</td>
+    <td class="p-4 text-red-600 font-black text-center">${item.prox_reteste || "---"}</td>
+    <td class="p-4 text-center">${item.data_selagem ? new Date(item.data_selagem + "T12:00:00").toLocaleDateString("pt-BR") : "--/--/----"}</td>
+    <td class="p-4 text-indigo-700 font-black text-center">${item.prox_recarga ? new Date(item.prox_recarga + "T12:00:00").toLocaleDateString("pt-BR") : "--/--/----"}</td>
+    
+    <td class="p-4 text-center italic text-slate-400">---</td> 
+    <td class="p-4 text-center font-medium text-slate-600">
+        ${item.operador || "-"}
+    </td>
 
-            <td class="p-4 text-center">
-                <div class="flex flex-col items-center gap-0.5">
-                    <span class="bg-slate-100 px-2 py-0.5 rounded text-slate-500 text-[8px] font-black uppercase">
-                        NV ${item.nivel || "1"}
-                    </span>
-                    <span class="${statusColor} text-[9px] font-black tracking-widest">
-                        ${statusResumo}
-                    </span>
-                </div>
-            </td>
+    <td class="p-4 text-center">
+        <div class="flex flex-col items-center gap-0.5">
+            <span class="badge-nivel-red">
+                NV ${item.nivel || "1"}
+            </span>
+            <span class="${statusColor} text-[9px] font-black tracking-widest">
+                ${statusResumo}
+            </span>
+        </div>
+    </td>
 
-            <td class="p-4 text-center pr-4">
-                <div class="flex gap-2 justify-center">
-                    <button onclick="prepararEdicao('${item.id}')" class="text-indigo-400 hover:scale-125 transition-all"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button onclick="deletarItem('${item.id}')" class="text-red-300 hover:scale-125 transition-all"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            </td>
-        </tr>
-    `;
+    <td class="p-4 text-center pr-4">
+        <div class="flex gap-2 justify-center">
+            <button onclick="prepararEdicao('${item.id}')" class="text-indigo-400 hover:scale-125 transition-all"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button onclick="deletarItem('${item.id}')" class="text-red-300 hover:scale-125 transition-all"><i class="fa-solid fa-trash"></i></button>
+        </div>
+    </td>
+</tr>`;
 }).join("");
 }
 async function registrarItem() {

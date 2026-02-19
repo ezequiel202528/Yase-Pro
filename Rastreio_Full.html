@@ -28,6 +28,7 @@
           <a href="GestaoOS.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 text-slate-300 hover:text-white transition-all font-bold text-xs border border-slate-700/50">
             <i class="fa-solid fa-arrow-left"></i> Voltar para Gestão
           </a>
+         
 
           <div class="space-y-2 pt-2">
              <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest px-1">Monitorização</div>
@@ -81,151 +82,190 @@
       </aside>
 
       <main>
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
-          
-          <div class="bg-white p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-200">
-            <h3 class="text-[10px] font-black text-slate-700 uppercase mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-fingerprint text-indigo-500"></i> Identificação
-            </h3>
-            <div class="space-y-2">
-              <input type="text" id="cod_barras" class="w-full h-8 px-2 text-[10px] border rounded-lg focus:ring-2 ring-indigo-500/20 outline-none" placeholder="Cód. de Barras">
-              <div class="grid grid-cols-2 gap-2">
-                <div class="relative">
-                  <input type="number" id="X_input_id" class="w-full h-8 pl-2 pr-6 text-[10px] border rounded-lg" oninput="X_BUSCAR_POR_ID(this.value)" placeholder="Fab.">
-                  <span id="badgeNomeFabricante" class="hidden absolute left-2 top-[-10px] bg-amber-500 text-white text-[7px] px-1 rounded font-black">NOME</span>
-                  <button onclick="X_ABRIR_FAB()" class="absolute right-2 top-2 text-slate-400"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
-                </div>
-                <div class="relative">
-                  <input type="text" id="nr_cilindro" class="w-full h-8 pr-6 text-[10px] border rounded-lg" placeholder="Nº Cilindro">
-                  <button onclick="abrirModalBuscaRapida()" class="absolute right-2 top-2 text-indigo-500"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <input type="number" id="ano_fab" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Ano Fab.">
-                <input type="text" id="ult_reteste" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Últ. Reteste" onblur="definirNivelPeloReteste(); calcularDatasAutomaticas()">
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <select id="tipo_carga" class="w-full h-8 text-[10px] border rounded-lg px-1" onchange="definirNivelPeloReteste()">
-                  <option value="">Tipo</option><option value="PQS">PQS</option><option value="CO2">CO2</option><option value="AGUA">Água</option>
-                </select>
-                <div class="flex gap-1">
-                  <select id="capacidade" class="flex-1 h-8 text-[10px] border rounded-lg px-1"><option value="">Cap.</option></select>
-                  <button onclick="openCapacidadeModal()" class="w-8 h-8 bg-slate-50 border rounded-lg flex items-center justify-center"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
-                </div>
-              </div>
-              <div class="relative">
-                <select id="nbr_select" class="w-full h-8 text-[10px] border rounded-lg px-1"><option value="">Norma NBR</option></select>
-                <button onclick="X_ABRIR_NBR()" class="absolute right-2 top-2 text-slate-400"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
-              </div>
-              <button onclick="registrarItem()" class="w-full bg-indigo-600 text-white font-black py-2.5 rounded-xl text-[10px] uppercase shadow-md hover:bg-indigo-700 transition-all">
-                <i class="fa-solid fa-plus-circle"></i> REGISTRAR ITEM
-              </button>
-            </div>
-          </div>
+       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+  
+  <div class="card p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-700">
+    <h3 class="text-[10px] font-black text-slate-400 uppercase mb-3 flex items-center gap-2">
+      <i class="fa-solid fa-fingerprint text-indigo-500"></i> Identificação
+    </h3>
+    <div class="space-y-2">
+      <input type="text" id="cod_barras" class="w-full h-8 px-2 text-[10px] border rounded-lg focus:ring-2 ring-indigo-500/20 outline-none" placeholder="Cód. de Barras">
+      <div class="grid grid-cols-2 gap-2">
+        <div class="relative">
+          <input type="number" id="X_input_id" class="w-full h-8 pl-2 pr-6 text-[10px] border rounded-lg" oninput="X_BUSCAR_POR_ID(this.value)" placeholder="Fab.">
+          <span id="badgeNomeFabricante" class="hidden absolute left-2 top-[-10px] bg-amber-500 text-white text-[7px] px-1 rounded font-black">NOME</span>
+          <button onclick="X_ABRIR_FAB()" class="absolute right-2 top-2 text-slate-400"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+        </div>
+        <div class="relative">
+          <input type="text" id="nr_cilindro" class="w-full h-8 pr-6 text-[10px] border rounded-lg" placeholder="Nº Cilindro">
+          <button onclick="abrirModalBuscaRapida()" class="absolute right-2 top-2 text-indigo-500"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <input type="number" id="ano_fab" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Ano Fab.">
+        <input type="text" id="ult_reteste" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Últ. Reteste" onblur="definirNivelPeloReteste(); calcularDatasAutomaticas()">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <select id="tipo_carga" class="w-full h-8 text-[10px] border rounded-lg px-1" onchange="definirNivelPeloReteste()">
+          <option value="">Tipo</option><option value="PQS">PQS</option><option value="CO2">CO2</option><option value="AGUA">Água</option>
+        </select>
+        <div class="flex gap-1">
+          <select id="capacidade" class="flex-1 h-8 text-[10px] border rounded-lg px-1"><option value="">Cap.</option></select>
+          <button onclick="openCapacidadeModal()" class="w-8 h-8 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+        </div>
+      </div>
+      <div class="relative">
+        <select id="nbr_select" class="w-full h-8 text-[10px] border rounded-lg px-1"><option value="">Norma NBR</option></select>
+        <button onclick="X_ABRIR_NBR()" class="absolute right-2 top-2 text-slate-400"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+      </div>
+      <button onclick="registrarItem()" class="w-full bg-indigo-600 text-white font-black py-2.5 rounded-xl text-[10px] uppercase shadow-md hover:bg-indigo-700 transition-all">
+        <i class="fa-solid fa-plus-circle"></i> REGISTRAR ITEM
+      </button>
+    </div>
+  </div>
 
-          <div class="space-y-3">
-            <div class="bg-white p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-200">
-              <h3 class="text-[10px] font-black text-slate-700 uppercase mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-microchip text-indigo-500"></i> Dados Técnicos
-              </h3>
-              <div class="space-y-2">
-                <input type="text" id="lote_nitrogenio" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Lote Nitro.">
-                <input type="text" id="ampola_vinculada" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Ampola Vinc.">
-                <input type="date" id="data_selagem" class="w-full h-8 px-2 text-[10px] border rounded-lg" onchange="calcularDatasAutomaticas()">
-                <label class="flex items-center gap-2 text-[10px] font-bold text-slate-600">
-                  <input type="checkbox" id="realizado_troca" class="w-3 h-3 accent-indigo-600"> Troca de Peças
-                </label>
-              </div>
-            </div>
-            <div class="bg-white p-3 rounded-xl border border-indigo-100 shadow-sm">
-              <div class="flex justify-between mb-1"><span class="text-[9px] font-black text-slate-400">PROX. RECARGA</span><span id="display_prox_recarga" class="text-[10px] font-bold text-indigo-600">--/--/----</span></div>
-              <div class="flex justify-between"><span class="text-[9px] font-black text-slate-400">PROX. RETESTE</span><span id="display_prox_reteste" class="text-[10px] font-bold text-red-500">----</span></div>
-              <textarea id="obs_ensaio" rows="1" class="w-full mt-2 text-[10px] border rounded-lg p-2 outline-none" placeholder="Observações..."></textarea>
-            </div>
-          </div>
+  <div class="space-y-3">
+    <div class="card p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-700">
+      <h3 class="text-[10px] font-black text-slate-400 uppercase mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-microchip text-indigo-500"></i> Dados Técnicos
+      </h3>
+      <div class="space-y-2">
+        <input type="text" id="lote_nitrogenio" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Lote Nitro.">
+        <input type="text" id="ampola_vinculada" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Ampola Vinc.">
+        <input type="date" id="data_selagem" class="w-full h-8 px-2 text-[10px] border rounded-lg" onchange="calcularDatasAutomaticas()">
+        <label class="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+          <input type="checkbox" id="realizado_troca" class="w-3 h-3 accent-indigo-600"> Troca de Peças
+        </label>
+      </div>
+    </div>
+    <div class="card p-3 rounded-xl border border-slate-700 shadow-sm">
+      <div class="flex justify-between mb-1"><span class="text-[9px] font-black text-slate-500">PROX. RECARGA</span><span id="display_prox_recarga" class="text-[10px] font-bold text-indigo-400">--/--/----</span></div>
+      <div class="flex justify-between"><span class="text-[9px] font-black text-slate-500">PROX. RETESTE</span><span id="display_prox_reteste" class="text-[10px] font-bold text-red-400">----</span></div>
+      <textarea id="obs_ensaio" rows="1" class="w-full mt-2 text-[10px] border border-slate-700 rounded-lg p-2 outline-none" placeholder="Observações..."></textarea>
+    </div>
+  </div>
 
-          <div class="bg-white p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-200">
-              <h3 class="text-[10px] font-black text-slate-700 uppercase mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-truck-ramp-box text-indigo-500"></i> Manutenção
-              </h3>
-              <div class="flex gap-1 mb-2">
-                <div class="flex-1 btn-level active cursor-pointer bg-slate-100 px-1 py-1 rounded-md text-[9px] font-bold text-center" data-level="1" onclick="setLevel(1)">NV 1</div>
-                <div class="flex-1 btn-level cursor-pointer bg-slate-100 px-1 py-1 rounded-md text-[9px] font-bold text-center" data-level="2" onclick="setLevel(2)">NV 2</div>
-                <div class="flex-1 btn-level cursor-pointer bg-slate-100 px-1 py-1 rounded-md text-[9px] font-bold text-center" data-level="3" onclick="setLevel(3)">NV 3</div>
-              </div>
-              <div class="grid grid-cols-2 gap-2 mb-2">
-                <input type="text" id="selo_anterior" class="w-full h-8 text-[10px] border rounded-lg px-2" placeholder="Selo Ant.">
-                <input type="text" id="pallet" class="w-full h-8 text-[10px] border rounded-lg px-2" placeholder="Pallet">
-                <input type="text" id="deposito_galpao" class="w-full h-8 text-[10px] border rounded-lg px-2" placeholder="Setor">
-                <input type="text" id="local_extintor" class="w-full h-8 text-[10px] border rounded-lg px-2" placeholder="Local">
-              </div>
-              <div class="flex gap-2 mb-2">
-                <div class="flex-1 text-center btn-level border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-emerald-50 text-emerald-600 border-emerald-200 active" onclick="setStatus('APROVADO', this)">APR</div>
-                <div class="flex-1 text-center btn-level border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-slate-50 text-slate-400 border-slate-200" onclick="setStatus('REPROVADO', this)">REP</div>
-                <input type="hidden" id="resultado_valor" value="APROVADO">
-              </div>
-              <button onclick="openAcessoriosModal()" class="w-full bg-amber-50 border-2 border-dashed border-amber-200 text-amber-700 py-3 rounded-xl text-[9px] font-black uppercase hover:bg-amber-100 transition-colors">Componentes e Ensaios</button>
-          </div>
+  <div class="card p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-700">
+      <h3 class="text-[10px] font-black text-slate-400 uppercase mb-3 flex items-center gap-2">
+        <i class="fa-solid fa-truck-ramp-box text-indigo-500"></i> Manutenção
+      </h3>
+      <div class="flex gap-1 mb-2">
+        <div class="flex-1 btn-level  cursor-pointer px-1 py-1 rounded-md text-[9px] font-bold text-center" data-level="1" onclick="setLevel(1)">NV 1</div>
+        <div class="flex-1 btn-level  active cursor-pointer px-1 py-1 rounded-md text-[9px] font-bold text-center" data-level="2" onclick="setLevel(2)">NV 2</div>
+        <div class="flex-1 btn-level  cursor-pointer px-1 py-1 rounded-md text-[9px] font-bold text-center" data-level="3" onclick="setLevel(3)">NV 3</div>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <input type="text" id="selo_anterior" class="w-full h-8 text-[10px] border border-slate-700 rounded-lg px-2" placeholder="Selo Ant.">
+        <input type="text" id="pallet" class="w-full h-8 text-[10px] border border-slate-700 rounded-lg px-2" placeholder="Pallet">
+        <input type="text" id="deposito_galpao" class="w-full h-8 text-[10px] border border-slate-700 rounded-lg px-2" placeholder="Setor">
+        <input type="text" id="local_extintor" class="w-full h-8 text-[10px] border border-slate-700 rounded-lg px-2" placeholder="Local">
+      </div>
+      <div class="flex gap-2 mb-2">
+        <div class="flex-1 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-amber-900/20 text-amber-500 border-amber-500/30" onclick="setStatus('NOVO', this)">NOVO</div>        
+        <div class="flex-1 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-emerald-900/20 text-emerald-400 border-emerald-500/30" onclick="setStatus('APROVADO', this)">APR</div>
+        <div class="flex-1 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-red-900/20 text-red-500 border-red-500/30" onclick="setStatus('REPROVADO', this)">REP</div>        <input type="hidden" id="resultado_valor" value="APROVADO">
+      </div>
+<button onclick="openAcessoriosModal()" class="w-full bg-slate-800 border-2 border-dashed border-slate-700 text-amber-500/70 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-slate-700 transition-colors mb-3">
+    Componentes e Ensaios
+</button>
 
-          <div class="bg-white p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-200 space-y-2">
-            <h3 class="text-[10px] font-black text-slate-700 uppercase mb-1 flex items-center gap-2">
-                <i class="fa-solid fa-gauge-high text-indigo-500"></i> Ensaios Técnicos
-            </h3>
-            <div class="p-2 bg-yellow-50/50 rounded-lg grid grid-cols-2 gap-1 border border-yellow-100">
-              <input type="number" id="p_vazio_valvula" class="h-7 text-[9px] border rounded px-1" placeholder="P.Vazio">
-              <input type="number" id="p_cheio_valvula" class="h-7 text-[9px] border rounded px-1" placeholder="P.Cheio">
-              <input type="number" id="p_atual" class="h-7 text-[9px] border rounded px-1" placeholder="P.Atual">
-              <input type="text" id="porcent_dif" class="h-7 text-[9px] border bg-slate-50 rounded px-1 font-bold text-amber-700" placeholder="%" readonly>
+<div class="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3">
+    <div class="text-[8px] font-black text-slate-500 uppercase mb-2 tracking-widest border-b border-slate-700/30 pb-1">
+        Checklist de Inspeção
+    </div>
+    
+   <div class="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 mt-2">
+    <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+            <div class="text-[7px] font-black text-slate-500 uppercase mb-2 tracking-widest border-b border-slate-700/30 pb-1">
+                Inspeção e Ensaio
             </div>
-            <div class="p-2 bg-emerald-50/50 rounded-lg grid grid-cols-2 gap-1 border border-emerald-100">
-              <input type="number" id="tara_cilindro" class="h-7 text-[9px] border rounded px-1" placeholder="Tara">
-              <input type="number" id="p_cil_vazio_kg" class="h-7 text-[9px] border rounded px-1" placeholder="P.Vazio Kg">
-              <input type="text" id="perda_massa_porcent" class="col-span-2 h-7 text-[9px] border bg-slate-50 rounded px-1 font-bold text-emerald-700" placeholder="% Perda" readonly>
-            </div>
-            <div class="p-2 bg-blue-50/50 rounded-lg grid grid-cols-2 gap-1 border border-blue-100">
-              <input type="number" id="vol_litros" class="h-7 text-[9px] border rounded px-1" placeholder="Vol.">
-              <input type="number" id="dvm_et" class="h-7 text-[9px] border rounded px-1" placeholder="DVM">
-              <input type="number" id="dvp_ep" class="h-7 text-[9px] border rounded px-1" placeholder="DVP">
-              <input type="text" id="ee_resultado" class="h-7 text-[9px] border bg-slate-50 rounded px-1 font-bold text-blue-700" placeholder="EE" readonly>
-            </div>
-          </div>
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" class="custom-checkbox">
+                <span class="text-[9px] text-slate-400 group-hover:text-slate-200 leading-tight">Ens. Pneum. Manômetro</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" class="custom-checkbox">
+                <span class="text-[9px] text-slate-400 group-hover:text-slate-200 leading-tight">Ens. Pneum. Válvula</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" class="custom-checkbox">
+                <span class="text-[9px] text-slate-400 group-hover:text-slate-200 leading-tight">Reg. Válvula Alívio</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" class="custom-checkbox">
+                <span class="text-[9px] text-slate-400 group-hover:text-slate-200 leading-tight">Ens. Cond. Elétrica</span>
+            </label>
         </div>
 
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm flex-1 flex flex-col min-h-0 overflow-hidden">
-
-         <div class="table-wrapper"> 
-    <div class="table-header-area">
-        <span class="text-[10px] bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full font-bold uppercase">
-            Controle de Rastreabilidade
-        </span>
-    </div>
-
-<div class="table-wrapper">
-    <div class="scrollable-body">
-        <table>
-            <thead>
-                <tr>
-                    <th>Cód Barras</th>
-                    <th>Fabricante</th>
-                    <th>NBR</th>                                 
-                    <th>Cilindro</th>
-                    <th>Tipo/Capac.</th>
-                    <th>Ano Fab</th>
-                    <th>Ult. Reteste</th>
-                    <th>Prox. Reteste</th>
-                    <th>Data Recarga</th>
-                    <th>Prox. Recarga</th>
-                    <th>N-C</th>
-                    <th>Operador</th>
-                    <th>Nível</th>
-                    <th class="pr-4">Ações</th>
-                </tr>
-            </thead>
-            <tbody id="itensList">
-                </tbody>
-        </table>
+        <div class="space-y-1.5">
+            <div class="text-[7px] font-black text-amber-500/70 uppercase mb-2 tracking-widest border-b border-slate-700/30 pb-1">
+                Ensaio Hidrostático
+            </div>
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" class="custom-checkbox">
+                <span class="text-[9px] text-slate-400 group-hover:text-slate-200 leading-tight">Ens. Hidrost. Válvula</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" class="custom-checkbox">
+                <span class="text-[9px] text-slate-400 group-hover:text-slate-200 leading-tight">Ens. Hidrost. Mangueira</span>
+            </label>
+        </div>
     </div>
 </div>
+</div>  </div>
+
+  <div class="card p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-700 space-y-2">
+    <h3 class="text-[10px] font-black text-slate-400 uppercase mb-1 flex items-center gap-2">
+        <i class="fa-solid fa-gauge-high text-indigo-500"></i> Ensaios Técnicos
+    </h3>
+    <div class="p-2 bg-slate-900/50 rounded-lg grid grid-cols-2 gap-1 border border-yellow-500/20">
+      <input type="number" id="p_vazio_valvula" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="P.Vazio">
+      <input type="number" id="p_cheio_valvula" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="P.Cheio">
+      <input type="number" id="p_atual" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="P.Atual">
+      <input type="text" id="porcent_dif" class="h-7 text-[9px] border border-slate-700 bg-slate-800 rounded px-1 font-bold text-amber-500" placeholder="%" readonly>
+    </div>
+    <div class="p-2 bg-slate-900/50 rounded-lg grid grid-cols-2 gap-1 border border-emerald-500/20">
+      <input type="number" id="tara_cilindro" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="Tara">
+      <input type="number" id="p_cil_vazio_kg" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="P.Vazio Kg">
+      <input type="text" id="perda_massa_porcent" class="col-span-2 h-7 text-[9px] border border-slate-700 bg-slate-800 rounded px-1 font-bold text-emerald-500" placeholder="% Perda" readonly>
+    </div>
+    <div class="p-2 bg-slate-900/50 rounded-lg grid grid-cols-2 gap-1 border border-blue-500/20">
+      <input type="number" id="vol_litros" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="Vol.">
+      <input type="number" id="dvm_et" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="DVM">
+      <input type="number" id="dvp_ep" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="DVP">
+      <input type="text" id="ee_resultado" class="h-7 text-[9px] border border-slate-700 bg-slate-800 rounded px-1 font-bold text-blue-400" placeholder="EE" readonly>
+    </div>
+  </div>
+</div>
+
+<div class="flex-1 flex flex-col min-h-0 overflow-hidden">
+    <div class="table-wrapper">
+        <div class="scrollable-body">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cód Barras</th>
+                        <th>Fabricante</th>
+                        <th>NBR</th>                                 
+                        <th>Cilindro</th>
+                        <th>Tipo/Capac.</th>
+                        <th>Ano Fab</th>
+                        <th>Ult. Reteste</th>
+                        <th>Prox. Reteste</th>
+                        <th>Data Recarga</th>
+                        <th>Prox. Recarga</th>
+                        <th>N-C</th>
+                        <th>Operador</th>
+                        <th>Nível</th>
+                        <th class="pr-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="itensList">
+                    </tbody>
+            </table>
+        </div>
+    </div>
 </div>
         </div>
       </main>
@@ -255,14 +295,7 @@
         </div>
     </div>
 
-    <div id="modalNBR" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white w-[450px] rounded-3xl p-6 shadow-2xl">
-            <h2 class="text-sm font-black text-slate-800 mb-4 uppercase tracking-tighter">Normas Técnicas NBR</h2>
-            <div class="max-h-[350px] overflow-y-auto mb-4 border rounded-xl" id="listaNBR"></div>
-            <button onclick="X_FECHAR_NBR()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-black text-[10px] uppercase">Fechar</button>
-        </div>
-    </div>
-
+    
     <div id="confirmacaoGeral" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/40 backdrop-blur-md">
         <div class="bg-white w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl text-center border border-slate-200">
             <div class="w-16 h-16 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-6">
@@ -289,6 +322,7 @@
     <script src="Rastreabilidade/buscarextintor.js"></script>
     <script src="Rastreabilidade/relatorioHidro.js"></script>
     <script src="Rastreabilidade/acessorios.js"></script>
+    
 
   </body>
 </html>

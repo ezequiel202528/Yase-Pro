@@ -325,3 +325,42 @@ tbody tr:nth-child(even) {
 .custom-checkbox:checked::before {
     transform: scale(1);
 }
+
+/* Estado Aberto do Painel */
+#topDrawer.open {
+    max-h: 250px; /* Ajuste conforme a necessidade */
+    border-bottom-width: 4px;
+    border-color: #f59e0b; /* Borda Amber ao abrir */
+}
+
+/* Rotação do Ícone */
+#drawerIcon.rotate {
+    transform: rotate(180deg);
+}
+
+/* Garantir que o conteúdo do drawer não quebre a linha */
+#topDrawer > div {
+    min-width: 800px;
+}
+
+/* Checkbox Customizado (Reutilizando seu estilo) */
+.custom-checkbox {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+}
+.custom-checkbox:checked {
+    background-color: #4f46e5;
+    border-color: #6366f1;
+}
+.custom-checkbox:checked::after {
+    content: "✔";
+    color: white;
+    font-size: 8px;
+}

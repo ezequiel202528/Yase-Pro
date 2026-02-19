@@ -1,12 +1,11 @@
-
-    /* 1. ESTRUTURA GLOBAL */
+/* 1. ESTRUTURA GLOBAL E RESET */
     html, body {
         height: 100vh;
         margin: 0;
         padding: 0;
-        overflow: hidden;
+        overflow: hidden; /* Impede o scroll na página inteira */
         font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #f1f5f9; /* Um cinza leve para destacar os cards brancos */
+        background-color: #f1f5f9; /* Fundo suave para destacar os cards */
     }
 
     .app-container {
@@ -15,6 +14,7 @@
         width: 100vw;
     }
 
+    /* SIDEBAR (ASIDE) */
     aside {
         width: 270px;
         flex-shrink: 0;
@@ -25,65 +25,66 @@
         flex-direction: column;
         padding: 20px;
         border-right: 1px solid #1e293b;
+        z-index: 50;
     }
 
-    /* 2. ÁREA DO CONTEÚDO COM RESPIRO (PADDINGS) */
+    /* ÁREA PRINCIPAL (MAIN) - O segredo do respiro está aqui */
     main {
         flex: 1;
         height: 100vh;
         display: flex;
         flex-direction: column;
-        /* Aumentamos o padding lateral para 35px para afastar dos cantos */
-        /* O padding superior e inferior (20px) mantém o equilíbrio */
-        padding: 20px 35px; 
-        gap: 20px; /* Espaço entre a linha de cards e a tabela */
-        overflow-y: auto;
+        padding: 20px 40px; /* Aumentado para descolar dos cantos */
+        gap: 25px; /* Espaço entre os cards e a tabela */
+        overflow: hidden; /* Mantém o scroll apenas dentro dos elementos necessários */
         box-sizing: border-box;
     }
 
-    /* 3. GRID DE CARDS COM AFASTAMENTO INTERNO */
+    /* 2. GRID DE FORMULÁRIOS (CARDS) */
     .form-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 20px; /* Aumentado para os cards não ficarem "colados" uns nos outros */
+        gap: 20px; /* Espaço entre os cartões */
         width: 100%;
-        max-width: 1600px; /* Evita que os cards fiquem gigantes em telas muito largas */
-        margin: 0 auto; /* Centraliza o bloco de cards se a tela for maior que 1600px */
+        max-width: 1600px;
+        margin: 0 auto; /* Centraliza o bloco se a tela for ultra-wide */
         flex-shrink: 0;
     }
 
     .card {
         background: white;
         border-radius: 16px;
-        padding: 20px !important; /* Espaço interno para o conteúdo respirar */
+        padding: 20px !important;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        transition: transform 0.2s ease;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
     }
 
-    /* 4. AJUSTES DOS INPUTS PARA CABER NO CARD COM RESPIRO */
     .section-title {
         font-size: 11px;
         font-weight: 800;
         color: #1e293b;
         text-transform: uppercase;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
         gap: 8px;
         letter-spacing: 0.05em;
     }
 
+    /* 3. INPUTS E CAMPOS */
     .input-field {
         width: 100%;
-        height: 36px !important;
+        height: 34px !important;
         padding: 0 12px !important;
         font-size: 13px !important;
-        border-radius: 10px;
+        font-weight: 600;
+        border-radius: 8px;
         border: 1px solid #cbd5e1;
         background-color: #f8fafc;
         margin-bottom: 8px;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
     }
 
     .input-field:focus {
@@ -93,29 +94,109 @@
         outline: none;
     }
 
-    /* 5. TABELA AJUSTADA AO NOVO PADDING */
+    /* 4. TABELA EXPANSÍVEL (Destaque do Sistema) */
     .table-wrapper {
-        flex: 1;
+        flex: 1; /* Faz a tabela ocupar todo o espaço restante vertical */
         background: white;
-        border-radius: 16px;
+        border-radius: 20px;
         border: 1px solid #e2e8f0;
         display: flex;
         flex-direction: column;
-        overflow: hidden;
         width: 100%;
         max-width: 1600px;
-        margin: 0 auto 10px auto;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin: 0 auto;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
     }
 
-    /* 6. MODAL CORRIGIDO */
+    .table-header-area {
+        padding: 15px 20px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .scrollable-body {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1000px;
+    }
+
+    thead {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+        box-shadow: 0 1px 0 #e2e8f0;
+    }
+
+    th {
+        padding: 14px 10px;
+        font-size: 10px;
+        font-weight: 800;
+        color: #64748b;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: center;
+    }
+
+    td {
+        padding: 12px 10px;
+        font-size: 13px;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+        text-align: center;
+    }
+
+    tr:hover td {
+        background-color: #f8fafc;
+    }
+
+    /* 5. FIX DOS MODAIS (Sempre à frente e centralizado) */
     .modal-fix {
         position: fixed !important;
         inset: 0 !important;
-        display: none;
+        display: none; /* JS muda para flex */
         align-items: center;
         justify-content: center;
         z-index: 99999 !important;
-        background: rgba(15, 23, 42, 0.7);
+        background-color: rgba(15, 23, 42, 0.7);
         backdrop-filter: blur(8px);
     }
+
+    .modal-content-container {
+        max-height: 90vh;
+        overflow-y: auto;
+        background: white;
+        border-radius: 24px;
+        width: 100%;
+        max-width: 800px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* 6. SCROLLBARS ESTILIZADAS */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    aside::-webkit-scrollbar-thumb { background: #334155; }
+
+    /* ANIMAÇÃO DAS DIVS (Opcional) */
+    @keyframes vooAleatorio {
+        0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translate(var(--tx4), var(--ty4)) rotate(360deg) scale(0); opacity: 0; }
+    }
+    .flying-div { position: fixed; pointer-events: none; z-index: 9998; }
+
+    /* CORES DE STATUS */
+    .btn-status-apr.active { background: #ecfdf5 !important; border-color: #10b981 !important; color: #10b981 !important; }
+    .btn-status-rep.active { background: #fef2f2 !important; border-color: #ef4444 !important; color: #ef4444 !important; }

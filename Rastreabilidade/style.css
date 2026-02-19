@@ -1,11 +1,11 @@
-/* 1. ESTRUTURA GLOBAL E RESET */
+/* RESET E ESTRUTURA */
     html, body {
         height: 100vh;
         margin: 0;
         padding: 0;
-        overflow: hidden; /* Impede o scroll na página inteira */
+        overflow: hidden;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #f1f5f9; /* Fundo suave para destacar os cards */
+        background-color: #f1f5f9;
     }
 
     .app-container {
@@ -14,133 +14,107 @@
         width: 100vw;
     }
 
-    /* SIDEBAR (ASIDE) */
     aside {
-        width: 270px;
+        width: 250px;
         flex-shrink: 0;
         background-color: #0f172a;
         color: white;
         height: 100vh;
         display: flex;
         flex-direction: column;
-        padding: 20px;
+        padding: 15px;
         border-right: 1px solid #1e293b;
-        z-index: 50;
     }
 
-    /* ÁREA PRINCIPAL (MAIN) - O segredo do respiro está aqui */
     main {
         flex: 1;
         height: 100vh;
         display: flex;
         flex-direction: column;
-        padding: 20px 40px; /* Aumentado para descolar dos cantos */
-        gap: 25px; /* Espaço entre os cards e a tabela */
-        overflow: hidden; /* Mantém o scroll apenas dentro dos elementos necessários */
+        padding: 10px 25px; /* Reduzido o respiro superior para subir tudo */
+        gap: 10px; 
+        overflow: hidden;
         box-sizing: border-box;
     }
 
-    /* 2. GRID DE FORMULÁRIOS (CARDS) */
+    /* CARDS COMPACTOS */
     .form-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 20px; /* Espaço entre os cartões */
+        gap: 8px; /* Espaço mínimo entre cards */
         width: 100%;
-        max-width: 1600px;
-        margin: 0 auto; /* Centraliza o bloco se a tela for ultra-wide */
         flex-shrink: 0;
     }
 
     .card {
         background: white;
-        border-radius: 16px;
-        padding: 20px !important;
+        border-radius: 12px;
+        padding: 8px 12px !important; /* Super compacto */
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        display: flex;
-        flex-direction: column;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .section-title {
-        font-size: 11px;
+        font-size: 9px;
         font-weight: 800;
-        color: #1e293b;
+        color: #475569;
         text-transform: uppercase;
-        margin-bottom: 12px;
+        margin-bottom: 6px;
         display: flex;
         align-items: center;
-        gap: 8px;
-        letter-spacing: 0.05em;
+        gap: 5px;
     }
 
-    /* 3. INPUTS E CAMPOS */
     .input-field {
         width: 100%;
-        height: 34px !important;
-        padding: 0 12px !important;
-        font-size: 13px !important;
-        font-weight: 600;
-        border-radius: 8px;
+        height: 28px !important; /* Inputs bem baixos */
+        padding: 0 8px !important;
+        font-size: 11px !important;
+        border-radius: 6px;
         border: 1px solid #cbd5e1;
-        background-color: #f8fafc;
-        margin-bottom: 8px;
-        transition: all 0.2s ease;
+        margin-bottom: 4px;
     }
 
-    .input-field:focus {
-        background-color: #ffffff;
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        outline: none;
+    .label-mini {
+        font-size: 8px !important;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 1px;
+        display: block;
     }
 
-    /* 4. TABELA EXPANSÍVEL (Destaque do Sistema) */
+    /* TABELA MAXIMIZADA */
     .table-wrapper {
-        flex: 1; /* Faz a tabela ocupar todo o espaço restante vertical */
+        flex: 1; /* Ocupa o máximo de espaço */
         background: white;
-        border-radius: 20px;
+        border-radius: 12px;
         border: 1px solid #e2e8f0;
         display: flex;
         flex-direction: column;
-        width: 100%;
-        max-width: 1600px;
-        margin: 0 auto;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         overflow: hidden;
-    }
-
-    .table-header-area {
-        padding: 15px 20px;
-        background: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        margin-bottom: 10px;
     }
 
     .scrollable-body {
         flex: 1;
         overflow-y: auto;
-        overflow-x: auto;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 1000px;
     }
 
     thead {
         position: sticky;
         top: 0;
-        background: white;
+        background: #f8fafc;
         z-index: 10;
-        box-shadow: 0 1px 0 #e2e8f0;
     }
 
     th {
-        padding: 14px 10px;
-        font-size: 10px;
+        padding: 8px 5px !important;
+        font-size: 9px !important;
         font-weight: 800;
         color: #64748b;
         text-transform: uppercase;
@@ -149,54 +123,28 @@
     }
 
     td {
-        padding: 12px 10px;
-        font-size: 13px;
+        padding: 6px 5px !important;
+        font-size: 11px !important;
         color: #334155;
         border-bottom: 1px solid #f1f5f9;
         text-align: center;
     }
 
-    tr:hover td {
-        background-color: #f8fafc;
+    /* BOTÕES PEQUENOS */
+    .btn-level {
+        padding: 3px 0 !important;
+        font-size: 9px !important;
+        border-radius: 4px;
     }
 
-    /* 5. FIX DOS MODAIS (Sempre à frente e centralizado) */
+    /* MODAL FIX */
     .modal-fix {
         position: fixed !important;
         inset: 0 !important;
-        display: none; /* JS muda para flex */
+        background: rgba(15, 23, 42, 0.7);
+        display: none;
         align-items: center;
         justify-content: center;
-        z-index: 99999 !important;
-        background-color: rgba(15, 23, 42, 0.7);
-        backdrop-filter: blur(8px);
+        z-index: 9999;
+        backdrop-filter: blur(4px);
     }
-
-    .modal-content-container {
-        max-height: 90vh;
-        overflow-y: auto;
-        background: white;
-        border-radius: 24px;
-        width: 100%;
-        max-width: 800px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    }
-
-    /* 6. SCROLLBARS ESTILIZADAS */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-    aside::-webkit-scrollbar-thumb { background: #334155; }
-
-    /* ANIMAÇÃO DAS DIVS (Opcional) */
-    @keyframes vooAleatorio {
-        0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
-        100% { transform: translate(var(--tx4), var(--ty4)) rotate(360deg) scale(0); opacity: 0; }
-    }
-    .flying-div { position: fixed; pointer-events: none; z-index: 9998; }
-
-    /* CORES DE STATUS */
-    .btn-status-apr.active { background: #ecfdf5 !important; border-color: #10b981 !important; color: #10b981 !important; }
-    .btn-status-rep.active { background: #fef2f2 !important; border-color: #ef4444 !important; color: #ef4444 !important; }

@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YaSe PRO - Rastreabilidade de Itens</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="Rastreabilidade/style.css">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+    <style>
+      /* ANIMAÇÃO DE DIVS VOANDO */
+      @keyframes vooAleatorio {
+        0% {
+          transform: translate(0, 0) rotate(0deg) scale(1);
+          opacity: 1;
+        }
+        25% {
+          transform: translate(var(--tx1), var(--ty1)) rotate(45deg) scale(0.9);
+        }
+        50% {
+          transform: translate(var(--tx2), var(--ty2)) rotate(180deg) scale(0.8);
+        }
+        75% {
+          transform: translate(var(--tx3), var(--ty3)) rotate(270deg) scale(0.9);
+        }
+        100% {
+          transform: translate(var(--tx4), var(--ty4)) rotate(360deg) scale(0);
+          opacity: 0;
+        }
+      }
+
+      @keyframes flutuar {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+      }
+
+      .flying-div {
+        position: fixed;
+        pointer-events: none;
+        z-index: 9998;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        mix-blend-mode: screen;
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .flying-div.animate {
+          animation: vooAleatorio 3s ease-out forwards;
+        }
+      }
+    </style>
+
+  </head>
+  <body>
+   
+    
+    <aside>
+      <div class="mb-10 flex items-center gap-3">
+        <div
+          class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center"
+        >
+          <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight">
+            YaSe <span class="text-amber-500">PRO</span>
+          </h1>
+        </div>
+      </div>
+      <nav class="space-y-2 flex-1">
+        
+        <a
+          href="GestaoOS.html"
+          class="w-full flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-colors font-bold text-sm text-left"
+        >
+          <i class="fa-solid fa-arrow-left"></i> Voltar para Gestão
+        </a>
+        <div class="pt-4 px-3">
+          <div
+            class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-2"
+          >
+            Trabalhando na OS:
+          </div>
+          <div id="displayOS" class="text-amber-500 font-black text-lg">
+            ---
+          </div>
+        </div>
+      </nav>
+      <!-- USUÁRIO LOGADO -->
+      <div
+        class="mt-6 p-3 bg-slate-800/60 rounded-xl border border-slate-700 text-[10px] font-bold text-slate-300 uppercase tracking-widest"
+      >
+        <div>Operador:</div>
+        <div id="userName" class="text-amber-500 text-xs mt-1">
+          Carregando...
+        </div>
+        <div
+          id="userRole"
+          class="text-slate-400 text-[9px] normal-case tracking-normal"
+        >
+          Técnico Nível 2
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="flex justify-between items-center mb-6">
+        <div>
+          <h2 class="text-2xl font-black text-slate-800 tracking-tight">
+            Rastreabilidade de Itens
+          </h2>
+          <p class="text-slate-500 text-sm font-medium">
+            Controlo Técnico e Logístico de Extintores
+          </p>
+        </div>
+        <div class="flex gap-3">
+          <div
+            id="osBadge"
+            class="bg-indigo-600 text-white px-4 py-2 rounded-full text-xs font-black flex items-center gap-2"
+          >
+            <i class="fa-solid fa-folder-tree"></i>
+            <span id="osBadgeNumber">OS: ---</span>
+          </div>
+        </div>
+            <button onclick="gerarRelatorioSaida()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full text-xs font-black flex items-center gap-2 transition-all shadow-lg shadow-emerald-100">
+      <i class="fa-solid fa-print"></i>
+      GERAR RELATÓRIO TÉCNICO
+    </button>
+
+      </header>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-4 items-start bg-slate-100 p-1">
+    
+    <div class="card !p-3 shadow-sm border-t-2 border-indigo-500">
+        <h3 class="section-title !mb-2 !text-[10px]">
+            <i class="fa-solid fa-fingerprint text-indigo-500"></i> Identificação
+        </h3>
+        <div class="space-y-2">
+            <div>
+                <label class="label-mini !text-[9px]">Cód. de Barras</label>
+                <input type="text" id="cod_barras" class="input-field h-8 !py-1 !text-[10px]" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="label-mini !text-[9px]">Fabricante (Cód)</label>
+                    <div class="relative flex items-center h-8">
+                        <input type="number" id="X_input_id" class="input-field w-full pl-2 pr-8 h-8 !py-1 !text-[10px]" oninput="X_BUSCAR_POR_ID(this.value)">
+                        <span id="badgeNomeFabricante" class="hidden absolute left-10 z-10 bg-amber-500 text-white text-[7px] px-1 rounded font-black uppercase whitespace-nowrap">NOME</span>
+                        <button onclick="X_ABRIR_FAB()" class="absolute right-2 text-slate-400"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="label-mini !text-[9px]">Nº Cilindro</label>
+                    <div class="relative flex items-center h-8">
+                        <input type="text" id="nr_cilindro" class="input-field w-full pr-8 h-8 !py-1 !text-[10px]" />
+                        <button onclick="abrirModalBuscaRapida()" class="absolute right-2 text-indigo-500"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div><label class="label-mini !text-[9px]">Ano Fab.</label><input type="number" id="ano_fab" class="input-field h-8 !py-1 !text-[10px]"></div>
+                <div><label class="label-mini !text-[9px]">Últ. Reteste</label><input type="text" id="ult_reteste" class="input-field h-8 !py-1 !text-[10px]" onblur="definirNivelPeloReteste(); calcularDatasAutomaticas()"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="label-mini !text-[9px]">Tipo</label>
+                    <select id="tipo_carga" class="input-field h-8 !py-1 !text-[10px]" onchange="definirNivelPeloReteste()">
+                        <option value=""></option>
+                        <option value="PQS">PQS-BC</option>
+                        <option value="PQS">PQS-ABC</option>
+                        <option value="CO2">CO2</option>
+                        <option value="AGUA">Água</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="label-mini !text-[9px]">Capacidade</label>
+                    <div class="flex gap-1 h-8">
+                        <select id="capacidade" class="input-field flex-1 h-8 !py-1 !text-[10px]"><option value="">...</option></select>
+                        <button onclick="openCapacidadeModal()" class="w-8 bg-slate-100 border rounded flex items-center justify-center"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label class="label-mini !text-[9px]">Norma (NBR)</label>
+                <div class="relative flex items-center h-8">
+                    <select id="nbr_select" class="input-field w-full h-8 !py-1 !text-[10px] uppercase"><option value="">Carregando...</option></select>
+                    <button onclick="X_ABRIR_NBR()" class="absolute right-2 text-slate-400"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
+                </div>
+            </div>
+        </div>
+        <button onclick="registrarItem()" class="w-full mt-3 bg-indigo-600 text-white font-bold py-2 rounded-lg text-[10px] uppercase shadow-md">
+            <i class="fa-solid fa-plus-circle"></i> REGISTRAR ITEM
+        </button>
+    </div>
+
+    <div class="space-y-3">
+        <div class="card !p-3 border-t-2 border-indigo-500">
+            <h3 class="section-title !mb-2 !text-[10px]"><i class="fa-solid fa-microchip text-indigo-500"></i> Dados Técnicos</h3>
+            <div class="space-y-2">
+                <input type="text" id="lote_nitrogenio" class="input-field h-8 !py-1 !text-[10px]" placeholder="Lote Nitro.">
+                <input type="text" id="ampola_vinculada" class="input-field h-8 !py-1 !text-[10px]" placeholder="Ampola Vinc.">
+                <div>
+                    <label class="label-mini !text-[9px]">Data Selagem</label>
+                    <input type="date" id="data_selagem" class="input-field h-8 !py-1 !text-[10px]" onchange="calcularDatasAutomaticas()">
+                </div>
+                <label class="checkbox-item !text-[10px]">
+                    <input type="checkbox" id="realizado_troca" class="w-3 h-3" /> Realizado Troca de Peças
+                </label>
+            </div>
+        </div>
+        <div class="card !p-3 bg-indigo-50/20 border border-indigo-100">
+            <div class="bg-white p-2 rounded-xl border border-indigo-100 mb-2 space-y-1">
+                <div class="flex justify-between items-center"><span class="text-[9px] font-black text-slate-400 uppercase">Prox. Recarga</span><span id="display_prox_recarga" class="text-[10px] font-bold text-indigo-600">--/--/----</span></div>
+                <div class="flex justify-between items-center"><span class="text-[9px] font-black text-slate-400 uppercase">Prox. Reteste</span><span id="display_prox_reteste" class="text-[10px] font-bold text-red-500">----</span></div>
+            </div>
+            <textarea id="obs_ensaio" rows="1" class="input-field !h-auto !py-1 !text-[10px]" placeholder="Obs. técnicas..."></textarea>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+        <div class="card !p-3 border-t-2 border-indigo-500">
+            <h3 class="section-title !mb-2 !text-[10px]"><i class="fa-solid fa-truck-ramp-box text-indigo-500"></i> Manutenção</h3>
+            <div class="flex gap-1 mb-2">
+                <div class="btn-level active !py-1 !text-[9px]" data-level="1" onclick="setLevel(1)">NV 1</div>
+                <div class="btn-level !py-1 !text-[9px]" data-level="2" onclick="setLevel(2)">NV 2</div>
+                <div class="btn-level !py-1 !text-[9px]" data-level="3" onclick="setLevel(3)">NV 3</div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+                <input type="text" id="selo_anterior" class="input-field h-8 !py-1 !text-[10px]" placeholder="Selo Ant.">
+                <input type="text" id="pallet" class="input-field h-8 !py-1 !text-[10px]" placeholder="Pallet">
+                <input type="text" id="deposito_galpao" class="input-field h-8 !py-1 !text-[10px]" placeholder="Setor">
+                <input type="text" id="local_extintor" class="input-field h-8 !py-1 !text-[10px]" placeholder="Local">
+            </div>
+            <div class="flex gap-1 mb-2" id="groupResultado">
+                <div class="btn-level btn-status-apr active !py-1 !text-[9px]" onclick="setStatus('APROVADO', this)">APR</div>
+                <div class="btn-level btn-status-rep !py-1 !text-[9px]" onclick="setStatus('REPROVADO', this)">REP</div>
+                <input type="hidden" id="resultado_valor" value="APROVADO">
+            </div>
+            <button onclick="openAcessoriosModal()" class="w-full bg-amber-50 border-2 border-dashed border-amber-300 text-amber-700 py-2 rounded-xl text-[10px] font-black uppercase">
+                Componentes e Ensaios
+            </button>
+        </div>
+
+        <div id="status-selo-container" class="hidden">
+            <div class="bg-[#0f172a] rounded-xl p-3 shadow-xl border-b-4 border-amber-500">
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex gap-2">
+                        <div class="w-7 h-7 bg-amber-500 rounded flex items-center justify-center text-slate-900"><i class="fa-solid fa-stamp text-[10px]"></i></div>
+                        <div>
+                            <p class="text-[7px] font-black text-slate-500 uppercase leading-none mb-0.5">Estoque Ativo</p>
+                            <h4 id="lote_documento" class="text-[10px] font-bold text-white leading-none">LOTE 1</h4>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[7px] font-black text-slate-500 uppercase leading-none mb-0.5">Próximo</p>
+                        <span id="proximo_selo_num" class="text-xs font-black text-amber-500">1</span>
+                    </div>
+                </div>
+                <div class="flex justify-between text-[7px] font-black text-slate-400 uppercase mb-1">
+                    <span>Disponibilidade</span>
+                    <span id="qtd_restante_texto" class="text-white">10000 / 10000</span>
+                </div>
+                <div class="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                    <div id="barra_progresso_selo" class="bg-amber-500 h-full rounded-full transition-all duration-1000" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card !p-3 border-t-2 border-indigo-500 bg-slate-50/50 flex flex-col gap-2">
+        <h3 class="section-title !mb-1 !text-[10px]"><i class="fa-solid fa-gauge-high text-indigo-500"></i> Ensaios</h3>
+        
+        <div class="p-2 bg-yellow-50/60 border border-yellow-100 rounded-lg">
+            <span class="text-[8px] font-black text-yellow-700 uppercase block mb-1">Pesagem BC</span>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="p_vazio_valvula" class="input-field !h-6 !text-[9px]" placeholder="P. Vazio V.">
+                <input type="number" id="p_cheio_valvula" class="input-field !h-6 !text-[9px]" placeholder="P. Cheio V.">
+                <input type="number" id="p_atual" class="input-field !h-6 !text-[9px]" placeholder="P. Atual">
+                <input type="text" id="porcent_dif" class="input-field !h-6 !text-[9px]" placeholder="% Dif" readonly>
+            </div>
+        </div>
+
+        <div class="p-2 bg-emerald-50/60 border border-emerald-100 rounded-lg">
+            <span class="text-[8px] font-black text-emerald-700 uppercase block mb-1">Perda de Massa</span>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="tara_cilindro" class="input-field !h-6 !text-[9px]" placeholder="Tara">
+                <input type="number" id="p_cil_vazio_kg" class="input-field !h-6 !text-[9px]" placeholder="P. Cil V.">
+                <input type="text" id="perda_massa_porcent" class="input-field !h-6 !text-[9px] col-span-2" placeholder="% Perda" readonly>
+            </div>
+        </div>
+
+        <div class="p-2 bg-blue-50/60 border border-blue-100 rounded-lg">
+            <span class="text-[8px] font-black text-blue-700 uppercase block mb-1">Cubagem / Hidro</span>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="vol_litros" class="input-field !h-6 !text-[9px]" placeholder="Vol.">
+                <input type="number" id="dvm_et" class="input-field !h-6 !text-[9px]" placeholder="DVM">
+                <input type="number" id="dvp_ep" class="input-field !h-6 !text-[9px]" placeholder="DVP">
+                <input type="text" id="ee_resultado" class="input-field !h-6 !text-[9px]" placeholder="EE" readonly>
+            </div>
+        </div>
+    </div>
+</div>
+    
+
+
+
+        
+        
+        
+
+    
+
+
+<div class="card overflow-hidden !p-0 flex-1 flex flex-col min-h-0">
+    <div class="px-4 py-2 border-b flex justify-between items-center bg-slate-50/50">
+        <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+            Itens Registrados nesta OS
+        </h3>
+        <div class="bg-white px-3 py-0.5 rounded-full border text-[9px] font-bold text-slate-500">
+            Total Cilindros: <span id="itemCounter" class="text-indigo-600">0</span>
+        </div>
+    </div>
+
+    <div class="overflow-y-auto" style="max-height: 600px; height: auto;">
+        <table class="w-full text-left border-collapse">
+            <thead class="sticky top-0 bg-slate-50 text-[9px] uppercase font-black text-slate-400 border-b z-10">
+                <tr>
+                    <th class="p-1.5 pl-4">Cód de Barras</th>
+                    <th class="p-1.5">Fabricante</th>
+                    <th class="p-1.5">NBR</th>                                 
+                    <th class="p-1.5">Cilindro</th>
+                    <th class="p-1.5">Tipo/Capac.</th>
+                    <th class="p-1.5">Ano Fab</th>
+                    <th class="p-1.5">Ult. Reteste</th>
+                    <th class="p-1.5">Prox. Reteste</th>
+                    <th class="p-1.5">Data Recarga</th>
+                    <th class="p-1.5">Prox. Recarga</th>
+                    <th class="p-1.5">N-C</th>
+                    <th class="p-1.5">Operador</th>
+                    <th class="p-1.5">Nível</th>
+                    <th class="p-1.5 text-center pr-4">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody id="itensList" class="text-[10px] font-semibold text-slate-600">
+                <tr>
+                    <td colspan="13" class="p-10 text-center text-slate-400 italic">
+                        Selecione uma OS para listar os itens.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<body>
+<!-- ========================================= -->
+<!--               check list                  -->
+<!-- ========================================= -->
+<div id="modalAcessorios" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    
+    <div class="bg-white w-full max-w-6xl rounded-[2.5rem] shadow-2xl flex flex-col max-h-[95vh] overflow-hidden border border-amber-100 animate-in fade-in zoom-in duration-300">
+        
+        <div class="p-6 bg-amber-500 flex justify-between items-center text-white shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="bg-white/20 p-2 rounded-xl">
+                    <i class="fa-solid fa-toolbox text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="font-black uppercase tracking-tight leading-none text-lg">Revisão Técnica e Acessórios</h2>
+                    <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest mt-1 text-white">Componentes e Ensaios</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeAcessoriosModal()" class="w-10 h-10 rounded-full hover:bg-black/10 flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+            <div class="grid grid-cols-12 gap-8">
+                
+                <div class="col-span-12 lg:col-span-9">
+                    <div class="flex items-center justify-between mb-6 border-b pb-3">
+                        <h3 class="font-black uppercase text-gray-700 text-sm flex items-center gap-2">
+                            <span class="w-1.5 h-5 bg-amber-500 rounded-full"></span> Peças e Componentes
+                        </h3>
+                        <button type="button" class="text-[10px] font-black uppercase bg-amber-50 text-amber-700 border border-amber-200 px-3 py-1 rounded-lg hover:bg-amber-100">Marcar Varias Peças</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2">
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Pistola</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Válvula</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Bucha</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Sifão</span></label>
+                        
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Pintura</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Punho/Pino</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Quebra Jato</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Manômetro</span></label>
+                        
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Mangueira</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Cord. Plástico</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Saia Plastica</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Conj. Apague</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Difusor</span></label>
+                        
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Pera/Ved</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Mola/Rosca</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Conj. Miolo</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Conj. Haste</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Anel Oring</span></label>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-dashed border-gray-100">
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Sifão de Alumínio</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Conj. Segurança</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Haste p/ Válvula</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Gancho C/ Sup</span></label>
+                        <label class="item-check"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Trava e Corrente</span></label>
+                    </div>
+                </div>
+
+                <div class="col-span-12 lg:col-span-3 space-y-6 bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100">
+                    <div>
+                        <h4 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Inspeção e Ensaio</h4>
+                        <div class="space-y-3">
+                            <label class="item-check-alt"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Ens. Pneum. Manômetro</span></label>
+                            <label class="item-check-alt"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Ens. Pneum. Válvula</span></label>
+                            <label class="item-check-alt"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Reg. Válvula de Alívio</span></label>
+                            <label class="item-check-alt"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Ens. Cond. Elétrica</span></label>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-200">
+                        <h4 class="text-[10px] font-black uppercase text-blue-500 mb-4 tracking-widest">Ensaio Hidrostático</h4>
+                        <div class="space-y-3">
+                            <label class="item-check-alt blue"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Ens. Hidrost. Válvula</span></label>
+                            <label class="item-check-alt blue"><input type="checkbox" onchange="updateCount()" class="check-item"><span>Ens. Hidrost. Mangueira</span></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-gray-100">
+                <label class="text-[10px] font-black uppercase text-gray-400 mb-2 block tracking-widest">Observações do Extintor</label>
+                <textarea class="w-full bg-gray-50 border-2 border-gray-100 rounded-2xl p-4 text-xs font-medium focus:bg-white focus:border-amber-400 outline-none transition-all placeholder:text-gray-300" rows="3" placeholder="Digite observações técnicas..."></textarea>
+            </div>
+        </div>
+
+        <div class="p-6 bg-gray-50 border-t flex justify-end gap-3 shrink-0">
+            <button type="button" onclick="closeAcessoriosModal()" class="px-6 py-3 text-xs font-black uppercase text-gray-400 hover:text-gray-600">Cancelar</button>
+            <button type="button" onclick="closeAcessoriosModal()" class="px-10 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-black uppercase shadow-lg shadow-amber-200 flex items-center gap-2 transition-all">
+                <i class="fa-solid fa-check"></i> Confirmar Revisão
+            </button>
+        </div>
+    </div>
+</div>
+
+   
+
+</body>
+</html>
+<!-- ========================================= -->
+<!--            MODAL FABRICANTE              -->
+<!-- ========================================= -->
+   <div id="modalFabricante" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden z-[1000] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden border border-slate-200">
+        
+        <div class="bg-[#2b5a9a] p-3 flex justify-between items-center shrink-0">
+            <h3 class="text-white font-bold text-xs uppercase flex items-center gap-2">
+                <i class="fa-solid fa-industry"></i> Busca Fabricantes - CADEX089
+            </h3>
+            <button onclick="fecharModalFab()" class="text-white hover:bg-red-500 w-6 h-6 rounded flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-4 space-y-4">
+            <div class="flex gap-4">
+                <div class="flex-1 border border-slate-300 p-3 rounded-sm relative">
+                    <span class="absolute -top-2.5 left-2 bg-white px-1 text-[10px] font-bold text-slate-500">Busca de Fabricantes</span>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <label class="text-[11px] w-12">Nome:</label>
+                            <input type="text" id="busca_fab_nome" oninput="filtrarFabricantes()" class="flex-1 border border-slate-400 h-6 px-1 text-sm outline-none focus:border-blue-500" />
+                            <button onclick="filtrarFabricantes()" class="bg-slate-200 border border-slate-400 px-3 h-6 text-[11px] hover:bg-slate-300">Buscar</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-[11px] w-12">Apelido:</label>
+                            <input type="text" id="busca_fab_apelido" class="flex-1 border border-slate-400 h-6 px-1 text-sm outline-none focus:border-blue-500" />
+                        </div>
+                    </div>
+                </div>
+                <div class="w-40 border border-slate-300 rounded-sm relative bg-slate-50 flex items-center justify-center">
+                    <span class="absolute -top-2.5 left-2 bg-white px-1 text-[10px] font-bold text-slate-400 uppercase italic">Logo</span>
+                    <i class="fa-solid fa-image text-slate-200 text-3xl"></i>
+                </div>
+            </div>
+
+            <div class="border border-slate-400 bg-white">
+                <div class="max-h-64 overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-100 text-[11px] text-slate-700 border-b sticky top-0">
+                            <tr>
+                                <th class="p-1 border-r border-slate-300 w-20">Código</th>
+                                <th class="p-1 border-r border-slate-300">Nome</th>
+                                <th class="p-1">Apelido</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaFabricantesModal" class="text-[12px] font-medium text-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button onclick="cadastrarNovoFabricante()" class="bg-slate-200 border border-slate-400 px-6 py-1 text-[11px] hover:bg-slate-300 transition-colors">
+                    Cadastrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ========================================= -->
+<!--               MODAL NBR                  -->
+<!-- ========================================= -->
+<div id="modalNBR" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden z-[1000] flex justify-center items-start pt-20 p-4 overflow-hidden">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl flex flex-col border border-slate-200">
+        
+        <div class="bg-[#2b5a9a] p-3 flex justify-between items-center shrink-0 rounded-t-3xl">
+            <h3 class="text-white font-bold text-[11px] uppercase flex items-center gap-2">
+                <i class="fa-solid fa-book-bookmark"></i> Busca de Normas Técnicas
+            </h3>
+            <button onclick="fecharModalNBR()" class="text-white hover:bg-red-500 w-6 h-6 rounded flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-4 space-y-4">
+            <div class="flex gap-4">
+                <div class="flex-1 border border-slate-300 p-3 rounded-sm relative bg-slate-50/50">
+                    <span class="absolute -top-2.5 left-2 bg-white px-1 text-[9px] font-black text-slate-400 uppercase">Filtros e Cadastro</span>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <label class="text-[10px] font-bold text-slate-600 w-20">NORMA:</label>
+                            <input type="text" id="busca_nbr_nome" oninput="filtrarNBR()" placeholder="Ex: NBR 15808" class="flex-1 border border-slate-400 h-7 px-2 text-sm outline-none focus:border-blue-500 uppercase" />
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-[10px] font-bold text-slate-600 w-20">DESCRIÇÃO:</label>
+                            <input type="text" id="busca_nbr_descricao" placeholder="PQS / CO2 / AGUA" class="flex-1 border border-slate-400 h-7 px-2 text-sm outline-none focus:border-blue-500 uppercase" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border border-slate-300 bg-white shadow-inner overflow-hidden rounded-sm">
+                <div class="h-[250px] overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-100 text-[10px] font-bold text-slate-600 border-b sticky top-0 z-10">
+                            <tr>
+                                <th class="p-2 border-r border-slate-300 w-12 text-center">ID</th>
+                                <th class="p-2 border-r border-slate-300">NORMA</th>
+                                <th class="p-2 border-r border-slate-300">DESCRIÇÃO</th>
+                                <th class="p-2 w-20 text-center">AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaNBRModal" class="text-[11px] font-medium text-slate-700">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button id="btnCancelarEdicaoNBR" onclick="cancelarEdicaoNBR()" class="hidden bg-slate-200 px-4 py-1.5 text-[10px] font-black text-slate-600 hover:bg-slate-300 uppercase transition-all">
+                    Cancelar
+                </button>
+                <button id="btnSalvarNBR" onclick="salvarNBR()" class="bg-slate-100 border border-slate-400 px-6 py-1.5 text-[10px] font-black text-slate-700 hover:bg-emerald-600 hover:text-white transition-all uppercase">
+                    + Salvar Norma
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================================= -->
+<!--               MODAL BUSCAR EXT            -->
+<!-- ========================================= -->
+
+<div id="modalBuscaRapida" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden z-[2000] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md border border-slate-200 overflow-hidden transform transition-all">
+        
+        <div class="bg-indigo-600 p-4 flex justify-between items-center shrink-0">
+            <h3 class="text-white font-black text-[11px] uppercase tracking-widest flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass"></i> Localizar Extintor no Sistema
+            </h3>
+            <button onclick="fecharModalBuscaRapida()" class="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-6">
+            <div class="mb-4">
+                <label class="label-mini !text-slate-500 mb-1 block">Número do Cilindro / Código</label>
+                <div class="relative flex items-center">
+                    <input type="text" id="inputBuscaGlobal" 
+                           class="input-field !h-12 !text-lg font-bold pr-12 focus:ring-4 focus:ring-indigo-100 transition-all" 
+                           placeholder="Ex: 123456"
+                           onkeyup="if(event.key === 'Enter') realizarBuscaRapida()">
+                    <button onclick="realizarBuscaRapida()" class="absolute right-2 w-8 h-8 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="resultadoBusca" class="min-h-[100px] flex flex-col justify-center border-2 border-dashed border-slate-100 rounded-2xl p-4">
+                <div class="text-center text-slate-400">
+                    <i class="fa-solid fa-barcode text-3xl mb-2 opacity-20"></i>
+                    <p class="text-[10px] font-bold uppercase tracking-tight">Aguardando busca...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-slate-50 border-t flex justify-end">
+            <button onclick="fecharModalBuscaRapida()" class="px-6 py-2 text-[10px] font-black text-slate-400 hover:text-slate-600 uppercase">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!--               MODAL CONFIRMAÇÃO           -->
+<!-- ========================================= -->
+
+<div id="modalConfirmacao" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[99999] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm border border-slate-200 overflow-hidden transform transition-all animate-in zoom-in duration-200">
+        <div class="p-8 text-center">
+            <div id="confirmIconContainer" class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 ring-4 ring-red-50">
+                <i id="confirmIcon" class="fa-solid fa-trash-can text-2xl"></i>
+            </div>
+            
+            <h3 id="confirmTitle" class="text-lg font-black text-slate-800 mb-1">Confirmar Exclusão</h3>
+            <p id="confirmMessage" class="text-slate-500 text-[11px] font-medium leading-relaxed mb-6">
+                Esta ação não poderá ser desfeita e o registro será removido permanentemente.
+            </p>
+
+            <div class="flex gap-2">
+                <button onclick="fecharConfirmacao()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl text-[10px] uppercase transition-all">
+                    Cancelar
+                </button>
+                <button id="btnConfirmarAcaoGeral" class="flex-[1.5] bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl text-[10px] uppercase shadow-lg shadow-red-200 transition-all">
+                    Sim, Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+
+<script src="Rastreabilidade/main.js"></script>
+<script src="Rastreabilidade/prepararEdicao.js"></script>
+<script src="Rastreabilidade/fabricantes.js"></script>
+<script src="Rastreabilidade/nbr.js"></script>
+<script src="Rastreabilidade/renderizarTabela.js"></script>
+<script src="Rastreabilidade/calculos-tecnicos.js"></script>
+<script src="Rastreabilidade/ui-updates.js"></script>
+<script src="Rastreabilidade/deletarEeditar.js"></script>
+<script src="Rastreabilidade/funcaoUniversalDeConfirmacao.js"></script>
+<script src="Rastreabilidade/buscarextintor.js"></script>
+<script src="Rastreabilidade/relatorioHidro.js"></script>
+<script src="Rastreabilidade/acessorios.js"></script>
+
+
+ 
+
+
+</body>
+</html>
+
+    
+

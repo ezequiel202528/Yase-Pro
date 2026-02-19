@@ -11,57 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
-    <style>
-      html, body {
-        height: 100vh;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #f8fafc;
-      }
-
-      .app-container {
-        display: flex;
-        height: 100vh;
-        width: 100vw;
-      }
-
-      aside {
-        width: 280px;
-        flex-shrink: 0;
-        background-color: #0f172a;
-        color: white;
-        height: 100%;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        border-right: 1px solid #1e293b;
-      }
-
-      main {
-        flex: 1;
-        height: 100%;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        padding: 1rem;
-      }
-
-      /* Scrollbar interna lateral */
-      aside::-webkit-scrollbar { width: 4px; }
-      aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-
-      ::-webkit-scrollbar { width: 5px; height: 5px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-      @keyframes vooAleatorio {
-        0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
-        100% { transform: translate(var(--tx4), var(--ty4)) rotate(360deg) scale(0); opacity: 0; }
-      }
-      .flying-div { position: fixed; pointer-events: none; z-index: 9999; }
-    </style>
+    
   </head>
   <body>
 

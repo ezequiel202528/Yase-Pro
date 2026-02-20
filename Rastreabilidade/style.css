@@ -1,13 +1,15 @@
-/* YaSe PRO - Estilização Premium com Divisão 50/50 */
+/* YaSe PRO - Unified Modern Dark Theme 
+    Integração: Estrutura Responsiva + Estilização Premium
+*/
 
-/* 1. ESTRUTURA BASE */
+/* 1. RESET E ESTRUTURA BASE */
 html, body {
     height: 100vh;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Impede scroll na página, foca nos containers internos */
+    overflow: hidden; /* Mantém tudo fixo na tela */
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: #0f172a;
+    background-color: #0f172a; 
     color: #f8fafc;
 }
 
@@ -18,106 +20,145 @@ html, body {
 }
 
 aside {
-    width: 240px;
+    width: 250px;
     flex-shrink: 0;
-    background-color: #1e293b;
-    border-right: 1px solid #334155;
+    background-color: #1e293b; 
+    color: white;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     padding: 15px;
+    border-right: 1px solid #334155;
 }
 
 main {
     flex: 1;
     display: flex;
-    flex-direction: column; /* Alinha cards em cima e tabela embaixo */
-    height: 100vh;
+    flex-direction: column;
     background-color: #0f172a;
-    padding: 10px 15px;
-    overflow: hidden;
+    padding: 12px; /* Reduzido para economizar espaço vertical */
+    overflow: hidden; 
 }
 
-/* 2. AREA SUPERIOR (CARDS) */
-.cards-container {
-    flex: 0 0 auto; /* Não cresce além do conteúdo necessário */
-    max-height: 48vh; /* Limita os cards a pouco menos de metade da tela */
-    overflow-y: auto; /* Se os cards não couberem, rolam internamente */
-    margin-bottom: 10px;
-}
-
+/* 2. CARDS E INPUTS (ESTILO DARK UNIFICADO) */
 .card {
-    background-color: #0f172a !important;
+    background-color: #0f172a !important; 
     border: 1px solid #334155;
     border-radius: 12px;
-    padding: 10px !important;
+    padding: 0.6rem !important; /* Padding reduzido para empurrar cards para cima */
 }
 
-.input-field, input, select, textarea {
+.input-field, input[type="text"], input[type="number"], input[type="date"], select, textarea {
     width: 100%;
-    height: 26px !important; /* Mais fino para caber em notebooks */
+    height: 26px !important; /* Altura compacta */
     padding: 0 8px !important;
     font-size: 11px !important;
     border-radius: 6px;
-    background-color: #0b0f1a !important;
+    background-color: #0b0f1a !important; 
     border: 1px solid #2d3748 !important;
     color: #e2e8f0 !important;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
+    transition: border-color 0.2s;
 }
 
-/* 3. AREA INFERIOR (TABELA) */
-.table-section {
-    flex: 1 1 50%; /* Ocupa pelo menos 50% da tela */
-    min-height: 0; /* Importante para o scroll interno do flexbox funcionar */
-    display: flex;
-    flex-direction: column;
-}
+/* 3. GRUPOS DE ENSAIO TÉCNICO */
+.ensaios-group-yellow { border: 1px solid rgba(234, 179, 8, 0.4); background: #0b0f1a; border-radius: 8px; padding: 6px; margin-bottom: 3px; }
+.ensaios-group-green { border: 1px solid rgba(34, 197, 94, 0.4); background: #0b0f1a; border-radius: 8px; padding: 6px; margin-bottom: 3px; }
+.ensaios-group-blue { border: 1px solid rgba(59, 130, 246, 0.4); background: #0b0f1a; border-radius: 8px; padding: 6px; margin-bottom: 3px; }
 
+/* 4. TABELA (OCUPANDO 50% DA TELA OU MAIS) */
 .table-wrapper {
-    flex: 1;
-    background: #111827;
+    flex: 1 1 50%; /* Força a tabela a tentar ocupar 50% da altura disponível */
+    min-height: 0; 
+    background: #111827; 
     border-radius: 16px;
     border: 1px solid #1f2937;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    margin-top: 5px;
     box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
 }
 
 .scrollable-body {
-    flex: 1;
+    flex: 1; 
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #374151 transparent;
 }
 
-/* Estilo da Tabela */
+/* Scrollbar Customizada */
+.scrollable-body::-webkit-scrollbar { width: 6px; }
+.scrollable-body::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
+
 table { width: 100%; border-collapse: separate; border-spacing: 0; }
 thead { position: sticky; top: 0; background: #1f2937; z-index: 10; }
-th { 
-    padding: 10px !important; 
-    font-size: 10px !important; 
+
+th {
+    padding: 8px 10px !important;
+    font-size: 10px !important;
     color: #94a3b8; 
-    text-transform: uppercase; 
-    border-bottom: 2px solid #374151; 
+    text-transform: uppercase;
+    border-bottom: 2px solid #374151;
 }
-td { 
-    padding: 8px !important; 
-    font-size: 11px !important; 
+
+td {
+    padding: 6px 8px !important;
+    font-size: 11px !important;
     color: #ffffff !important; 
-    border-bottom: 1px solid #1f2937; 
+    border-bottom: 1px solid #1f2937;
     text-align: center;
 }
 
-/* Efeito Hover */
-tbody tr:hover { background-color: #f8fafc !important; cursor: pointer; }
+/* 5. HOVER E DESTAQUES */
+tbody tr:hover { background-color: #e2e8f0 !important; cursor: pointer; }
 tbody tr:hover td { color: #0f172a !important; }
+tbody tr:hover td:first-child { color: #b45309 !important; }
 
-/* 4. AJUSTES ESPECIFICOS */
+/* 6. MEDIA QUERIES PARA NOTEBOOKS */
+@media (max-width: 1440px) {
+    aside { width: 220px; }
+    .card { padding: 0.5rem !important; }
+    .section-title { margin-bottom: 10px; }
+    /* Reduz o checklist para não empurrar a tabela */
+    #status-selo-container { padding: 0.4rem !important; }
+}
+
+/* Badge Nível (Vermelho Fixo) */
 .badge-nivel-red {
     background-color: #ef4444 !important;
-    color: white !important;
+    color: #ffffff !important;
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 8px;
-    font-weight: 800;
+    font-weight: 900;
+    border: 1px solid #dc2626;
 }
+
+/* Checkbox */
+.custom-checkbox {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background-color: #0b0f1a;
+    border: 1px solid #334155;
+    border-radius: 3px;
+    cursor: pointer;
+}
+.custom-checkbox:checked { background-color: #4f46e5; border-color: #4f46e5; }
+
+/* Botões de Nível */
+.btn-level {
+    padding: 2px 0 !important;
+    font-size: 9px !important;
+    border: 1px solid #2d3748;
+    background: #0b0f1a;
+    color: #64748b;
+}
+.btn-level.active { background: #4f46e5; color: #fff; }
+
+/* Light Mode (Mantido) */
+body.light-mode { background-color: #f1f5f9; color: #1e293b; }
+body.light-mode main { background-color: #f1f5f9; }
+body.light-mode .table-wrapper { background: #ffffff; border: 1px solid #e2e8f0; }
+body.light-mode td { color: #334155 !important; }

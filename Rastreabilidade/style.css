@@ -1,15 +1,16 @@
-/* YaSe PRO - Unified Modern Dark Theme 
-    Integração: Estrutura Responsiva + Estilização Premium
-*/
+/* ============================================================
+   YaSe PRO - Estilização Premium Ultra-Compacta (Notebooks)
+   Divisão 50/50 e Grupos de Ensaios Coloridos
+   ============================================================ */
 
-/* 1. RESET E ESTRUTURA BASE */
+/* 1. ESTRUTURA GLOBAL E RESET */
 html, body {
     height: 100vh;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Mantém tudo fixo na tela */
+    overflow: hidden; /* Mantém o layout fixo sem scroll na página toda */
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: #0f172a; 
+    background-color: #0f172a;
     color: #f8fafc;
 }
 
@@ -20,145 +21,193 @@ html, body {
 }
 
 aside {
-    width: 250px;
+    width: 240px;
     flex-shrink: 0;
-    background-color: #1e293b; 
-    color: white;
-    height: 100vh;
+    background-color: #1e293b;
+    border-right: 1px solid #334155;
     display: flex;
     flex-direction: column;
-    padding: 15px;
-    border-right: 1px solid #334155;
+    padding: 10px;
 }
 
 main {
     flex: 1;
     display: flex;
     flex-direction: column;
+    height: 100vh;
     background-color: #0f172a;
-    padding: 12px; /* Reduzido para economizar espaço vertical */
-    overflow: hidden; 
+    padding: 8px 12px;
+    overflow: hidden; /* Garante que o scroll aconteça apenas nos containers internos */
 }
 
-/* 2. CARDS E INPUTS (ESTILO DARK UNIFICADO) */
+/* 2. ÁREA SUPERIOR: CARDS (Layout Notebook) */
+.cards-wrapper {
+    flex: 0 0 auto;
+    max-height: 48vh; /* Limita os cards a quase metade da altura total */
+    overflow-y: auto; /* Scroll interno caso os cards sejam muito altos */
+    margin-bottom: 8px;
+    padding-right: 4px;
+}
+
 .card {
-    background-color: #0f172a !important; 
+    background-color: #0f172a !important;
     border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 0.6rem !important; /* Padding reduzido para empurrar cards para cima */
+    border-radius: 8px;
+    padding: 8px !important;
+    transition: all 0.2s ease;
 }
 
-.input-field, input[type="text"], input[type="number"], input[type="date"], select, textarea {
+/* 3. FORMULÁRIOS E INPUTS COMPACTOS */
+input[type="text"], 
+input[type="number"], 
+input[type="date"], 
+select, 
+textarea {
     width: 100%;
-    height: 26px !important; /* Altura compacta */
-    padding: 0 8px !important;
-    font-size: 11px !important;
-    border-radius: 6px;
-    background-color: #0b0f1a !important; 
+    height: 24px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    border-radius: 4px;
+    background-color: #0b0f1a !important;
     border: 1px solid #2d3748 !important;
     color: #e2e8f0 !important;
-    margin-bottom: 3px;
-    transition: border-color 0.2s;
+    margin-bottom: 2px !important;
 }
 
-/* 3. GRUPOS DE ENSAIO TÉCNICO */
-.ensaios-group-yellow { border: 1px solid rgba(234, 179, 8, 0.4); background: #0b0f1a; border-radius: 8px; padding: 6px; margin-bottom: 3px; }
-.ensaios-group-green { border: 1px solid rgba(34, 197, 94, 0.4); background: #0b0f1a; border-radius: 8px; padding: 6px; margin-bottom: 3px; }
-.ensaios-group-blue { border: 1px solid rgba(59, 130, 246, 0.4); background: #0b0f1a; border-radius: 8px; padding: 6px; margin-bottom: 3px; }
+input:focus, select:focus {
+    border-color: #4f46e5 !important;
+    outline: none;
+}
 
-/* 4. TABELA (OCUPANDO 50% DA TELA OU MAIS) */
+/* 4. GRUPOS DE ENSAIOS TÉCNICOS (CORES DA IMAGEM) */
+.ensaios-group-yellow, 
+.ensaios-group-green, 
+.ensaios-group-blue {
+    border-radius: 6px;
+    padding: 6px;
+    margin-bottom: 5px;
+    background: rgba(15, 23, 42, 0.4);
+}
+
+/* Amarelo/Pesagem */
+.ensaios-group-yellow { border: 1px solid rgba(245, 158, 11, 0.4); }
+/* Verde/Perda de Massa */
+.ensaios-group-green { border: 1px solid rgba(16, 185, 129, 0.4); }
+/* Azul/Volume e EE */
+.ensaios-group-blue { border: 1px solid rgba(59, 130, 246, 0.4); }
+
+/* Títulos internos dos grupos */
+.ensaios-group-yellow div:first-child,
+.ensaios-group-green div:first-child,
+.ensaios-group-blue div:first-child {
+    font-size: 8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+/* 5. ÁREA DA TABELA (OCUPANDO O RESTANTE) */
+.table-section {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+}
+
 .table-wrapper {
-    flex: 1 1 50%; /* Força a tabela a tentar ocupar 50% da altura disponível */
-    min-height: 0; 
-    background: #111827; 
-    border-radius: 16px;
+    flex: 1;
+    background: #111827;
+    border-radius: 12px;
     border: 1px solid #1f2937;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    margin-top: 5px;
-    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .scrollable-body {
-    flex: 1; 
+    flex: 1;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #374151 transparent;
 }
 
-/* Scrollbar Customizada */
-.scrollable-body::-webkit-scrollbar { width: 6px; }
+/* Custom Scrollbar Chrome/Edge */
+.scrollable-body::-webkit-scrollbar { width: 5px; }
 .scrollable-body::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
 
-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-thead { position: sticky; top: 0; background: #1f2937; z-index: 10; }
+/* ESTILIZAÇÃO DA TABELA */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    background: #1f2937;
+    z-index: 20;
+}
 
 th {
-    padding: 8px 10px !important;
-    font-size: 10px !important;
-    color: #94a3b8; 
+    padding: 6px 4px !important;
+    font-size: 9px !important;
+    font-weight: 800;
+    color: #94a3b8;
     text-transform: uppercase;
     border-bottom: 2px solid #374151;
+    text-align: center;
 }
 
 td {
-    padding: 6px 8px !important;
-    font-size: 11px !important;
-    color: #ffffff !important; 
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    color: #ffffff !important;
     border-bottom: 1px solid #1f2937;
     text-align: center;
 }
 
-/* 5. HOVER E DESTAQUES */
-tbody tr:hover { background-color: #e2e8f0 !important; cursor: pointer; }
-tbody tr:hover td { color: #0f172a !important; }
-tbody tr:hover td:first-child { color: #b45309 !important; }
-
-/* 6. MEDIA QUERIES PARA NOTEBOOKS */
-@media (max-width: 1440px) {
-    aside { width: 220px; }
-    .card { padding: 0.5rem !important; }
-    .section-title { margin-bottom: 10px; }
-    /* Reduz o checklist para não empurrar a tabela */
-    #status-selo-container { padding: 0.4rem !important; }
+/* Efeito Hover na Tabela */
+tbody tr:hover {
+    background-color: #f8fafc !important;
+    cursor: pointer;
 }
 
-/* Badge Nível (Vermelho Fixo) */
+tbody tr:hover td {
+    color: #0f172a !important;
+}
+
+/* 6. COMPONENTES EXTRA */
 .badge-nivel-red {
     background-color: #ef4444 !important;
-    color: #ffffff !important;
-    padding: 2px 6px;
-    border-radius: 4px;
+    color: white !important;
+    padding: 1px 5px;
+    border-radius: 3px;
     font-size: 8px;
-    font-weight: 900;
+    font-weight: 800;
     border: 1px solid #dc2626;
 }
 
-/* Checkbox */
-.custom-checkbox {
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    background-color: #0b0f1a;
-    border: 1px solid #334155;
-    border-radius: 3px;
-    cursor: pointer;
-}
-.custom-checkbox:checked { background-color: #4f46e5; border-color: #4f46e5; }
-
-/* Botões de Nível */
 .btn-level {
-    padding: 2px 0 !important;
-    font-size: 9px !important;
-    border: 1px solid #2d3748;
+    padding: 2px 0;
+    font-size: 9px;
     background: #0b0f1a;
-    color: #64748b;
+    border: 1px solid #2d3748;
+    cursor: pointer;
+    border-radius: 4px;
 }
-.btn-level.active { background: #4f46e5; color: #fff; }
 
-/* Light Mode (Mantido) */
-body.light-mode { background-color: #f1f5f9; color: #1e293b; }
-body.light-mode main { background-color: #f1f5f9; }
-body.light-mode .table-wrapper { background: #ffffff; border: 1px solid #e2e8f0; }
-body.light-mode td { color: #334155 !important; }
+.btn-level.active {
+    background: #4f46e5;
+    color: white;
+}
+
+/* 7. MEDIA QUERIES PARA TELAS MUITO PEQUENAS */
+@media (max-height: 750px) {
+    .cards-wrapper { max-height: 42vh; }
+    input[type="text"], input[type="number"] { height: 22px !important; font-size: 9px !important; }
+    th, td { padding: 3px 4px !important; font-size: 9px !important; }
+}

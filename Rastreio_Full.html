@@ -256,28 +256,40 @@
 </div>
 </div>  </div>
 
-  <div class="card p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-700 space-y-2">
-    <h3 class="text-[10px] font-black text-slate-400 uppercase mb-1 flex items-center gap-2">
+<div class="card border-t-4 border-indigo-500 shadow-sm border border-slate-700">
+    <h3 class="text-[10px] font-black text-slate-400 uppercase mb-2 flex items-center gap-2">
         <i class="fa-solid fa-gauge-high text-indigo-500"></i> Ensaios Técnicos
     </h3>
-    <div class="p-2 bg-slate-900/50 rounded-lg grid grid-cols-2 gap-1 border border-yellow-500/20">
-      <input type="number" id="p_vazio_valvula" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="P.Vazio">
-      <input type="number" id="p_cheio_valvula" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="P.Cheio">
-      <input type="number" id="p_atual" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="P.Atual">
-      <input type="text" id="porcent_dif" class="h-7 text-[9px] border border-slate-700 bg-slate-800 rounded px-1 font-bold text-amber-500" placeholder="%" readonly>
+
+    <div class="ensaios-group-yellow">
+        <div class="text-[8px] font-black text-amber-500/80 uppercase mb-1 tracking-wider" id="titulo_pesagem">Pesagem ABC</div>
+        <div class="grid grid-cols-2 gap-1">
+            <input type="number" id="p_vazio_valvula" placeholder="P.Vazio">
+            <input type="number" id="p_cheio_valvula" placeholder="P.Cheio">
+            <input type="number" id="p_atual" placeholder="P.Atual">
+            <input type="text" id="porcent_dif" placeholder="%" readonly class="font-bold text-amber-500">
+        </div>
     </div>
-    <div class="p-2 bg-slate-900/50 rounded-lg grid grid-cols-2 gap-1 border border-emerald-500/20">
-      <input type="number" id="tara_cilindro" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="Tara">
-      <input type="number" id="p_cil_vazio_kg" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="P.Vazio Kg">
-      <input type="text" id="perda_massa_porcent" class="col-span-2 h-7 text-[9px] border border-slate-700 bg-slate-800 rounded px-1 font-bold text-emerald-500" placeholder="% Perda" readonly>
+
+    <div class="ensaios-group-green">
+        <div class="text-[8px] font-black text-emerald-500/80 uppercase mb-1 tracking-wider">Perda de Massa</div>
+        <div class="grid grid-cols-2 gap-1">
+            <input type="number" id="tara_cilindro" placeholder="Tara">
+            <input type="number" id="p_cil_vazio_kg" placeholder="P.Vazio Kg">
+            <input type="text" id="perda_massa_porcent" placeholder="% Perda" readonly class="col-span-2 font-bold text-emerald-500">
+        </div>
     </div>
-    <div class="p-2 bg-slate-900/50 rounded-lg grid grid-cols-2 gap-1 border border-blue-500/20">
-      <input type="number" id="vol_litros" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="Vol.">
-      <input type="number" id="dvm_et" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="DVM">
-      <input type="number" id="dvp_ep" class="h-7 text-[9px] border border-slate-700 rounded px-1" placeholder="DVP">
-      <input type="text" id="ee_resultado" class="h-7 text-[9px] border border-slate-700 bg-slate-800 rounded px-1 font-bold text-blue-400" placeholder="EE" readonly>
+
+    <div class="ensaios-group-blue">
+        <div class="text-[8px] font-black text-blue-400/80 uppercase mb-1 tracking-wider">Cub. (Volume Int.)</div>
+        <div class="grid grid-cols-2 gap-1">
+            <input type="number" id="vol_litros" placeholder="Vol.">
+            <input type="number" id="dvm_et" placeholder="DVH">
+            <input type="number" id="dvp_ep" placeholder="DVP">
+            <input type="text" id="ee_resultado" placeholder="EE" readonly class="font-bold text-blue-400">
+        </div>
     </div>
-  </div>
+</div>
 </div>
 
 <div class="flex-1 flex flex-col min-h-0 overflow-hidden">

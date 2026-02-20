@@ -58,3 +58,12 @@ function logout() {
 }
 
 
+// Para que o "Pesagem ABC" 
+// mude automaticamente quando você trocar o tipo de extintor, 
+// adicione isso ao seu arquivo de scripts:
+
+// Exemplo de como mudar o nome conforme a carga
+document.getElementById('tipo_carga').addEventListener('change', function() {
+    const valor = this.value || 'ABC';
+    document.getElementById('titulo_pesagem').innerText = 'Pesagem ' + valor;
+});

@@ -58,14 +58,3 @@ function logout() {
 }
 
 
-function toggleTopDrawer() {
-    const drawer = document.getElementById('topDrawer');
-    const icon = document.getElementById('drawerIcon');
-    const text = document.getElementById('drawerText');
-    
-    const isOpen = drawer.classList.toggle('open');
-    icon.classList.toggle('rotate');
-    
-    // Opcional: mudar o texto ao abrir
-    text.innerText = isOpen ? "Fechar Painel" : "Opções Extras";
-}

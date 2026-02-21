@@ -1,15 +1,60 @@
 /**
  * RESPONSABILIDADE: Gestão da Interface do Usuário (UI).
  * - Controla estados visuais de botões e limpeza do formulário.
- * - Gerencia modais de confirmação universais.
+ * - Gerencia modais de confirmação universais e automação de níveis.
  */
 
 function setLevel(lvl) {
     selectedLevel = lvl;
+    
+    // 1. Controle Visual dos Botões de Nível
     document.querySelectorAll('[data-level]').forEach((btn) => {
-        btn.classList.remove("active");
-        if (parseInt(btn.dataset.level) === lvl) btn.classList.add("active");
+        btn.classList.remove("active", "bg-indigo-600", "text-white");
+        btn.classList.add("bg-slate-800/40", "text-slate-300");
+        
+        if (parseInt(btn.dataset.level) === lvl) {
+            btn.classList.add("active", "bg-indigo-600", "text-white");
+        }
     });
+
+    // 2. Automação de Checklist de Inspeção e Ensaio
+    const checkboxes = document.querySelectorAll('.custom-checkbox');
+    // Mapeamento conforme a ordem do seu HTML
+    const ensPneumManometro   = checkboxes[0];
+    const ensPneumValvula     = checkboxes[1];
+    const regValvulaAlivio    = checkboxes[2];
+    const ensCondEletrica     = checkboxes[3];
+    const ensHidrostValvula   = checkboxes[4];
+    const ensHidrostMangueira = checkboxes[5];
+
+    // Lógica Dinâmica baseada no Nível selecionado
+    if (lvl === 2) {
+        // Nível 2: Apenas inspeção pneumática
+        if(ensPneumManometro)   ensPneumManometro.checked = true;
+        if(ensPneumValvula)     ensPneumValvula.checked = true;
+        
+        // Desmarca ensaios hidrostáticos obrigatoriamente
+        if(ensHidrostValvula)   ensHidrostValvula.checked = false;
+        if(ensHidrostMangueira) ensHidrostMangueira.checked = false;
+        
+        // Esmaecer visualmente o grupo de ensaios hidrostáticos
+        const grupoHidro = document.querySelector('.ensaios-group-red');
+        if(grupoHidro) grupoHidro.style.opacity = "0.5";
+    } 
+    else if (lvl === 3) {
+        // Nível 3: Habilita Pneumáticos + Hidrostáticos
+        if(ensPneumManometro)   ensPneumManometro.checked = true;
+        if(ensPneumValvula)     ensPneumValvula.checked = true;
+        if(ensHidrostValvula)   ensHidrostValvula.checked = true;
+        if(ensHidrostMangueira) ensHidrostMangueira.checked = true;
+        
+        // Automação: Marca "Pintura" em acessórios (conforme imagem de Nível 3)
+        const checkPintura = document.querySelector('input[type="checkbox"][id*="Pintura"]');
+        if(checkPintura) checkPintura.checked = true;
+
+        const grupoHidro = document.querySelector('.ensaios-group-red');
+        if(grupoHidro) grupoHidro.style.opacity = "1";
+    }
 }
 
 function setStatus(valor, elemento) {
@@ -31,23 +76,15 @@ function limparFormulario() {
     // 1. Resetar o estado de edição
     editandoID = null;
 
-    // 2. Lista expandida de campos para limpar (incluindo os novos que vimos no seu HTML)
+    // 2. Limpeza abrangente de campos (Texto, Números e Selects)
     const campos = [
-        "cod_barras", 
-        "fabricante_id", 
-        "nr_cilindro", 
-        "ano_fab", 
-        "ult_reteste", 
-        "selo_anterior", 
-        "obs_ensaio", 
-        "tipo_carga", 
-        "capacidade", 
-        "nbr_id",
-        "lote_nitrogenio",
-        "ampola_vinculada",
-        "pallet",
-        "deposito_galpao",
-        "local_extintor"
+        "cod_barras", "fabricante_id", "nr_cilindro", "ano_fab", "ult_reteste", 
+        "selo_anterior", "obs_ensaio", "tipo_carga", "capacidade", "nbr_id",
+        "lote_nitrogenio", "ampola_vinculada", "pallet", "deposito_galpao", "local_extintor",
+        "p_vazio_valvula", "p_cheio_valvula", "p_atual", "porcent_dif",
+        "tara_cilindro", "p_cil_vazio_kg", "perda_massa_porcent",
+        "vol_litros", "dvm_et", "dvp_ep", "ee_resultado",
+        "et_ensaio", "ep_ensaio", "ee_calculado", "ep_porcent_final"
     ];
 
     campos.forEach(id => {
@@ -55,19 +92,25 @@ function limparFormulario() {
         if (el) el.value = "";
     });
     
-    // 3. Limpar displays de texto e labels
-    document.getElementById("nomeFabricanteDisplay").innerText = "";
-    document.getElementById("display_prox_recarga").innerText = "--/--/----";
-    document.getElementById("display_prox_reteste").innerText = "----";
+    // 3. Resetar todos os checkboxes (Inspeção e Componentes)
+    document.querySelectorAll('input[type="checkbox"]').forEach(check => {
+        check.checked = false;
+    });
     
-    // 4. Resetar componentes visuais (Nível e Status)
-    if (typeof setLevel === "function") setLevel(1);
-    if (typeof setStatus === "function") {
-        const btnApr = document.querySelector('.btn-status-apr');
-        setStatus('APROVADO', btnApr);
-    }
+    // 4. Limpar displays de texto e labels
+    const badgeFab = document.getElementById("badgeNomeFabricante");
+    if(badgeFab) badgeFab.classList.add("hidden");
     
-    // 5. Restaurar o botão de Registro (caso tenha vindo de uma edição)
+    if(document.getElementById("display_prox_recarga")) document.getElementById("display_prox_recarga").innerText = "--/--/----";
+    if(document.getElementById("display_prox_reteste")) document.getElementById("display_prox_reteste").innerText = "----";
+    
+    // 5. Resetar componentes visuais para o padrão (Nível 2 e Status Aprovado)
+    if (typeof setLevel === "function") setLevel(2); 
+    
+    const btnApr = document.querySelector('.bg-emerald-900\\/20'); // Seleciona o botão APR via classe
+    if (btnApr) setStatus('APROVADO', btnApr);
+    
+    // 6. Restaurar o botão de Registro (caso tenha vindo de uma edição)
     const btnRegistro = document.querySelector('button[onclick="registrarItem()"]');
     if (btnRegistro) {
         btnRegistro.innerHTML = '<i class="fa-solid fa-plus-circle"></i> REGISTRAR ITEM';
@@ -75,94 +118,7 @@ function limparFormulario() {
         btnRegistro.classList.add("bg-indigo-600");
     }
 
-    // 6. FOCO AUTOMÁTICO (O mais importante para agilidade)
+    // 7. Foco automático para produtividade
     const campoFoco = document.getElementById("cod_barras");
     if (campoFoco) campoFoco.focus();
 }
-
-function solicitarConfirmacao({ titulo, mensagem, corBtn, textoBtn, icone, callback }) {
-    const modal = document.getElementById('modalConfirmacao');
-    const btn = document.getElementById('btnConfirmarAcaoGeral');
-    
-    document.getElementById('confirmTitle').innerText = titulo || "Tem certeza?";
-    document.getElementById('confirmMessage').innerHTML = mensagem || "Esta ação é permanente.";
-    document.getElementById('confirmIcon').className = `fa-solid ${icone || 'fa-trash-can'} text-3xl`;
-    
-    btn.className = `flex-[1.5] text-white font-bold py-4 rounded-2xl text-xs uppercase shadow-lg transition-all ${corBtn || 'bg-red-500'}`;
-    btn.innerText = textoBtn || "Confirmar";
-
-    modal.classList.remove('hidden');
-    btn.onclick = async () => {
-        btn.disabled = true;
-        await callback();
-        btn.disabled = false;
-        fecharConfirmacao();
-    };
-}
-
-function fecharConfirmacao() {
-    document.getElementById('modalConfirmacao').classList.add('hidden');
-}
-
-/**
- * Atualiza o Widget de Selos na tela de Rastreio
- */
-async function atualizarWidgetSelo() {
-    try {
-        // 1. Busca o lote mais antigo que ainda esteja ABERTO (FIFO - First In, First Out)
-        const { data: lote, error } = await _supabase
-            .from('rem_essas')
-            .select('*')
-            .eq('status_lote', 'ABERTO')
-            .order('selo_inicio', { ascending: true })
-            .limit(1)
-            .single();
-
-        const container = document.getElementById('status-selo-container');
-
-        if (error || !lote) {
-            container.classList.add('hidden');
-            return;
-        }
-
-        // 2. Conta quantos selos deste lote já foram usados na tabela itens_os
-        const { count: usados } = await _supabase
-            .from('itens_os')
-            .select('*', { count: 'exact', head: true })
-            .gte('selo_inmetro', lote.selo_inicio)
-            .lte('selo_inmetro', lote.selo_fim);
-
-        // 3. Cálculos
-        const restante = lote.qtd_selos - usados;
-        const proximoSelo = lote.selo_inicio + usados;
-        const porcentagem = (restante / lote.qtd_selos) * 100;
-
-        // 4. Atualiza a Interface
-        container.classList.remove('hidden');
-        document.getElementById('lote_documento').innerText = lote.documento || `Lote ${lote.selo_inicio}`;
-        document.getElementById('proximo_selo_num').innerText = proximoSelo;
-        document.getElementById('qtd_restante_texto').innerText = `${restante} / ${lote.qtd_selos}`;
-        
-        const barra = document.getElementById('barra_progresso_selo');
-        barra.style.width = `${porcentagem}%`;
-
-        // Muda a cor da barra se estiver acabando (menos de 10%)
-        if (porcentagem < 10) {
-            barra.classList.replace('bg-emerald-500', 'bg-red-500');
-        } else {
-            barra.classList.replace('bg-red-500', 'bg-emerald-500');
-        }
-
-        // AUTO-PREENCHIMENTO: Se o campo de selo estiver vazio, sugere o próximo
-        const inputSelo = document.getElementById('selo_inmetro');
-        if (inputSelo && !inputSelo.value) {
-            inputSelo.placeholder = `Sugestão: ${proximoSelo}`;
-        }
-
-    } catch (err) {
-        console.error("Erro ao atualizar widget de selos:", err);
-    }
-}
-
-// Chama a função ao carregar a página
-document.addEventListener('DOMContentLoaded', atualizarWidgetSelo);

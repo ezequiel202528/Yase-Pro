@@ -177,12 +177,12 @@ td {
 
 /* Efeito Hover na Tabela */
 tbody tr:hover {
-    background-color: #f8fafc !important;
+    background-color: #696b6b !important;
     cursor: pointer;
 }
 
 tbody tr:hover td {
-    color: #0f172a !important;
+    color: #d0d1d3 !important;
 }
 
 /* 6. COMPONENTES EXTRA */

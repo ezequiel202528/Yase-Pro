@@ -159,8 +159,18 @@
         <select id="nbr_select" class="w-full h-8 text-[10px] border rounded-lg px-1"><option value="">Norma NBR</option></select>
         <button onclick="X_ABRIR_NBR()" class="absolute right-2 top-2 text-slate-400"><i class="fa-solid fa-magnifying-glass text-[9px]"></i></button>
       </div>
+<div class="flex items-center justify-between p-2 bg-slate-800/30 rounded-xl mb-3 border border-slate-700/50">
+    <div class="flex items-center gap-2">
+        <i class="fa-solid fa-print text-slate-500 text-[10px]"></i>
+        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Imprimir Etiqueta</span>
+    </div>
+    <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="switchEtiqueta" class="sr-only peer" checked>
+        <div class="w-7 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
+    </label>
+</div>
       <button onclick="registrarItem()" class="w-full bg-indigo-600 text-white font-black py-2.5 rounded-xl text-[10px] uppercase shadow-md hover:bg-indigo-700 transition-all">
-        <i class="fa-solid fa-plus-circle"></i> REGISTRAR ITEM
+        <i class="fa-solid fa-plus-circle"></i> REGISTRAR
       </button>
     </div>
   </div>
@@ -199,10 +209,11 @@
         <input type="text" id="local_extintor" class="w-full h-8 text-[10px] border border-slate-700 rounded-lg px-2" placeholder="Local">
       </div>
       <div class="flex gap-2 mb-2">
-        <div class="flex-1 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-amber-900/20 text-amber-500 border-amber-500/30" onclick="setStatus('NOVO', this)">NOVO</div>        
-        <div class="flex-1 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-emerald-900/20 text-emerald-400 border-emerald-500/30" onclick="setStatus('APROVADO', this)">APR</div>
-        <div class="flex-1 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-red-900/20 text-red-500 border-red-500/30" onclick="setStatus('REPROVADO', this)">REP</div>        <input type="hidden" id="resultado_valor" value="APROVADO">
-      </div>
+    <div class="flex-1 opacity-40 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-amber-900/20 text-amber-500 border-amber-500/30" onclick="setStatus('NOVO', this)">NOVO</div>        
+    <div class="flex-1 opacity-100 text-center border-2 px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-emerald-900/20 text-emerald-400 border-emerald-500/30" onclick="setStatus('APROVADO', this)">APR</div>
+    <div class="flex-1 opacity-40 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-red-900/20 text-red-500 border-red-500/30" onclick="setStatus('REPROVADO', this)">REP</div>
+    <input type="hidden" id="resultado_valor" value="APROVADO">
+</div>
 <button onclick="openAcessoriosModal()" class="w-full bg-slate-800 border-2 border-dashed border-slate-700 text-amber-500/70 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-slate-700 transition-colors mb-3">
     Componentes
 </button>
@@ -347,14 +358,7 @@
       </div>
     </div>
 
-    <div id="modalFabricante" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white w-[450px] rounded-3xl p-6 shadow-2xl">
-            <h2 class="text-sm font-black text-slate-800 mb-4 uppercase tracking-tighter">Selecione o Fabricante</h2>
-            <div class="max-h-[350px] overflow-y-auto mb-4 border rounded-xl" id="listaFab"></div>
-            <button onclick="X_FECHAR_FAB()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-black text-[10px] uppercase">Fechar</button>
-        </div>
-    </div>
-
+    
     
     <div id="confirmacaoGeral" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/40 backdrop-blur-md">
         <div class="bg-white w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl text-center border border-slate-200">
@@ -369,6 +373,69 @@
             </div>
         </div>
     </div>
+
+    <div id="modalEtiqueta" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-300">
+        
+        <div class="bg-slate-100 px-4 py-2 border-b flex justify-between items-center">
+            <span class="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">Código de Barras Extintores - YaSe PRO</span>
+            <button onclick="fecharModalEtiqueta()" class="text-slate-400 hover:text-red-500 text-lg">&times;</button>
+        </div>
+
+        <div class="p-8">
+            <div id="areaImpressaoEtiqueta" class="bg-white border-[1.5px] border-black p-2 mx-auto" style="width: 100mm; min-height: 50mm; font-family: Arial, sans-serif; color: black;">
+                
+                <div class="flex border-b border-black pb-1 mb-1">
+                    <div class="w-1/4 flex items-center justify-center border-r border-black mr-2">
+                         <i class="fa-solid fa-fire-extinguisher text-2xl"></i>
+                    </div>
+                    <div class="w-3/4 text-[7px] leading-tight font-bold">
+                        <div class="text-[9px] font-black uppercase">Sua Empresa de Extintores Ltda</div>
+                        RUA EXEMPLO, 123 - CENTRO - CASCAVEL/PR<br>
+                        CNPJ: 00.000.000/0001-00 - (45) 3222-0000
+                    </div>
+                </div>
+
+                <div class="text-[6px] text-center font-bold uppercase leading-none mb-2">
+                    PARA CONCESSÃO DE GARANTIA ESTE EXTINTOR DEVE SER VERIFICADO MENSALMENTE.<br>
+                    GARANTIA DE 1 ANO (ATÉ A DATA DE RECARGA). A VIOLAÇÃO DO LACRE INTERROMPE A GARANTIA.
+                </div>
+
+                <div class="grid grid-cols-3 gap-0 border border-black mb-2">
+                    <div class="border-r border-black text-center p-1">
+                        <div class="text-[6px] font-black uppercase">Próx. Manut.</div>
+                        <div id="etiqueta_val_manut" class="text-[11px] font-bold">---</div>
+                    </div>
+                    <div class="border-r border-black text-center p-1">
+                        <div class="text-[6px] font-black uppercase">Próx. Reteste</div>
+                        <div id="etiqueta_val_reteste" class="text-[11px] font-bold">---</div>
+                    </div>
+                    <div class="text-center p-1 bg-black text-white">
+                        <div class="text-[6px] font-black uppercase">Manut. Realizada</div>
+                        <div id="etiqueta_nivel" class="text-[11px] font-bold italic">NÍVEL 2</div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-end">
+                    <div class="text-[7px] font-bold italic">
+                        Tipo: <span id="etiqueta_tipo">---</span><br>
+                        Capacidade: <span id="etiqueta_cap">---</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <svg id="barcode_preview"></svg>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        <div class="bg-slate-50 px-6 py-4 border-t flex gap-3">
+            <button onclick="fecharModalEtiqueta()" class="flex-1 py-2 text-[10px] font-black uppercase text-slate-500 hover:bg-slate-200 rounded-lg transition-all">Cancelar</button>
+            <button onclick="executarImpressao()" class="flex-[2] py-2 bg-indigo-600 text-white rounded-lg text-[10px] font-black uppercase shadow-lg shadow-indigo-500/30 hover:bg-indigo-700">
+                <i class="fa-solid fa-print mr-2"></i> Confirmar e Imprimir
+            </button>
+        </div>
+    </div>
+</div>
 
     <script src="Rastreabilidade/main.js"></script>
     <script src="Rastreabilidade/prepararEdicao.js"></script>

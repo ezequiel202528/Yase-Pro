@@ -13,11 +13,22 @@ function setLevel(lvl) {
 }
 
 function setStatus(valor, elemento) {
-    document.querySelectorAll('#groupResultado .btn-level').forEach(btn => {
-        btn.classList.remove('active');
+    // 1. Atualiza o valor no campo oculto para salvar no banco
+    document.getElementById("resultado_valor").value = valor;
+
+    // 2. Remove o destaque visual de todos os botões de status
+    // Selecionamos todos os botões que estão dentro da mesma linha
+    const botoes = elemento.parentElement.querySelectorAll('div');
+    botoes.forEach(btn => {
+        btn.classList.replace('opacity-100', 'opacity-40'); // Deixa os não selecionados apagados
+        btn.style.borderWidth = "1px";
     });
-    elemento.classList.add('active');
-    document.getElementById('resultado_valor').value = valor;
+
+    // 3. Aplica destaque no botão clicado
+    elemento.classList.replace('opacity-40', 'opacity-100');
+    elemento.style.borderWidth = "3px";
+    
+    console.log("Status selecionado:", valor);
 }
 
 function limparFormulario() {

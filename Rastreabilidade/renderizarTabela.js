@@ -68,16 +68,13 @@ async function registrarItem() {
   console.log("Iniciando gravação...");
   try {
     const fabId = document.getElementById("X_input_id").value;
-    const nomeFab =
-      document.getElementById("badgeNomeFabricante")?.innerText || "N/I";
+    const nomeFab = document.getElementById("badgeNomeFabricante")?.innerText || "N/I";
     const nrCilindro = document.getElementById("nr_cilindro").value;
     const ultReteste = document.getElementById("ult_reteste").value;
     const dataSelagem = document.getElementById("data_selagem").value;
 
-    // --- LOGICA PARA PEGAR APENAS O NÚMERO DA NBR ---
     const nbrSelect = document.getElementById("nbr_select");
     const nbrTextoCompleto = nbrSelect.options[nbrSelect.selectedIndex].text;
-    // Se o texto for "15808 - PQS", o split pega só "15808"
     const nbrApenasNumero = nbrTextoCompleto.split(" - ")[0].trim();
 
     if (!fabId) {
@@ -110,18 +107,24 @@ async function registrarItem() {
       prox_recarga: vProxRecarga,
       tipo_carga: document.getElementById("tipo_carga").value,
       capacidade: document.getElementById("capacidade").value,
-      nbr_id: nbrApenasNumero, // SALVANDO APENAS O NÚMERO (Ex: 15808)
+      nbr_id: nbrApenasNumero,
       nivel: typeof selectedLevel !== "undefined" ? selectedLevel : 1,
       selo_anterior: document.getElementById("selo_anterior").value,
-      resultado:
-        document.getElementById("resultado_valor")?.value || "APROVADO",
+      resultado: document.getElementById("resultado_valor")?.value || "APROVADO",
       obs_ensaio: document.getElementById("obs_ensaio").value,
     };
 
     const { error } = await _supabase.from("itens_os").insert([payload]);
     if (error) throw error;
 
-    // Limpeza
+    // --- LÓGICA DE ETIQUETA OPCIONAL ---
+    const deveImprimir = document.getElementById("switchEtiqueta").checked;
+    if (deveImprimir) {
+      // Abre o modal de visualização (exatamente como na foto que você enviou)
+      prepararModalEtiqueta(payload);
+    }
+
+    // Limpeza padrão
     document.getElementById("nr_cilindro").value = "";
     const cb = document.getElementById("cod_barras");
     if (cb) {
@@ -130,6 +133,7 @@ async function registrarItem() {
     }
 
     if (typeof loadItens === "function") loadItens();
+    
   } catch (err) {
     console.error("Erro no registro:", err);
     alert("Erro ao salvar: " + err.message);

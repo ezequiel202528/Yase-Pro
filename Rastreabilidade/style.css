@@ -91,13 +91,13 @@ input:focus, select:focus {
 }
 
 /* Amarelo/Pesagem */
-.ensaios-group-yellow { border: 1px solid rgba(245, 158, 11, 0.4); }
+.ensaios-group-yellow { border: 1px solid rgb(245, 159, 11); }
 /* Verde/Perda de Massa */
-.ensaios-group-green { border: 1px solid rgba(16, 185, 129, 0.4); }
+.ensaios-group-green { border: 1px solid rgb(3, 255, 171); }
 /* Azul/Volume e EE */
-.ensaios-group-blue { border: 1px solid rgba(59, 130, 246, 0.4); }
+.ensaios-group-blue { border: 1px solid rgb(4, 95, 243); }
 /* Vermelho/Teste Hidrostático */
-.ensaios-group-red { border: 1px solid rgba(239, 68, 68, 0.4); }
+.ensaios-group-red { border: 1px solid rgba(235, 7, 7, 0.993); }
 
     
 

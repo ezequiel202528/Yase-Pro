@@ -7,47 +7,61 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="Remessas/style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      /* CSS PADRÃO CORRIGIDO - SEM SINTAXE TAILWIND DENTRO DO STYLE */
+      body { font-family: "Plus Jakarta Sans", sans-serif; background-color: #020617; color: white; min-height: 100vh; margin: 0; }
+      aside { width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background: #0f172a; padding: 24px; display: flex; flex-direction: column; z-index: 50; border-right: 1px solid rgba(51, 65, 85, 0.5); }
+      main { margin-left: 260px; padding: 48px; }
+      
+      .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); border-radius: 24px; padding: 24px; }
+      .input-field { background: #1e293b; border: 1px solid #334155; color: white; border-radius: 12px; padding: 10px 14px; width: 100%; font-weight: 600; font-size: 13px; box-sizing: border-box; }
+      .input-field:focus { border-color: #fbbf24; outline: none; }
+      
+      .label-mini { font-size: 9px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: block; margin-left: 4px; }
+      .btn-action { padding: 12px 20px; border-radius: 14px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; transition: all 0.3s; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+      
+      .table-header { background: rgba(30, 41, 59, 0.5); color: #94a3b8; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+      .accent-text { color: #fbbf24; }
+    </style>
   </head>
   <body>
     <aside>
       <div class="mb-10 flex items-center gap-3">
-        <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
+        <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
           <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
         </div>
-        <div>
-          <h1 class="text-xl font-extrabold tracking-tight">YaSe <span class="text-amber-500">PRO</span></h1>
-          <p class="text-[9px] text-slate-400 font-bold tracking-widest uppercase">Sistema de Rastreio</p>
-        </div>
+        <h1 class="text-xl font-extrabold tracking-tight">YaSe <span class="accent-text">PRO</span></h1>
       </div>
-      <nav class="space-y-2 flex-1">
-        <a href="Rastreio_Full.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-sm"><i class="fa-solid fa-chart-pie"></i>Rastreio</a>
+      <nav class="space-y-3 flex-1">
+        <a href="Dashboard.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-xs rounded-xl hover:bg-slate-800/50">
+          <i class="fa-solid fa-house accent-text"></i> Dashboard
+        </a>
+        <a href="#" class="flex items-center gap-3 p-3 bg-slate-800/80 text-white rounded-xl font-bold text-xs border border-slate-700/50">
+          <i class="fa-solid fa-ticket-alt accent-text"></i> Remessas
+        </a>
       </nav>
-      <div class="mt-auto pt-6 border-t border-slate-800">
-        <div class="bg-slate-800/50 p-4 rounded-2xl text-xs font-bold text-white uppercase tracking-widest text-center">Configurações</div>
-      </div>
     </aside>
 
     <main>
-      <div class="flex justify-between items-center mb-6">
+      <header class="flex justify-between items-end mb-10">
         <div>
-          <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">Remessas de Selos</h2>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Controle e Lote de Selos Inmetro</p>
+          <h2 class="text-3xl font-black text-white tracking-tighter">Gestão de <span class="accent-text">Remessas</span></h2>
+          <p class="text-slate-500 text-sm font-medium">Controle e Lote de Selos Inmetro</p>
         </div>
         <div class="flex gap-3">
-          <button onclick="salvarLote()" class="btn-action bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20">
+          <button onclick="salvarLote()" class="btn-action bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white">
             <i class="fa-solid fa-floppy-disk"></i> Gravar Lote
           </button>
-          <button onclick="limparCampos()" class="btn-action bg-white text-red-500 border border-red-100 hover:bg-red-50">
+          <button onclick="limparCampos()" class="btn-action bg-slate-800 text-slate-400 hover:text-white border border-slate-700">
             <i class="fa-solid fa-eraser"></i> Limpar
           </button>
         </div>
-      </div>
+      </header>
 
-      <div class="section-card grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 border-t-4 border-t-indigo-500 mb-6">
-        <div class="md:col-span-1">
-          <label class="label-mini">Data de Recebimento</label>
+      <div class="glass-card grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8 border-t-4 border-t-amber-500">
+        <div>
+          <label class="label-mini">Recebimento</label>
           <input type="date" id="data_rec" class="input-field">
         </div>
         <div>
@@ -59,90 +73,71 @@
         </div>
         <div>
           <label class="label-mini">Selo Inicial</label>
-          <input type="number" id="selo_inicio" class="input-field" placeholder="Ex: 10001">
+          <input type="number" id="selo_inicio" class="input-field" placeholder="00000">
         </div>
         <div>
           <label class="label-mini">Selo Final</label>
-          <input type="number" id="selo_fim" class="input-field" placeholder="Ex: 20000">
+          <input type="number" id="selo_fim" class="input-field" placeholder="00000">
         </div>
         <div>
-          <label class="label-mini">Quantidade</label>
-          <input type="number" id="qtd_selos" class="input-field bg-slate-100 font-black text-indigo-600" readonly>
+          <label class="label-mini">Qtd.</label>
+          <input type="number" id="qtd_selos" class="input-field bg-slate-900/50 accent-text font-black" readonly>
         </div>
         <div>
           <label class="label-mini">Prefixo</label>
-          <input type="text" id="prefixo" class="input-field" placeholder="Ex: ABC">
+          <input type="text" id="prefixo" class="input-field" placeholder="ABC">
         </div>
         <div class="md:col-span-4">
-          <label class="label-mini">Num. Solicitação / NF-e</label>
-          <input type="text" id="documento" class="input-field" placeholder="Identificação da Nota Fiscal ou Pedido">
+          <label class="label-mini">Solicitação / NF-e</label>
+          <input type="text" id="documento" class="input-field">
         </div>
         <div class="md:col-span-2">
-            <label class="label-mini">Situação do Lote</label>
+            <label class="label-mini">Situação</label>
             <select id="status_lote" class="input-field">
               <option value="ABERTO">ABERTO</option>
-              <option value="FECHADO">FECHADO / ESGOTADO</option>
-              <option value="CANCELADO">CANCELADO</option>
+              <option value="FECHADO">FECHADO</option>
             </select>
         </div>
       </div>
 
-      <section class="section-card !p-0 overflow-hidden mb-6">
-        <div class="bg-slate-50 p-4 border-b">
-            <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Histórico de Lotes Gravados</h3>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead class="bg-slate-50 text-[9px] uppercase font-black text-slate-400 border-b">
-              <tr>
-                <th class="p-4">Data</th>
-                <th class="p-4">Tipo</th>
-                <th class="p-4">Selo Inicial</th>
-                <th class="p-4">Selo Final</th>
-                <th class="p-4 text-center">Qtd.</th>
-                <th class="p-4">Solicitação/NF</th>
-                <th class="p-4">Situação</th>
-                <th class="p-4 text-center">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="lista-remessas" class="text-[11px] font-bold text-slate-700"></tbody>
-          </table>
-        </div>
+      <section class="glass-card !p-0 overflow-hidden mb-8">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="table-header">
+              <th class="p-5">Data</th>
+              <th class="p-5">Selo Inicial</th>
+              <th class="p-5">Selo Final</th>
+              <th class="p-5 text-center">Qtd.</th>
+              <th class="p-5">NF-e</th>
+              <th class="p-5 text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="lista-remessas" class="text-[11px] font-bold text-slate-300">
+            </tbody>
+        </table>
       </section>
 
-      <section class="section-card mt-4 bg-slate-50 border border-slate-200 !p-4">
-        <div class="flex flex-col gap-2">
-          <span class="text-[10px] font-black text-purple-600 uppercase tracking-widest">Quantidade Total de Selos (Lotes Abertos)</span>
-          <div class="flex flex-wrap items-end gap-2">
-            <div class="flex flex-col">
-              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Última Remessa</label>
-              <input type="text" id="resumo_data" class="input-field !py-1 !px-2 !text-center w-[100px] bg-slate-100 font-bold" readonly>
+      <section class="glass-card bg-amber-500/5 border-amber-500/20">
+          <span class="label-mini accent-text mb-4">Estoque Geral de Selos</span>
+          <div class="flex flex-wrap items-end gap-6">
+            <div>
+              <label class="label-mini">Total Recebido</label>
+              <input type="text" id="resumo_total" class="input-field w-32 bg-slate-900" readonly>
             </div>
-            <span class="text-slate-300 font-bold mb-2">/</span>
-            <div class="flex flex-col">
-              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Total Recebido</label>
-              <input type="text" id="resumo_total" class="input-field !py-1 !px-2 !text-center w-[90px] bg-slate-100 font-bold" readonly>
+            <div class="text-slate-600 text-2xl pb-1">−</div>
+            <div>
+              <label class="label-mini text-red-400">Utilizados</label>
+              <input type="number" id="resumo_utilizados" class="input-field w-28 border-red-500/30 text-red-400" value="0">
             </div>
-            <span class="text-slate-300 font-bold mb-2">-</span>
-            <div class="flex flex-col">
-              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Utilizados</label>
-              <input type="number" id="resumo_utilizados" class="input-field !py-1 !px-2 !text-center w-[80px] text-red-500 font-bold" value="0" oninput="calcularSaldoFinal()">
+            <div class="text-slate-600 text-2xl pb-1">=</div>
+            <div>
+              <label class="label-mini text-emerald-400">Estoque Atual</label>
+              <input type="text" id="resumo_estoque" class="input-field w-40 bg-emerald-500 text-slate-950 font-black text-lg" readonly>
             </div>
-            <span class="text-slate-300 font-bold mb-2">-</span>
-            <div class="flex flex-col">
-              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Inutilizados</label>
-              <input type="number" id="resumo_inutilizados" class="input-field !py-1 !px-2 !text-center w-[80px] text-orange-500 font-bold" value="0" oninput="calcularSaldoFinal()">
-            </div>
-            <span class="text-slate-300 font-bold mb-2">=</span>
-            <div class="flex flex-col">
-              <label class="text-[9px] text-slate-400 font-bold uppercase mb-1">Estoque Atual</label>
-              <input type="text" id="resumo_estoque" class="input-field !py-1 !px-2 !text-center w-[110px] !bg-yellow-300 font-black text-slate-900 shadow-sm" readonly>
-            </div>
-            <button onclick="atualizarResumoLotes()" class="btn-action bg-slate-200 text-slate-700 hover:bg-slate-300 !py-1.5 !px-4 text-[10px] font-black border border-slate-300">
-              ATUALIZAR
+            <button onclick="atualizarResumoLotes()" class="btn-action bg-amber-500 text-slate-950 hover:bg-amber-400 ml-auto font-black">
+              SINCRONIZAR ESTOQUE
             </button>
           </div>
-        </div>
       </section>
     </main>
 

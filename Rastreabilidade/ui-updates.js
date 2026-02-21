@@ -13,22 +13,18 @@ function setLevel(lvl) {
 }
 
 function setStatus(valor, elemento) {
-    // 1. Atualiza o valor no campo oculto para salvar no banco
     document.getElementById("resultado_valor").value = valor;
-
-    // 2. Remove o destaque visual de todos os botões de status
-    // Selecionamos todos os botões que estão dentro da mesma linha
+    
+    // Reset visual dos botões de status
     const botoes = elemento.parentElement.querySelectorAll('div');
     botoes.forEach(btn => {
-        btn.classList.replace('opacity-100', 'opacity-40'); // Deixa os não selecionados apagados
-        btn.style.borderWidth = "1px";
+        btn.classList.add('opacity-40');
+        btn.classList.remove('opacity-100', 'ring-2', 'ring-white');
     });
 
-    // 3. Aplica destaque no botão clicado
-    elemento.classList.replace('opacity-40', 'opacity-100');
-    elemento.style.borderWidth = "3px";
-    
-    console.log("Status selecionado:", valor);
+    // Ativa o clicado
+    elemento.classList.remove('opacity-40');
+    elemento.classList.add('opacity-100', 'ring-2', 'ring-white');
 }
 
 function limparFormulario() {

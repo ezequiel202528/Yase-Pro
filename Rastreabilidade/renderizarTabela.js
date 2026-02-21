@@ -65,7 +65,6 @@ function renderItens(itens) {
 }).join("");
 }
 async function registrarItem() {
-  console.log("Iniciando gravação...");
   try {
     const fabId = document.getElementById("X_input_id").value;
     const nomeFab = document.getElementById("badgeNomeFabricante")?.innerText || "N/I";
@@ -74,20 +73,12 @@ async function registrarItem() {
     const dataSelagem = document.getElementById("data_selagem").value;
 
     const nbrSelect = document.getElementById("nbr_select");
-    const nbrTextoCompleto = nbrSelect.options[nbrSelect.selectedIndex].text;
-    const nbrApenasNumero = nbrTextoCompleto.split(" - ")[0].trim();
+    const nbrApenasNumero = nbrSelect.options[nbrSelect.selectedIndex].text.split(" - ")[0].trim();
 
-    if (!fabId) {
-      alert("Informe o fabricante!");
-      return;
-    }
+    if (!fabId) return alert("Informe o fabricante!");
 
-    // CÁLCULOS AUTOMÁTICOS
-    let vProxReteste = null;
-    if (ultReteste && ultReteste.length === 4) {
-      vProxReteste = parseInt(ultReteste) + 5;
-    }
-
+    // Cálculos
+    let vProxReteste = ultReteste && ultReteste.length === 4 ? parseInt(ultReteste) + 5 : null;
     let vProxRecarga = null;
     if (dataSelagem) {
       let d = new Date(dataSelagem + "T12:00:00");
@@ -108,7 +99,7 @@ async function registrarItem() {
       tipo_carga: document.getElementById("tipo_carga").value,
       capacidade: document.getElementById("capacidade").value,
       nbr_id: nbrApenasNumero,
-      nivel: typeof selectedLevel !== "undefined" ? selectedLevel : 1,
+      nivel: typeof selectedLevel !== "undefined" ? selectedLevel : 2,
       selo_anterior: document.getElementById("selo_anterior").value,
       resultado: document.getElementById("resultado_valor")?.value || "APROVADO",
       obs_ensaio: document.getElementById("obs_ensaio").value,
@@ -117,25 +108,19 @@ async function registrarItem() {
     const { error } = await _supabase.from("itens_os").insert([payload]);
     if (error) throw error;
 
-    // --- LÓGICA DE ETIQUETA OPCIONAL ---
-    const deveImprimir = document.getElementById("switchEtiqueta").checked;
+    // Lógica Opcional de Etiqueta
+    const deveImprimir = document.getElementById("switchEtiqueta")?.checked;
     if (deveImprimir) {
-      // Abre o modal de visualização (exatamente como na foto que você enviou)
       prepararModalEtiqueta(payload);
+    } else {
+      alert("Item registrado com sucesso!");
     }
 
-    // Limpeza padrão
+    // Limpeza
     document.getElementById("nr_cilindro").value = "";
-    const cb = document.getElementById("cod_barras");
-    if (cb) {
-      cb.value = "";
-      cb.focus();
-    }
-
     if (typeof loadItens === "function") loadItens();
     
   } catch (err) {
-    console.error("Erro no registro:", err);
     alert("Erro ao salvar: " + err.message);
   }
 }

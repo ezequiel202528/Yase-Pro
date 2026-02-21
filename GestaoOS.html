@@ -5,269 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>YaSe PRO - Gestão de Ordens de Serviço</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-      body {
-        font-family: "Plus Jakarta Sans", sans-serif;
-        background-color: #f8fafc;
-      }
-      aside {
-        width: 260px;
-        height: 100vh;
-        position: fixed;
-        left: 0;
-        top: 0;
-        background: #0f172a;
-        color: white;
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        z-index: 50;
-      }
-      main {
-        margin-left: 260px;
-        padding: 32px;
-      }
-      .card {
-        background: white;
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-        border: 1px solid #e2e8f0;
-      }
-      .status-badge {
-        padding: 4px 12px;
-        rounded-full: 9999px;
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-      .status-aberta {
-        background: #eef2ff;
-        color: #6366f1;
-      }
-      .status-concluida {
-        background: #ecfdf5;
-        color: #10b981;
-      }
-      .btn-primary {
-        background: #6366f1;
-        color: white;
-        transition: all 0.2s;
-      }
-      .btn-primary:hover {
-        background: #4f46e5;
-        transform: translateY(-1px);
-      }
+      body { font-family: "Plus Jakarta Sans", sans-serif; background-color: #020617; color: white; min-height: 100vh; }
+      aside { width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background: #0f172a; padding: 24px; display: flex; flex-direction: column; z-index: 50; border-right: 1px solid rgba(51, 65, 85, 0.5); }
+      main { margin-left: 260px; padding: 48px; }
+      .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); border-radius: 24px; }
+      .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+      .status-aberta { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+      .status-concluida { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+      .table-header { background: rgba(30, 41, 59, 0.5); color: #94a3b8; font-size: 10px; font-weight: 900; text-transform: uppercase; }
     </style>
   </head>
   <body>
     <aside>
       <div class="mb-10 flex items-center gap-3">
-        <div
-          class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center"
-        >
+        <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
           <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
         </div>
-        <div>
-          <h1 class="text-xl font-extrabold tracking-tight">
-            YaSe <span class="text-amber-500">PRO</span>
-          </h1>
-        </div>
+        <h1 class="text-xl font-extrabold tracking-tight text-white">YaSe <span class="text-amber-500">PRO</span></h1>
       </div>
-      <nav class="space-y-2 flex-1">
-        <a
-          href="#"
-          class="w-full flex items-center gap-3 p-3 bg-slate-800 text-white rounded-xl font-bold text-sm"
-        >
+      <nav class="space-y-3 flex-1">
+        <a href="Dashboard.html" class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-xs rounded-xl hover:bg-slate-800/50">
+          <i class="fa-solid fa-house"></i> Dashboard
+        </a>
+        <a href="#" class="flex items-center gap-3 p-3 bg-slate-800 text-white rounded-xl font-bold text-xs border border-slate-700/50 shadow-lg">
           <i class="fa-solid fa-list-check"></i> Gestão de OS
         </a>
-        <a
-          href="#"
-          class="w-full flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-colors font-bold text-sm"
-        >
-          <i class="fa-solid fa-chart-line"></i> Dashboard
-        </a>
       </nav>
-      <div
-        class="mt-6 p-3 bg-slate-800/60 rounded-xl border border-slate-700 text-[10px] font-bold text-slate-300 uppercase tracking-widest"
-      >
-        <div>Operador:</div>
-        <div id="userName" class="text-amber-500 text-xs mt-1">
-          Carregando...
-        </div>
+      <div class="mt-auto p-4 bg-slate-900 rounded-2xl border border-slate-800">
+        <div class="text-[9px] font-black text-slate-500 uppercase mb-1">Operador</div>
+        <div id="userName" class="text-amber-500 text-xs font-black truncate">Carregando...</div>
       </div>
     </aside>
 
     <main>
-      <header class="flex justify-between items-center mb-8">
+      <header class="flex justify-between items-center mb-12">
         <div>
-          <h2 class="text-2xl font-black text-slate-800 tracking-tight">
-            Painel de Ordens de Serviço
-          </h2>
-          <p class="text-slate-500 text-sm font-medium">
-            Controle de manutenção e inspeção técnica
-          </p>
+          <h2 class="text-3xl font-black text-white tracking-tighter">Painel de <span class="text-amber-500">Serviços</span></h2>
+          <p class="text-slate-500 text-sm">Controle de manutenção e rastreabilidade técnica</p>
         </div>
-        <button
-          onclick="novaOS()"
-          class="btn-primary px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-indigo-500/20"
-        >
-          <i class="fa-solid fa-plus"></i> NOVA ORDEM DE SERVIÇO
+        <button onclick="novaOS()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-500/10">
+          Nova OS
         </button>
       </header>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="card flex items-center gap-4">
-          <div
-            class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500"
-          >
-            <i class="fa-solid fa-clock-rotate-left text-xl"></i>
-          </div>
-          <div>
-            <div
-              class="text-[10px] font-black text-slate-400 uppercase tracking-widest"
-            >
-              Em Aberto
-            </div>
-            <div id="countAbertas" class="text-2xl font-black text-slate-800">
-              0
-            </div>
-          </div>
+      <div class="grid grid-cols-3 gap-6 mb-12" id="statsGrid">
+        <div class="glass-card p-6 border-l-4 border-l-indigo-500">
+            <div class="text-[10px] font-black text-slate-500 uppercase">Em Aberto</div>
+            <div id="countAbertas" class="text-3xl font-black text-white">0</div>
         </div>
-        <div class="card flex items-center gap-4">
-          <div
-            class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500"
-          >
-            <i class="fa-solid fa-circle-check text-xl"></i>
-          </div>
-          <div>
-            <div
-              class="text-[10px] font-black text-slate-400 uppercase tracking-widest"
-            >
-              Concluídas
-            </div>
-            <div
-              id="countConcluidas"
-              class="text-2xl font-black text-slate-800"
-            >
-              0
-            </div>
-          </div>
+        <div class="glass-card p-6 border-l-4 border-l-emerald-500">
+            <div class="text-[10px] font-black text-slate-500 uppercase">Concluídas</div>
+            <div id="countConcluidas" class="text-3xl font-black text-white">0</div>
         </div>
-        <div class="card flex items-center gap-4">
-          <div
-            class="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-amber-500"
-          >
-            <i class="fa-solid fa-file-invoice text-xl"></i>
-          </div>
-          <div>
-            <div
-              class="text-[10px] font-black text-slate-400 uppercase tracking-widest"
-            >
-              Total do Mês
-            </div>
-            <div id="countTotal" class="text-2xl font-black text-slate-800">
-              0
-            </div>
-          </div>
+        <div class="glass-card p-6 border-l-4 border-l-amber-500">
+            <div class="text-[10px] font-black text-slate-500 uppercase">Total</div>
+            <div id="countTotal" class="text-3xl font-black text-white">0</div>
         </div>
       </div>
 
-      <div class="card !p-0 overflow-hidden">
-        <table class="w-full text-left text-xs">
-          <thead
-            class="bg-slate-50 border-b font-black text-slate-400 uppercase"
-          >
-            <tr>
-              <th class="p-4">Número OS</th>
-              <th class="p-4">Cliente</th>
-              <th class="p-4">Data Abertura</th>
-              <th class="p-4">Status</th>
-              <th class="p-4 text-center">Ações</th>
+      <div class="glass-card overflow-hidden">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="table-header">
+              <th class="p-5">OS</th>
+              <th class="p-5">Cliente</th>
+              <th class="p-5">Data</th>
+              <th class="p-5">Status</th>
+              <th class="p-5 text-center">Ações</th>
             </tr>
           </thead>
-          <tbody id="osTableBody" class="font-semibold text-slate-600">
-            <!-- Linhas inseridas via JS -->
-          </tbody>
+          <tbody id="osTableBody" class="text-xs font-bold text-slate-300"></tbody>
         </table>
       </div>
     </main>
    
     <script>
       const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co";
-      const SUPABASE_KEY =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
-      const _supabase = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY,
-      );
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+      const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      const usuario =
-        JSON.parse(localStorage.getItem("yase_user")) ||
-        JSON.parse(localStorage.getItem("yase_colab"));
-
-      if (!usuario) {
-        alert("Sessão expirada. Faça login novamente.");
-        window.location.href = "EntrarSistema.html";
-      }
-
-      const EMPRESA_ID = usuario.empresa_id;
+      const usuario = JSON.parse(localStorage.getItem("yase_user")) || JSON.parse(localStorage.getItem("yase_colab"));
 
       window.onload = () => {
-        const user = sessionStorage.getItem("usuarioNome") || "Técnico";
-        document.getElementById("userName").innerText = user;
+        if (!usuario) { window.location.href = "EntrarSistema.html"; return; }
+        document.getElementById("userName").innerText = usuario.nome_completo || "Técnico";
         loadOS();
       };
 
       async function loadOS() {
-        const { data, error } = await _supabase
-          .from("ordens_servico")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (error) return console.error(error);
+        const { data, error } = await _supabase.from("ordens_servico").select("*").order("created_at", { ascending: false });
+        if (error) return;
 
         const body = document.getElementById("osTableBody");
-        body.innerHTML = data
-          .map(
-            (os) => `
-          <tr class="border-b hover:bg-slate-50 transition-colors">
-            <td class="p-4 font-bold text-slate-800">#${os.os_number}</td>
-            <td class="p-4">${os.cliente || "Consumidor Final"}</td>
-            <td class="p-4">${new Date(os.created_at).toLocaleDateString("pt-BR")}</td>
-            <td class="p-4">
-              <span class="status-badge ${os.status === "CONCLUÍDA" ? "status-concluida" : "status-aberta"}">
-                ${os.status}
-              </span>
-            </td>
-            <td class="p-4 text-center">
-              <button onclick="abrirRastreio('${os.os_number}')" class="bg-slate-100 hover:bg-indigo-100 text-indigo-600 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 mx-auto">
-                <i class="fa-solid fa-magnifying-glass-chart"></i> RASTREAR ITENS
+        body.innerHTML = data.map(os => `
+          <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+            <td class="p-5 text-white">#${os.os_number}</td>
+            <td class="p-5">${os.cliente || "Geral"}</td>
+            <td class="p-5 text-slate-500">${new Date(os.created_at).toLocaleDateString("pt-BR")}</td>
+            <td class="p-5"><span class="status-badge ${os.status === "CONCLUÍDA" ? "status-concluida" : "status-aberta"}">${os.status}</span></td>
+            <td class="p-5 text-center">
+              <button onclick="abrirRastreio('${os.os_number}')" class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl text-amber-500 hover:border-amber-500 transition-all">
+                RASTREAR
               </button>
             </td>
           </tr>
-        `,
-          )
-          .join("");
+        `).join("");
 
-        // Atualizar Contadores
-        document.getElementById("countAbertas").innerText = data.filter(
-          (o) => o.status !== "CONCLUÍDA",
-        ).length;
-        document.getElementById("countConcluidas").innerText = data.filter(
-          (o) => o.status === "CONCLUÍDA",
-        ).length;
+        document.getElementById("countAbertas").innerText = data.filter(o => o.status !== "CONCLUÍDA").length;
+        document.getElementById("countConcluidas").innerText = data.filter(o => o.status === "CONCLUÍDA").length;
         document.getElementById("countTotal").innerText = data.length;
       }
 
@@ -277,15 +127,10 @@
       }
 
       async function novaOS() {
-        const num = prompt("Digite o número da nova OS:");
+        const num = prompt("Número da OS:");
         if (!num) return;
-
-        const { error } = await _supabase
-          .from("ordens_servico")
-          .insert([{ os_number: num, status: "ABERTA" }]);
-
-        if (error) alert("Erro ao criar OS: " + error.message);
-        else loadOS();
+        const { error } = await _supabase.from("ordens_servico").insert([{ os_number: num, status: "ABERTA", empresa_id: usuario.empresa_id }]);
+        if (!error) loadOS();
       }
     </script>
   </body>

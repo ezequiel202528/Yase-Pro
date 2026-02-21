@@ -17,44 +17,39 @@ function setLevel(lvl) {
         }
     });
 
-    // 2. Automação de Checklist de Inspeção e Ensaio
-    const checkboxes = document.querySelectorAll('.custom-checkbox');
-    // Mapeamento conforme a ordem do seu HTML
-    const ensPneumManometro   = checkboxes[0];
-    const ensPneumValvula     = checkboxes[1];
-    const regValvulaAlivio    = checkboxes[2];
-    const ensCondEletrica     = checkboxes[3];
-    const ensHidrostValvula   = checkboxes[4];
-    const ensHidrostMangueira = checkboxes[5];
+    // 2. Seleção dos campos de Ensaio Hidrostático
+    const camposHidro = ["et_ensaio", "ep_ensaio", "ee_calculado", "ep_porcent_final"];
+    const grupoHidro = document.querySelector('.ensaios-group-red');
 
-    // Lógica Dinâmica baseada no Nível selecionado
-    if (lvl === 2) {
-        // Nível 2: Apenas inspeção pneumática
-        if(ensPneumManometro)   ensPneumManometro.checked = true;
-        if(ensPneumValvula)     ensPneumValvula.checked = true;
-        
-        // Desmarca ensaios hidrostáticos obrigatoriamente
-        if(ensHidrostValvula)   ensHidrostValvula.checked = false;
-        if(ensHidrostMangueira) ensHidrostMangueira.checked = false;
-        
-        // Esmaecer visualmente o grupo de ensaios hidrostáticos
-        const grupoHidro = document.querySelector('.ensaios-group-red');
-        if(grupoHidro) grupoHidro.style.opacity = "0.5";
-    } 
-    else if (lvl === 3) {
-        // Nível 3: Habilita Pneumáticos + Hidrostáticos
-        if(ensPneumManometro)   ensPneumManometro.checked = true;
-        if(ensPneumValvula)     ensPneumValvula.checked = true;
-        if(ensHidrostValvula)   ensHidrostValvula.checked = true;
-        if(ensHidrostMangueira) ensHidrostMangueira.checked = true;
-        
-        // Automação: Marca "Pintura" em acessórios (conforme imagem de Nível 3)
-        const checkPintura = document.querySelector('input[type="checkbox"][id*="Pintura"]');
-        if(checkPintura) checkPintura.checked = true;
+   // Dentro da função setLevel(lvl) no ui-updates.js
 
-        const grupoHidro = document.querySelector('.ensaios-group-red');
-        if(grupoHidro) grupoHidro.style.opacity = "1";
-    }
+if (lvl === 2) {
+    // 1. Esmaece o grupo para o iniciante entender que não é necessário
+    const grupoHidro = document.querySelector('.ensaios-group-red');
+    if(grupoHidro) grupoHidro.style.opacity = "0.4"; // Um pouco mais transparente
+
+    // 2. Bloqueia os campos de Teste Hidrostático
+    const camposHidro = ["et_ensaio", "ep_ensaio", "ee_calculado", "ep_porcent_final"];
+    camposHidro.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            el.readOnly = true; // Impede a digitação
+            el.value = "";      // Limpa para não confundir com dados antigos
+        }
+    });
+} 
+else if (lvl === 3) {
+    // 1. Volta a cor normal (100% nítido)
+    const grupoHidro = document.querySelector('.ensaios-group-red');
+    if(grupoHidro) grupoHidro.style.opacity = "1";
+
+    // 2. Desbloqueia para preenchimento
+    const camposHidro = ["et_ensaio", "ep_ensaio", "ee_calculado", "ep_porcent_final"];
+    camposHidro.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.readOnly = false;
+    });
+}
 }
 
 function setStatus(valor, elemento) {

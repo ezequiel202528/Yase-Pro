@@ -16,70 +16,67 @@
   <body>
 
     <div class="app-container">
-      <aside class="p-5">
-        <div class="mb-8 flex items-center gap-3">
-          <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
-            <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
-          </div>
-          <h1 class="text-xl font-extrabold tracking-tight">YaSe <span class="text-amber-500">PRO</span></h1>
+<aside class="p-5 flex flex-col h-full"> <div class="mb-8 flex items-center gap-3">
+    <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
+      <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
+    </div>
+    <h1 class="text-xl font-extrabold tracking-tight">YaSe <span class="text-amber-500">PRO</span></h1>
+  </div>
+
+  <nav class="space-y-4 flex-1 flex flex-col"> <a href="GestaoOS.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 text-slate-300 hover:text-white transition-all font-bold text-xs border border-slate-700/50">
+      <i class="fa-solid fa-arrow-left"></i> Voltar para Gestão
+    </a>
+
+    <div class="space-y-2 pt-2">
+      <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest px-1">Monitorização</div>
+      <div class="grid grid-cols-2 gap-2">
+        <div id="osBadge" class="bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 p-2 rounded-xl text-center">
+          <div class="text-[8px] uppercase font-bold opacity-70">OS Atual</div>
+          <div id="osBadgeNumber" class="text-[11px] font-black tracking-wider">---</div>
         </div>
-
-        <nav class="space-y-4 flex-1">
-          <a href="GestaoOS.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 text-slate-300 hover:text-white transition-all font-bold text-xs border border-slate-700/50">
-            <i class="fa-solid fa-arrow-left"></i> Voltar para Gestão
-          </a>
-         
-
-          <div class="space-y-2 pt-2">
-             <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest px-1">Monitorização</div>
-             
-             <div class="grid grid-cols-2 gap-2">
-                <div id="osBadge" class="bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 p-2 rounded-xl text-center">
-                    <div class="text-[8px] uppercase font-bold opacity-70">OS Atual</div>
-                    <div id="osBadgeNumber" class="text-[11px] font-black tracking-wider">---</div>
-                </div>
-                <div class="bg-slate-800/60 border border-slate-700 p-2 rounded-xl text-center">
-                    <div class="text-[8px] uppercase font-bold opacity-70">Itens</div>
-                    <div class="text-[11px] font-black text-amber-500"><span id="itemCounter">0</span></div>
-                </div>
-             </div>
-
-             <div id="status-selo-container" class="bg-slate-900 border border-slate-700 p-3 rounded-xl shadow-inner">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-stamp text-amber-500 text-[10px]"></i>
-                        <span id="lote_documento" class="text-[10px] font-black text-white uppercase tracking-tighter">LOTE</span>
-                    </div>
-                    <span id="proximo_selo_num" class="bg-amber-500 text-slate-900 px-2 py-0.5 rounded text-[10px] font-black">---</span>
-                </div>
-                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-1">
-                    <div id="barra_progresso_selo" class="bg-amber-500 h-full w-[0%] transition-all duration-700"></div>
-                </div>
-                <div class="flex justify-between text-[8px] font-bold text-slate-500 uppercase">
-                    <span>Disponibilidade</span>
-                    <span id="qtd_restante_texto" class="text-slate-300">---</span>
-                </div>
-             </div>
-          </div>
-
-          <button onclick="gerarRelatorioSaida()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white p-3 rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-900/20">
-            <i class="fa-solid fa-print"></i> Relatório Técnico
-          </button>
-
-          <div class="h-px bg-slate-800 w-full my-2"></div>
-
-          <div class="p-3 bg-slate-800/40 rounded-xl border border-slate-700/50">
-            <div class="text-[9px] font-black text-slate-500 uppercase mb-1">Operador</div>
-            <div id="userName" class="text-amber-500 text-xs font-black truncate">Carregando...</div>
-            <div id="userRole" class="text-slate-400 text-[9px] font-medium">Técnico Nível 2</div>
-          </div>
-        </nav>
-
-        <div class="mt-auto pt-4 text-center">
-            <div id="displayOS" class="hidden">---</div>
-            <p class="text-[8px] text-slate-600 font-bold uppercase tracking-widest">YaSe PRO v2.0</p>
+        <div class="bg-slate-800/60 border border-slate-700 p-2 rounded-xl text-center">
+          <div class="text-[8px] uppercase font-bold opacity-70">Itens</div>
+          <div class="text-[11px] font-black text-amber-500"><span id="itemCounter">0</span></div>
         </div>
-      </aside>
+      </div>
+
+      <div id="status-selo-container" class="bg-slate-900 border border-slate-700 p-3 rounded-xl shadow-inner">
+        <div class="flex justify-between items-center mb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-stamp text-amber-500 text-[10px]"></i>
+            <span id="lote_documento" class="text-[10px] font-black text-white uppercase tracking-tighter">LOTE</span>
+          </div>
+          <span id="proximo_selo_num" class="bg-amber-500 text-slate-900 px-2 py-0.5 rounded text-[10px] font-black">---</span>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-1">
+          <div id="barra_progresso_selo" class="bg-amber-500 h-full w-[0%] transition-all duration-700"></div>
+        </div>
+        <div class="flex justify-between text-[8px] font-bold text-slate-500 uppercase">
+          <span>Disponibilidade</span>
+          <span id="qtd_restante_texto" class="text-slate-300">---</span>
+        </div>
+      </div>
+    </div>
+
+    <button onclick="gerarRelatorioSaida()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white p-3 rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-900/20">
+      <i class="fa-solid fa-print"></i> Relatório Técnico
+    </button>
+
+    <div class="flex-1"></div>
+
+    <div class="p-3 bg-slate-800/40 rounded-xl border border-slate-700/50 mb-2">
+      <div class="text-[9px] font-black text-slate-500 uppercase mb-1">Operador</div>
+      <div id="userName" class="text-amber-500 text-xs font-black truncate">Carregando...</div>
+      <div id="userRole" class="text-slate-400 text-[9px] font-medium">Técnico Nível 2</div>
+    </div>
+
+  </nav>
+
+  <div class="text-center pt-2">
+    <div id="displayOS" class="hidden">---</div>
+    <p class="text-[8px] text-slate-600 font-bold uppercase tracking-widest">YaSe PRO v2.0</p>
+  </div>
+</aside>
 
       <main class="relative flex-1 flex flex-col overflow-hidden">
 <div class="relative z-[50]">

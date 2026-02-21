@@ -174,9 +174,6 @@
         <input type="text" id="lote_nitrogenio" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Lote Nitro.">
         <input type="text" id="ampola_vinculada" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Ampola Vinc.">
         <input type="date" id="data_selagem" class="w-full h-8 px-2 text-[10px] border rounded-lg" onchange="calcularDatasAutomaticas()">
-        <label class="flex items-center gap-2 text-[10px] font-bold text-slate-400">
-          <input type="checkbox" id="realizado_troca" class="w-3 h-3 accent-indigo-600"> Troca de Peças
-        </label>
       </div>
     </div>
     <div class="card p-3 rounded-xl border border-slate-700 shadow-sm">
@@ -207,7 +204,7 @@
         <div class="flex-1 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-red-900/20 text-red-500 border-red-500/30" onclick="setStatus('REPROVADO', this)">REP</div>        <input type="hidden" id="resultado_valor" value="APROVADO">
       </div>
 <button onclick="openAcessoriosModal()" class="w-full bg-slate-800 border-2 border-dashed border-slate-700 text-amber-500/70 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-slate-700 transition-colors mb-3">
-    Componentes e Ensaios
+    Componentes
 </button>
 
 <div class="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3">
@@ -264,10 +261,10 @@
     <div class="ensaios-group-yellow">
         <div class="text-[8px] font-black text-amber-500/80 uppercase mb-1 tracking-wider" id="titulo_pesagem">Pesagem ABC</div>
         <div class="grid grid-cols-2 gap-1">
-            <input type="number" id="p_vazio_valvula" placeholder="P.Vazio">
-            <input type="number" id="p_cheio_valvula" placeholder="P.Cheio">
+            <input type="number" id="p_vazio_valvula" placeholder="P.Vazio com Válvula">
+            <input type="number" id="p_cheio_valvula" placeholder="P.Cheio com Válvula">
             <input type="number" id="p_atual" placeholder="P.Atual">
-            <input type="text" id="porcent_dif" placeholder="%" readonly class="font-bold text-amber-500">
+            <input type="text" id="porcent_dif" placeholder="% Diferença" readonly class="font-bold text-amber-500">
         </div>
     </div>
 
@@ -275,8 +272,8 @@
         <div class="text-[8px] font-black text-emerald-500/80 uppercase mb-1 tracking-wider">Perda de Massa</div>
         <div class="grid grid-cols-2 gap-1">
             <input type="number" id="tara_cilindro" placeholder="Tara">
-            <input type="number" id="p_cil_vazio_kg" placeholder="P.Vazio Kg">
-            <input type="text" id="perda_massa_porcent" placeholder="% Perda" readonly class="col-span-2 font-bold text-emerald-500">
+            <input type="number" id="p_cil_vazio_kg" placeholder="P. Cilindro Vazio - Kg">
+            <input type="text" id="perda_massa_porcent" placeholder="% Perda de Massa" readonly class="col-span-2 font-bold text-emerald-500">
         </div>
     </div>
 
@@ -289,6 +286,16 @@
             <input type="text" id="ee_resultado" placeholder="EE" readonly class="font-bold text-blue-400">
         </div>
     </div>
+    <div class="ensaios-group-red">
+        <div class="text-[8px] font-black text-red-500/80 uppercase mb-1 tracking-wider">Teste Hidrostático</div>
+        <div class="grid grid-cols-2 gap-1">
+            <input type="number" id="et_ensaio" placeholder="DVM = ET">
+            <input type="number" id="ep_ensaio" placeholder="DVP = EP">
+            <input type="number" id="ee_calculado" placeholder="DVM - DVP = EE">
+            <input type="text" id="ep_porcent_final" placeholder="DVP/DVM EP(%)" readonly class="font-bold text-red-500">
+        </div>
+    </div>
+    
 </div>
 </div>
 

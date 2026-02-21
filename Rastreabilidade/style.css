@@ -82,7 +82,8 @@ input:focus, select:focus {
 /* 4. GRUPOS DE ENSAIOS TÉCNICOS (CORES DA IMAGEM) */
 .ensaios-group-yellow, 
 .ensaios-group-green, 
-.ensaios-group-blue {
+.ensaios-group-blue,
+.ensaios-group-red {
     border-radius: 6px;
     padding: 6px;
     margin-bottom: 5px;
@@ -95,6 +96,10 @@ input:focus, select:focus {
 .ensaios-group-green { border: 1px solid rgba(16, 185, 129, 0.4); }
 /* Azul/Volume e EE */
 .ensaios-group-blue { border: 1px solid rgba(59, 130, 246, 0.4); }
+/* Vermelho/Teste Hidrostático */
+.ensaios-group-red { border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    
 
 /* Títulos internos dos grupos */
 .ensaios-group-yellow div:first-child,

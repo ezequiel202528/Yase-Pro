@@ -1,14 +1,13 @@
 /* ============================================================
-   YaSe PRO - Estilização Premium Ultra-Compacta (Notebooks)
-   Divisão 50/50 e Grupos de Ensaios Coloridos
+   YaSe PRO - Estilização Premium 50/50 Real
    ============================================================ */
 
-/* 1. ESTRUTURA GLOBAL E RESET */
+/* 1. ESTRUTURA GLOBAL */
 html, body {
     height: 100vh;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Mantém o layout fixo sem scroll na página toda */
+    overflow: hidden; 
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-color: #0f172a;
     color: #f8fafc;
@@ -37,34 +36,39 @@ main {
     height: 100vh;
     background-color: #0f172a;
     padding: 8px 12px;
-    overflow: hidden; /* Garante que o scroll aconteça apenas nos containers internos */
+    overflow: hidden; 
 }
 
-/* 2. ÁREA SUPERIOR: CARDS (Layout Notebook) */
-.cards-wrapper {
-    flex: 0 0 auto;
-    max-height: 48vh; /* Limita os cards a quase metade da altura total */
-    overflow-y: auto; /* Scroll interno caso os cards sejam muito altos */
-    margin-bottom: 8px;
-    padding-right: 4px;
+/* 2. ÁREA SUPERIOR: CARDS (Exatos 50% da tela) */
+/* Seletor específico para o grid de cards do seu HTML */
+main > div.grid.grid-cols-1 {
+    display: grid !important;
+    flex: 0 0 50% !important; /* Fixa em 50% da altura */
+    height: 50% !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+    overflow: hidden !important; /* Impede o scroll nos campos */
 }
 
+/* Deixando os cards ultra-compactos para caberem nos 50% */
 .card {
     background-color: #0f172a !important;
     border: 1px solid #334155;
     border-radius: 8px;
-    padding: 8px !important;
-    transition: all 0.2s ease;
+    padding: 6px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
-/* 3. FORMULÁRIOS E INPUTS COMPACTOS */
+/* 3. INPUTS E FORMULÁRIOS (Otimizados para espaço) */
 input[type="text"], 
 input[type="number"], 
 input[type="date"], 
 select, 
 textarea {
     width: 100%;
-    height: 24px !important;
+    height: 22px !important; /* Altura reduzida para não estourar os 50% */
     padding: 0 6px !important;
     font-size: 10px !important;
     border-radius: 4px;
@@ -74,51 +78,25 @@ textarea {
     margin-bottom: 2px !important;
 }
 
-input:focus, select:focus {
-    border-color: #4f46e5 !important;
-    outline: none;
-}
-
-/* 4. GRUPOS DE ENSAIOS TÉCNICOS (CORES DA IMAGEM) */
-.ensaios-group-yellow, 
-.ensaios-group-green, 
-.ensaios-group-blue,
-.ensaios-group-red {
+/* 4. GRUPOS DE ENSAIOS (Visual original mantido) */
+.ensaios-group-yellow, .ensaios-group-green, .ensaios-group-blue, .ensaios-group-red {
     border-radius: 6px;
-    padding: 6px;
-    margin-bottom: 5px;
+    padding: 4px 6px;
+    margin-bottom: 4px;
     background: rgba(15, 23, 42, 0.4);
 }
 
-/* Amarelo/Pesagem */
 .ensaios-group-yellow { border: 1px solid rgb(245, 159, 11); }
-/* Verde/Perda de Massa */
 .ensaios-group-green { border: 1px solid rgb(3, 255, 171); }
-/* Azul/Volume e EE */
 .ensaios-group-blue { border: 1px solid rgb(4, 95, 243); }
-/* Vermelho/Teste Hidrostático */
 .ensaios-group-red { border: 1px solid rgba(235, 7, 7, 0.993); }
 
-    
-
-/* Títulos internos dos grupos */
-.ensaios-group-yellow div:first-child,
-.ensaios-group-green div:first-child,
-.ensaios-group-blue div:first-child {
-    font-size: 8px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
-}
-
-/* 5. ÁREA DA TABELA (OCUPANDO O RESTANTE) */
-.table-section {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    margin-top: 4px;
+/* 5. ÁREA DA TABELA (50% Inferior com Estilização Recuperada) */
+.flex-1.flex.flex-col.min-h-0.overflow-hidden {
+    flex: 0 0 50% !important;
+    height: 50% !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 .table-wrapper {
@@ -139,11 +117,7 @@ input:focus, select:focus {
     scrollbar-color: #374151 transparent;
 }
 
-/* Custom Scrollbar Chrome/Edge */
-.scrollable-body::-webkit-scrollbar { width: 5px; }
-.scrollable-body::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }
-
-/* ESTILIZAÇÃO DA TABELA */
+/* ESTILIZAÇÃO DA TABELA (Cores e Alinhamento) */
 table {
     width: 100%;
     border-collapse: separate;
@@ -158,7 +132,7 @@ thead {
 }
 
 th {
-    padding: 6px 4px !important;
+    padding: 8px 4px !important;
     font-size: 9px !important;
     font-weight: 800;
     color: #94a3b8;
@@ -168,7 +142,7 @@ th {
 }
 
 td {
-    padding: 4px 6px !important;
+    padding: 6px 6px !important;
     font-size: 10px !important;
     color: #ffffff !important;
     border-bottom: 1px solid #1f2937;
@@ -177,12 +151,8 @@ td {
 
 /* Efeito Hover na Tabela */
 tbody tr:hover {
-    background-color: #696b6b !important;
+    background-color: #334155 !important;
     cursor: pointer;
-}
-
-tbody tr:hover td {
-    color: #d0d1d3 !important;
 }
 
 /* 6. COMPONENTES EXTRA */
@@ -193,7 +163,6 @@ tbody tr:hover td {
     border-radius: 3px;
     font-size: 8px;
     font-weight: 800;
-    border: 1px solid #dc2626;
 }
 
 .btn-level {
@@ -203,6 +172,7 @@ tbody tr:hover td {
     border: 1px solid #2d3748;
     cursor: pointer;
     border-radius: 4px;
+    color: #94a3b8;
 }
 
 .btn-level.active {
@@ -210,9 +180,6 @@ tbody tr:hover td {
     color: white;
 }
 
-/* 7. MEDIA QUERIES PARA TELAS MUITO PEQUENAS */
-@media (max-height: 750px) {
-    .cards-wrapper { max-height: 42vh; }
-    input[type="text"], input[type="number"] { height: 22px !important; font-size: 9px !important; }
-    th, td { padding: 3px 4px !important; font-size: 9px !important; }
-}
+/* Custom Scrollbar Chrome/Edge */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: #374151; border-radius: 10px; }

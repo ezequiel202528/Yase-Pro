@@ -6,11 +6,7 @@ function calcularDatasAutomaticas() {
   if (dataSelagem) {
     const data = new Date(dataSelagem);
     data.setFullYear(data.getFullYear() + 1);
-
-    // Formata para o padrão brasileiro DD/MM/AAAA
     const dataFormatada = data.toLocaleDateString("pt-BR");
-
-    // Atualiza o display visual no card de VALIDADES
     const displayRecarga = document.getElementById("display_prox_recarga");
     if (displayRecarga) displayRecarga.innerText = dataFormatada;
   }
@@ -22,33 +18,82 @@ function calcularDatasAutomaticas() {
     if (displayReteste) displayReteste.innerText = proxReteste;
   }
 }
+
+/**
+ * Define o nível de manutenção dinamicamente com base no ano do último reteste.
+ * Regras:
+ * - Ano Atual: Nível 3 (Ensaio Hidrostático)
+ * - Até 5 anos atrás: Nível 2 (Manutenção de 2º Grau)
+ * - Acima de 5 anos: Nível 1 (Inspeção)
+ */
 function definirNivelPeloReteste() {
-  const campoReteste = document.getElementById("ult_reteste");
-  const valorInformado = campoReteste.value;
-  const tipoCarga = document.getElementById("tipo_carga").value;
-  const anoAtual = new Date().getFullYear();
+    const campoReteste = document.getElementById("ult_reteste");
+    const valorInformado = campoReteste.value;
+    const anoAtual = new Date().getFullYear(); // 2026
 
-  // 1. Prioridade absoluta: Se for CO2, é inspeção (Nível 1)
-  if (tipoCarga === "CO2") {
-    setLevel(1);
-    return;
-  }
+    // Só processa se o ano tiver 4 dígitos
+    if (valorInformado.length === 4) {
+        const anoReteste = parseInt(valorInformado);
+        const diferencaAnos = anoAtual - anoReteste;
 
-  // 2. Só processa se o usuário informou um ano válido de 4 dígitos
-  if (valorInformado.length === 4) {
-    const anoReteste = parseInt(valorInformado);
-
-    // Se o ano informado for IGUAL ao ano atual -> Nível 3 (Vistoria de 5 anos)
-    if (anoReteste === anoAtual) {
-      setLevel(3);
+        // REGRA SOLICITADA:
+        // 1. Ano atual (2026) -> 3º Nível
+        if (anoReteste === anoAtual) {
+            setLevel(3);
+        } 
+        // 2. Abaixo do atual no prazo de 5 anos (2021 a 2025) -> 2º Nível
+        else if (diferencaAnos > 0 && diferencaAnos <= 5) {
+            setLevel(2);
+        }
+        // 3. Mais de 5 anos ou outros casos -> 1º Nível (Inspeção)
+        else {
+            setLevel(1);
+        }
     }
-    // Se o ano informado for MENOR que o atual e MAIOR que (atual - 5) -> Nível 2
-    else if (anoReteste < anoAtual && anoReteste >= anoAtual - 4) {
-      setLevel(2);
-    }
-    // Para qualquer outra situação (anos muito antigos ou novos) -> Nível 1
-    else {
-      setLevel(1);
-    }
-  }
 }
+
+// Modifique sua função setLevel para garantir a consistência visual
+function setLevel(lvl) {
+    selectedLevel = lvl;
+    
+    // Controle Visual dos Botões
+    document.querySelectorAll('[data-level]').forEach((btn) => {
+        // Remove classes de ativo
+        btn.classList.remove("active", "bg-indigo-600", "text-white");
+        // Adiciona classes de inativo
+        btn.classList.add("bg-slate-800/40", "text-slate-300");
+        
+        if (parseInt(btn.dataset.level) === lvl) {
+            btn.classList.add("active", "bg-indigo-600", "text-white");
+        }
+    });
+
+    // Lógica de bloqueio de campos do Teste Hidrostático (Nível 3)
+    const grupoHidro = document.querySelector('.ensaios-group-red');
+    const camposHidro = ["et_ensaio", "ep_ensaio", "ee_calculado", "ep_porcent_final"];
+
+    if (lvl === 3) {
+        if(grupoHidro) grupoHidro.style.opacity = "1";
+        camposHidro.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.readOnly = false;
+        });
+    } else {
+        // Níveis 1 e 2 desabilitam os campos de teste hidrostático
+        if(grupoHidro) grupoHidro.style.opacity = "0.4";
+        camposHidro.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.readOnly = true;
+                el.value = ""; 
+            }
+        });
+    }
+}
+
+// Inicialização ao carregar a página
+window.addEventListener('DOMContentLoaded', () => {
+    setLevel(2); // Define Nível 2 como padrão ao abrir
+});
+
+

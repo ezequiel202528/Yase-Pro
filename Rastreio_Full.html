@@ -150,9 +150,11 @@
 
             <div class="grid grid-cols-2 gap-2">
                 <input type="number" id="ano_fab" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Ano Fab.">
-                <input type="text" id="ult_reteste" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Últ. Reteste" onblur="definirNivelPeloReteste(); calcularDatasAutomaticas()">
-            </div>
-
+              <input type="text" id="ult_reteste" 
+       class="w-full h-8 px-2 text-[10px] border rounded-lg" 
+       placeholder="Últ. Reteste" 
+       oninput="definirNivelPeloReteste(); calcularDatasAutomaticas()">
+       </div>
             <div class="grid grid-cols-2 gap-2">
                 <div class="flex gap-1">
                     <select id="tipo_carga" class="flex-1 h-8 text-[10px] border rounded-lg px-1" onchange="definirNivelPeloReteste()">

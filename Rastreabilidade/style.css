@@ -1,5 +1,5 @@
 /* ============================================================
-   YaSe PRO - Layout Adaptativo e Responsivo (Full Screen)
+   YaSe PRO - Layout Adaptativo Premium (Cards + Tabela)
    ============================================================ */
 
 /* 1. ESTRUTURA GLOBAL */
@@ -7,7 +7,7 @@ html, body {
     height: 100vh;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Impede o scroll na página inteira */
+    overflow: hidden; 
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-color: #0f172a;
     color: #f8fafc;
@@ -39,12 +39,15 @@ main {
     overflow: hidden; 
 }
 
-/* 2. ÁREA SUPERIOR: CARDS (Flexível) */
+/* 2. ÁREA SUPERIOR: CARDS (Com Rolagem Interna se necessário) */
 main > div.grid {
     display: grid !important;
-    flex: 0 0 auto !important; /* Ocupa apenas o espaço do conteúdo */
+    flex: 0 0 auto !important; /* Não cresce, mantém o tamanho do conteúdo */
+    max-height: 45vh !important; /* Limite máximo de 45% da altura da tela para os cards */
+    overflow-y: auto !important; /* Se os cards forem maiores que 45vh, cria scroll aqui */
     gap: 8px !important;
-    margin-bottom: 8px !important;
+    margin-bottom: 12px !important;
+    padding-right: 4px; /* Espaço para a scrollbar não cobrir o conteúdo */
 }
 
 .card {
@@ -56,7 +59,7 @@ main > div.grid {
     flex-direction: column;
 }
 
-/* 3. INPUTS E FORMULÁRIOS (Otimizados) */
+/* 3. INPUTS E FORMULÁRIOS (Compactação Inteligente) */
 input[type="text"], 
 input[type="number"], 
 input[type="date"], 
@@ -73,11 +76,6 @@ textarea {
     margin-bottom: 2px !important;
 }
 
-input:focus, select:focus {
-    border-color: #6366f1 !important;
-    outline: none;
-}
-
 /* 4. GRUPOS DE ENSAIOS */
 .ensaios-group-yellow, .ensaios-group-green, .ensaios-group-blue, .ensaios-group-red {
     border-radius: 6px;
@@ -91,13 +89,12 @@ input:focus, select:focus {
 .ensaios-group-blue { border: 1px solid #3b82f6; }
 .ensaios-group-red { border: 1px solid #ef4444; }
 
-/* 5. ÁREA DA TABELA (Dinâmica) */
-/* Este container agora ocupa 100% do espaço que sobrar abaixo dos cards */
+/* 5. ÁREA DA TABELA (Ocupa o espaço restante) */
 .flex-1.flex.flex-col.min-h-0.overflow-hidden {
-    flex: 1 1 0% !important; 
+    flex: 1 !important; /* Força a tabela a ocupar todo o resto da tela */
     display: flex !important;
     flex-direction: column !important;
-    height: auto !important; 
+    min-height: 0; /* Essencial para o scroll interno funcionar */
 }
 
 .table-wrapper {
@@ -115,7 +112,6 @@ input:focus, select:focus {
     flex: 1;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #374151 transparent;
 }
 
 /* ESTILIZAÇÃO DA TABELA */
@@ -150,44 +146,23 @@ td {
     text-align: center;
 }
 
-tbody tr:hover {
-    background-color: #1e293b !important;
-}
-
-/* 6. COMPONENTES EXTRA E BADGES */
-.btn-level {
-    padding: 4px;
-    font-size: 9px;
-    background: #0b0f1a;
-    border: 1px solid #2d3748;
-    cursor: pointer;
-    border-radius: 4px;
-    color: #94a3b8;
-    transition: all 0.2s;
-}
-
-.btn-level.active {
-    background: #4f46e5;
-    color: white;
-    border-color: #6366f1;
-}
-
-/* Scrollbar Personalizada */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-/* 7. AJUSTES PARA TELAS PEQUENAS (Notebooks/Laptops) */
-@media (max-height: 768px) {
+/* 6. RESPONSIVIDADE (Ajuste fino para Notebooks) */
+@media (max-height: 800px) {
     main > div.grid {
-        grid-template-columns: repeat(4, 1fr) !important; /* Força 4 colunas */
+        max-height: 40vh !important; /* Em telas menores, diminui o espaço dos cards para sobrar mais tabela */
     }
     
-    .card h3 { font-size: 8px !important; margin-bottom: 4px !important; }
-    input, select { height: 22px !important; font-size: 10px !important; }
-    
-    .ensaios-group-yellow, .ensaios-group-green, .ensaios-group-blue, .ensaios-group-red {
-        padding: 2px 4px;
+    input, select { 
+        height: 22px !important; 
+        font-size: 10px !important; 
+    }
+
+    .card h3 { 
+        font-size: 9px !important; 
+        margin-bottom: 4px !important; 
     }
 }
+
+/* Scrollbars Personalizadas */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }

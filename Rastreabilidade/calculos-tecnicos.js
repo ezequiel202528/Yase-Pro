@@ -31,21 +31,40 @@ function definirNivelPeloReteste() {
     const valorInformado = campoReteste.value;
     const anoAtual = new Date().getFullYear(); // 2026
 
-    // Só processa se o ano tiver 4 dígitos
+    // Referência dos Checkboxes (Baseado nos textos do seu HTML)
+    // Dica: Se puder, adicione IDs neles no HTML para ser mais preciso
+    const checkboxes = document.querySelectorAll('.custom-checkbox');
+    const getCheck = (texto) => Array.from(checkboxes).find(c => c.nextElementSibling?.textContent.includes(texto));
+
+    const chkPneumMano = getCheck("Ens. Pneum. Manômetro");
+    const chkPneumValv = getCheck("Ens. Pneum. Válvula");
+    const chkHidroValv = getCheck("Ens. Hidrost. Válvula");
+    const chkHidroMang = getCheck("Ens. Hidrost. Mangueira");
+
     if (valorInformado.length === 4) {
         const anoReteste = parseInt(valorInformado);
         const diferencaAnos = anoAtual - anoReteste;
 
-        // REGRA SOLICITADA:
-        // 1. Ano atual (2026) -> 3º Nível
-        if (anoReteste === anoAtual) {
+        // RESET de todos antes de aplicar a regra
+        [chkPneumMano, chkPneumValv, chkHidroValv, chkHidroMang].forEach(c => { if(c) c.checked = false; });
+
+        // 1. Nível 3: Ano atual (2026) ou mais de 5 anos de atraso
+        if (anoReteste === anoAtual || diferencaAnos >= 5) {
             setLevel(3);
+            // Marca Pneumáticos + Hidrostáticos (Igual à Imagem 2)
+            if(chkPneumMano) chkPneumMano.checked = true;
+            if(chkPneumValv) chkPneumValv.checked = true;
+            if(chkHidroValv) chkHidroValv.checked = true;
+            if(chkHidroMang) chkHidroMang.checked = true;
         } 
-        // 2. Abaixo do atual no prazo de 5 anos (2021 a 2025) -> 2º Nível
-        else if (diferencaAnos > 0 && diferencaAnos <= 5) {
+        // 2. Nível 2: Abaixo do atual no prazo de 5 anos (Ex: 2022 a 2025)
+        else if (diferencaAnos > 0 && diferencaAnos < 5) {
             setLevel(2);
+            // Marca apenas Pneumáticos (Igual à Imagem 1)
+            if(chkPneumMano) chkPneumMano.checked = true;
+            if(chkPneumValv) chkPneumValv.checked = true;
         }
-        // 3. Mais de 5 anos ou outros casos -> 1º Nível (Inspeção)
+        // 3. Outros casos -> 1º Nível
         else {
             setLevel(1);
         }

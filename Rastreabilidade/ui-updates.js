@@ -104,3 +104,5 @@ function limparFormulario() {
     const campoFoco = document.getElementById("cod_barras");
     if (campoFoco) campoFoco.focus();
 }
+
+

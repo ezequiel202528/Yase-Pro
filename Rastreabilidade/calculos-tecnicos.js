@@ -1,3 +1,21 @@
+// Variável global para memorizar o status selecionado nos botões
+let statusSelecionadoManual = "APROVADO"; 
+
+function selecionarStatusManual(status) {
+    statusSelecionadoManual = status.toUpperCase();
+    console.log("Status definido para o próximo registro:", statusSelecionadoManual);
+    
+    // Feedback visual opcional: destaca o botão clicado
+    document.querySelectorAll('.btn-status-selector').forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-white', 'border-white');
+    });
+    // Você pode adicionar uma classe de destaque se seus botões tiverem essa classe
+}
+
+
+
+
+
 function calcularDatasAutomaticas() {
   const dataSelagem = document.getElementById("data_selagem").value;
   const ultReteste = document.getElementById("ult_reteste").value;

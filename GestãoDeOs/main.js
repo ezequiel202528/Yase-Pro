@@ -26,27 +26,31 @@
         }
       }
 
-      function renderOrders(orders) {
-        const list = document.getElementById('osList');
-        if (!orders || orders.length === 0) {
-          list.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Nenhuma OS encontrada.</td></tr>`;
-          return;
-        }
+function renderOrders(orders) {
+  const list = document.getElementById('osList');
+  if (!orders || orders.length === 0) {
+    list.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Nenhuma OS encontrada.</td></tr>`;
+    return;
+  }
 
-        list.innerHTML = orders.map(order => `
-          <tr class="border-b hover:bg-slate-50 transition-colors">
-            <td class="p-4 text-indigo-600 font-black">${order.os_number}</td>
-            <td class="p-4 font-semibold text-slate-600">${order.cliente_nome || '-'}</td>
-            <td class="p-4 text-xs">${order.data_abertura ? new Date(order.data_abertura).toLocaleDateString('pt-BR') : '-'}</td>
-            <td class="p-4 text-xs text-amber-600 font-bold">${order.previsao_entrega ? new Date(order.previsao_entrega).toLocaleDateString('pt-BR') : '-'}</td>
-            <td class="p-4 text-right">
-              <button onclick="abrirOS('${order.os_number}')" class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg font-bold uppercase text-[10px] hover:bg-indigo-600 hover:text-white transition-all">
-                Acessar <i class="fa-solid fa-chevron-right ml-1"></i>
-              </button>
-            </td>
-          </tr>
-        `).join('');
-      }
+  list.innerHTML = orders.map(order => `
+    <tr class="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+      <td class="p-4 text-amber-500 font-black">#${order.os_number}</td>
+      <td class="p-4 font-semibold text-slate-200">${order.cliente_nome || 'Cliente não informado'}</td>
+      <td class="p-4 text-xs text-slate-400">
+        ${order.data_abertura ? new Date(order.data_abertura + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
+      </td>
+      <td class="p-4 text-xs text-amber-600 font-bold">
+        ${order.previsao_entrega ? new Date(order.previsao_entrega + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
+      </td>
+      <td class="p-4 text-right">
+        <button onclick="abrirOS('${order.os_number}')" class="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-4 py-2 rounded-lg font-bold uppercase text-[10px] hover:bg-amber-500 hover:text-slate-900 transition-all">
+          Acessar <i class="fa-solid fa-chevron-right ml-1"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
 
       function abrirOS(osNumber) {
         sessionStorage.setItem('currentOS', osNumber);

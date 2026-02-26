@@ -133,16 +133,15 @@
             <div class="grid grid-cols-2 gap-2">
                 <div class="flex gap-1">
                     <div class="flex-1 relative">
-                        <input type="number" id="X_input_id" class="w-full h-8 px-2 text-[10px] border rounded-lg" oninput="X_BUSCAR_POR_ID(this.value)" placeholder="Fab.">
-                        <span id="badgeNomeFabricante" class="hidden absolute left-2 top-[-10px] bg-amber-500 text-white text-[7px] px-1 rounded font-black">NOME</span>
+                    <input type="number" id="X_input_id" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Fab.">
                     </div>
-                    <button onclick="X_ABRIR_FAB()" class="w-8 h-8 shrink-0 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-amber-500 transition-colors">
+                    <button  class="w-8 h-8 shrink-0 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-amber-500 transition-colors">
                         <i class="fa-solid fa-magnifying-glass text-[9px]"></i>
                     </button>
                 </div>
                 <div class="flex gap-1">
                     <input type="text" id="nr_cilindro" class="flex-1 h-8 px-2 text-[10px] border rounded-lg" placeholder="Nº Cilindro">
-                    <button onclick="abrirModalBuscaRapida()" class="w-8 h-8 shrink-0 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-indigo-500 hover:text-indigo-400 transition-colors">
+                    <button  class="w-8 h-8 shrink-0 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-indigo-500 hover:text-indigo-400 transition-colors">
                         <i class="fa-solid fa-magnifying-glass text-[9px]"></i>
                     </button>
                 </div>
@@ -307,8 +306,8 @@
 <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
     <div class="table-wrapper">
 <div class="table-wrapper overflow-x-auto relative shadow-2xl rounded-xl border border-slate-800 bg-slate-900/50">
-    <table class="w-full text-left border-collapse" style="min-width: 2800px;">
-        <thead>
+    <table class="w-full text-left border-collapse" style="min-width: 3500px;">
+      <thead>
             <tr class="bg-slate-900 text-[10px] uppercase tracking-wider text-slate-400">
                 <th class="p-4">#</th>
                 <th class="p-4 text-amber-500 font-black">Nº Selo</th>
@@ -319,28 +318,44 @@
                 <th class="p-4">Últ. Reteste</th>
                 <th class="p-4 text-red-400 font-bold">Prox. Reteste</th>
                 <th class="p-4 text-amber-500 font-bold">Prox. Recarga</th>
-                <th class="p-4">Operador</th>
-                <th class="p-4 text-center">Nível</th>
-                <th class="p-4">Status</th>
                 
                 <th class="p-4 sticky left-0 z-30 bg-slate-900 border-r border-slate-700 text-indigo-400 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
                     Tipo / Capacidade
                 </th>
 
-               
-                <th class="p-4 text-slate-500">Data Lançamento</th>
-                <th class="p-4">Usuário Lanç.</th>
-                <th class="p-4">Data Alt.</th>
-                <th class="p-4">Usuário Alt.</th>
-                <th class="p-4">Troca?</th>
+                <th class="p-4">Operador</th>
+                <th class="p-4 text-center">Nível</th>
+                <th class="p-4">Status</th>
+
+                <th class="p-4 bg-orange-500/10 text-orange-400 border-l border-slate-800">P. Vazio</th>
+                <th class="p-4 bg-orange-500/10 text-orange-400">P. Cheio</th>
+                <th class="p-4 bg-orange-500/10 text-orange-400">P. Atual</th>
+                <th class="p-4 bg-orange-500/10 text-orange-400">% Dif</th>
+
+                <th class="p-4 bg-emerald-500/10 text-emerald-400 border-l border-slate-800">Tara</th>
+                <th class="p-4 bg-emerald-500/10 text-emerald-400">P. Cil Vazio</th>
+                <th class="p-4 bg-emerald-500/10 text-emerald-400">% Perda</th>
+
+                <th class="p-4 bg-blue-500/10 text-blue-400 border-l border-slate-800">Vol.</th>
+                <th class="p-4 bg-blue-500/10 text-blue-400">DVH</th>
+                <th class="p-4 bg-blue-500/10 text-blue-400">DVP</th>
+                <th class="p-4 bg-blue-500/10 text-blue-400">EE</th>
+
+                <th class="p-4 bg-red-500/10 text-red-400 border-l border-slate-800">DVM=ET</th>
+                <th class="p-4 bg-red-500/10 text-red-400">DVP=EP</th>
+                <th class="p-4 bg-red-500/10 text-red-400">EE Calc</th>
+                <th class="p-4 bg-red-500/10 text-red-400">EP (%)</th>
+
+                <th class="p-4 text-slate-500">Data Lanç. (+Hora)</th>
                 <th class="p-4">Cód. Barras</th>
                 <th class="p-4">Lote N2</th>
-                <th class="p-4">Data Selagem</th>
+                <th class="p-4 text-cyan-400 font-bold">Data Selagem (+Hora)</th>
                 <th class="p-4">Ampola</th>
-                <th class="p-4">Inspec. Final</th>
-                <th class="p-4">Pallet</th>
                 <th class="p-4">Depósito</th>
+                <th class="p-4 text-indigo-400 font-bold bg-indigo-500/5">Nº Patrimônio</th>
                 <th class="p-4">Local Espec.</th>
+                <th class="p-4 text-slate-500 italic">Data Alt. (+Hora)</th>
+                <th class="p-4 text-amber-600 italic">Usuário Alt.</th>
 
                 <th class="p-4 sticky right-0 z-30 bg-slate-900 border-l border-slate-700 text-right pr-6 shadow-[-5px_0_10px_rgba(0,0,0,0.5)]">
                     Ações

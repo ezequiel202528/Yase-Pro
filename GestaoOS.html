@@ -313,6 +313,31 @@ async function executarReabertura(id) {
     if(error) alert(error.message);
     carregarOS();
 }
+
+
+function filtrarTabela() {
+    const busca = document.getElementById('filtroBusca').value.toUpperCase();
+    const statusFiltro = document.getElementById('filtroStatus').value;
+    const linhas = document.querySelectorAll('#osList tr');
+
+    linhas.forEach(linha => {
+        // Ignora a linha de "Nenhuma OS encontrada" se ela existir
+        if (linha.cells.length < 5) return;
+
+        const textoOS = linha.cells[0].textContent.toUpperCase();
+        const textoStatus = linha.cells[4].textContent.trim().toUpperCase();
+
+        // Lógica de correspondência
+        const correspondeBusca = textoOS.includes(busca);
+        const correspondeStatus = (statusFiltro === 'TODOS') || (textoStatus === statusFiltro);
+
+        if (correspondeBusca && correspondeStatus) {
+            linha.style.display = "";
+        } else {
+            linha.style.display = "none";
+        }
+    });
+}
 // Inicialização automática
 document.addEventListener('DOMContentLoaded', carregarOS);
     </script>

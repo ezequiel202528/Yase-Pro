@@ -1,0 +1,68 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+    <div class="card p-5 rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-trophy text-indigo-400 text-xs"></i>
+            </div>
+            <h3 class="text-[10px] font-black text-white uppercase tracking-widest">Performance da Equipe</h3>
+        </div>
+
+        <div id="lista_performance" class="space-y-4">
+            <div class="relative pt-1">
+                <div class="flex mb-2 items-center justify-between">
+                    <div>
+                        <span id="nome_operador_dash" class="text-[9px] font-black inline-block py-1 px-2 uppercase rounded-full text-indigo-400 bg-indigo-900/30 border border-indigo-500/20">
+                            Carregando...
+                        </span>
+                    </div>
+                    <div class="text-right">
+                        <span id="qtd_operador_dash" class="text-xs font-black text-white">0</span>
+                    </div>
+                </div>
+                <div class="overflow-hidden h-1.5 mb-4 text-xs flex rounded-full bg-slate-800">
+                    <div id="barra_operador_dash" style="width:0%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 transition-all duration-1000"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-5 rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl relative overflow-hidden">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-chart-pie text-emerald-400 text-xs"></i>
+            </div>
+            <h3 class="text-[10px] font-black text-white uppercase tracking-widest">Resumo de Aprovação</h3>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div class="text-center p-3 bg-slate-800/40 rounded-xl border border-slate-700">
+                <div class="text-2xl font-black text-emerald-500" id="dash_aprovados">0</div>
+                <div class="text-[8px] font-bold text-slate-500 uppercase">Aprovados</div>
+            </div>
+            <div class="text-center p-3 bg-slate-800/40 rounded-xl border border-slate-700">
+                <div class="text-2xl font-black text-red-500" id="dash_reprovados">0</div>
+                <div class="text-[8px] font-bold text-slate-500 uppercase">Reprovados</div>
+            </div>
+        </div>
+        
+        <i class="fa-solid fa-shield-halved absolute -right-6 -bottom-6 text-8xl text-slate-800 opacity-10"></i>
+    </div>
+</div>
+
+<script>
+// Lógica do Dashboard
+function atualizarDashboardPerformance() {
+    // Pega o nome do operador que está logado no seu sistema
+    const operadorAtual = document.getElementById('userName').innerText;
+    document.getElementById('nome_operador_dash').innerText = operadorAtual;
+
+    // Simulação de meta (ex: 50 extintores por dia)
+    let meta = 50;
+    let progresso = (totalItensOS / meta) * 100;
+    
+    document.getElementById('qtd_operador_dash').innerText = totalItensOS + " / " + meta;
+    document.getElementById('barra_operador_dash').style.width = Math.min(progresso, 100) + '%';
+}
+
+// Chame esta função também dentro do registrarItem()
+</script>

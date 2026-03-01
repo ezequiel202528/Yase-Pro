@@ -1,0 +1,78 @@
+<div class="card p-5 rounded-2xl border border-slate-700 bg-slate-900/50 shadow-xl mt-6">
+    <div class="flex justify-between items-center mb-6">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked text-amber-500"></i> Gestão de Insumos & Peças
+        </h3>
+        <span class="bg-amber-500/10 text-amber-500 text-[9px] font-black px-3 py-1 rounded-full border border-amber-500/20">ESTOQUE SINCRONIZADO</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700 relative overflow-hidden group">
+            <div class="text-[9px] font-bold text-slate-500 uppercase mb-1">Carga PQS Total</div>
+            <div class="flex items-end justify-between">
+                <span id="display_estoque_pqs" class="text-2xl font-black text-white">500.0</span>
+                <span class="text-[9px] text-slate-400 font-bold mb-1">KG</span>
+            </div>
+            <div class="w-full bg-slate-700 h-1 rounded-full mt-3">
+                <div id="barra_pqs" class="bg-amber-500 h-full w-[100%] transition-all duration-500"></div>
+            </div>
+        </div>
+
+        <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700">
+            <div class="text-[9px] font-bold text-slate-500 uppercase mb-1">Válvulas em Estoque</div>
+            <div class="flex items-end justify-between">
+                <span id="display_estoque_valvulas" class="text-2xl font-black text-white">150</span>
+                <span class="text-[9px] text-indigo-400 font-bold mb-1">UNIDADES</span>
+            </div>
+            <div class="flex gap-1 mt-3">
+                <div class="h-1 flex-1 bg-indigo-500 rounded-full"></div>
+                <div class="h-1 flex-1 bg-indigo-500 rounded-full opacity-30"></div>
+            </div>
+        </div>
+
+        <div class="bg-indigo-600/10 p-4 rounded-xl border border-indigo-500/30">
+            <div class="text-[9px] font-bold text-indigo-400 uppercase mb-1">Valor Estimado OS</div>
+            <div class="flex items-end justify-between">
+                <span id="display_lucro_os" class="text-2xl font-black text-white font-mono">R$ 0,00</span>
+            </div>
+            <p class="text-[8px] text-slate-500 mt-2 font-bold uppercase">Base: R$ 85,00/item</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// LÓGICA DE INVENTÁRIO E GESTÃO
+let estoquePQS = 500.0;
+let totalItensOS = 0;
+const VALOR_MEDIO_ITEM = 85.00;
+
+// Função para dar baixa no estoque e atualizar lucro
+function atualizarGestaoAmanha(tipoCarga, capacidade) {
+    // 1. Atualiza Contador de Itens e Lucro
+    totalItensOS++;
+    let lucroEstimado = totalItensOS * VALOR_MEDIO_ITEM;
+    document.getElementById('display_lucro_os').innerText = `R$ ${lucroEstimado.toLocaleString('pt-br', {minimumFractionDigits: 2})}`;
+
+    // 2. Se for PQS, subtrai do estoque
+    if (tipoCarga === 'PQS') {
+        let peso = parseFloat(capacidade) || 0;
+        estoquePQS -= peso;
+        
+        // Atualiza UI
+        const displayPQS = document.getElementById('display_estoque_pqs');
+        displayPQS.innerText = estoquePQS.toFixed(1);
+        
+        // Atualiza Barra de Progresso (Ex: 500kg é o max)
+        let porcentagem = (estoquePQS / 500) * 100;
+        document.getElementById('barra_pqs').style.width = porcentagem + '%';
+
+        // Alerta visual se estoque baixo
+        if (estoquePQS < 50) {
+            displayPQS.classList.add('text-red-500');
+        }
+    }
+}
+
+// INTEGRAÇÃO: Adicione esta linha dentro da sua função registrarItem() original:
+// atualizarGestaoAmanha(document.getElementById('tipo_carga').value, document.getElementById('capacidade').value);
+</script>

@@ -16,26 +16,97 @@ function selecionarStatusManual(status) {
 
 
 
-function calcularDatasAutomaticas() {
-  const dataSelagem = document.getElementById("data_selagem").value;
-  const ultReteste = document.getElementById("ult_reteste").value;
+// function calcularDatasAutomaticas() {
+//   const campoDataSelagem = document.getElementById("data_selagem");
+//   const ultReteste = document.getElementById("ult_reteste").value;
+//   const displayRecarga = document.getElementById("display_prox_recarga");
+//   const displayReteste = document.getElementById("display_prox_reteste");
 
-  // Cálculo Próxima Recarga (+1 ano)
-  if (dataSelagem) {
-    const data = new Date(dataSelagem);
-    data.setFullYear(data.getFullYear() + 1);
-    const dataFormatada = data.toLocaleDateString("pt-BR");
-    const displayRecarga = document.getElementById("display_prox_recarga");
-    if (displayRecarga) displayRecarga.innerText = dataFormatada;
+//   // 1. Cálculo Próxima Recarga
+//   let dataReferencia = campoDataSelagem.value ? new Date(campoDataSelagem.value) : new Date();
+  
+//   if (dataReferencia) {
+//     if (campoDataSelagem.value) {
+//         dataReferencia.setMinutes(dataReferencia.getMinutes() + dataReferencia.getTimezoneOffset());
+//     }
+//     const dataProx = new Date(dataReferencia);
+//     dataProx.setFullYear(dataProx.getFullYear() + 1);
+//     const dataFormatada = dataProx.toLocaleDateString("pt-BR");
+//     if (displayRecarga) {
+//         displayRecarga.innerText = dataFormatada;
+//         // Criamos um atributo de dados para o sistema de salvamento ler depois
+//         displayRecarga.dataset.valor = dataFormatada;
+//     }
+//   }
+
+//   // 2. Cálculo Próximo Reteste (+5 anos)
+//   if (ultReteste && ultReteste.length === 4) {
+//     const proxRetesteAno = parseInt(ultReteste) + 5;
+//     if (displayReteste) {
+//         displayReteste.innerText = proxRetesteAno;
+//         // IMPORTANTE: Guardamos o valor no dataset para o script de salvamento encontrar
+//         displayReteste.dataset.valor = proxRetesteAno;
+//     }
+//   } else {
+//     if (displayReteste) {
+//         displayReteste.innerText = "----";
+//         displayReteste.dataset.valor = "";
+//     }
+//   }
+// }
+// ... (mantenha as funções definirNivelPeloReteste e setLevel)
+
+// Inicialização ao carregar a página
+
+
+function calcularDatasAutomaticas() {
+  const campoDataSelagem = document.getElementById("data_selagem");
+  const ultReteste = document.getElementById("ult_reteste").value;
+  const displayRecarga = document.getElementById("display_prox_recarga");
+  const displayReteste = document.getElementById("display_prox_reteste");
+
+  // 1. Cálculo Próxima Recarga (Mantido como Data)
+  let dataReferencia = campoDataSelagem.value ? new Date(campoDataSelagem.value) : new Date();
+  
+  if (campoDataSelagem.value) {
+      dataReferencia.setMinutes(dataReferencia.getMinutes() + dataReferencia.getTimezoneOffset());
   }
 
-  // Cálculo Próximo Reteste (+5 anos)
+  const dataProxRecarga = new Date(dataReferencia);
+  dataProxRecarga.setFullYear(dataProxRecarga.getFullYear() + 1);
+  
+  if (displayRecarga) {
+      displayRecarga.innerText = dataProxRecarga.toLocaleDateString("pt-BR");
+  }
+
+  // 2. Cálculo Próximo Reteste (Ajustado para INTEIRO +5 anos)
   if (ultReteste && ultReteste.length === 4) {
-    const proxReteste = parseInt(ultReteste) + 5;
-    const displayReteste = document.getElementById("display_prox_reteste");
-    if (displayReteste) displayReteste.innerText = proxReteste;
+      const anoBase = parseInt(ultReteste);
+      const proximoReteste = anoBase + 5;
+      
+      if (displayReteste) {
+          displayReteste.innerText = proximoReteste; // Exibe ex: 2026
+      }
+  } else {
+      if (displayReteste) displayReteste.innerText = "----";
   }
 }
+
+
+
+
+window.addEventListener('DOMContentLoaded', () => {
+    setLevel(2); // Define Nível 2 como padrão ao abrir
+    
+    // Define a data de hoje no input de selagem por padrão (Opcional, mas recomendado)
+    const campoDataSelagem = document.getElementById("data_selagem");
+    if (campoDataSelagem && !campoDataSelagem.value) {
+        campoDataSelagem.value = new Date().toISOString().split('T')[0];
+    }
+    
+    // Chama o cálculo para preencher o "Próxima Recarga" imediatamente
+    calcularDatasAutomaticas();
+});
 
 /**
  * Define o nível de manutenção dinamicamente com base no ano do último reteste.
@@ -49,8 +120,7 @@ function definirNivelPeloReteste() {
     const valorInformado = campoReteste.value;
     const anoAtual = new Date().getFullYear(); // 2026
 
-    // Referência dos Checkboxes (Baseado nos textos do seu HTML)
-    // Dica: Se puder, adicione IDs neles no HTML para ser mais preciso
+    // 1. Referências dos Checkboxes de Inspeção
     const checkboxes = document.querySelectorAll('.custom-checkbox');
     const getCheck = (texto) => Array.from(checkboxes).find(c => c.nextElementSibling?.textContent.includes(texto));
 
@@ -58,79 +128,92 @@ function definirNivelPeloReteste() {
     const chkPneumValv = getCheck("Ens. Pneum. Válvula");
     const chkHidroValv = getCheck("Ens. Hidrost. Válvula");
     const chkHidroMang = getCheck("Ens. Hidrost. Mangueira");
+    
+    // 2. Referência FIXA do Checkbox de Pintura (que agora está na tela principal)
+    const chkPintura = document.getElementById('comp_pintura');
 
     if (valorInformado.length === 4) {
         const anoReteste = parseInt(valorInformado);
         const diferencaAnos = anoAtual - anoReteste;
 
-        // RESET de todos antes de aplicar a regra
-        [chkPneumMano, chkPneumValv, chkHidroValv, chkHidroMang].forEach(c => { if(c) c.checked = false; });
+        // RESET GERAL antes de aplicar a nova regra
+        [chkPneumMano, chkPneumValv, chkHidroValv, chkHidroMang, chkPintura].forEach(c => { 
+            if(c) c.checked = false; 
+        });
 
-        // 1. Nível 3: Ano atual (2026) ou mais de 5 anos de atraso
+        // REGRA NÍVEL 3: Ano atual (2026) ou mais de 5 anos de atraso
         if (anoReteste === anoAtual || diferencaAnos >= 5) {
             setLevel(3);
-            // Marca Pneumáticos + Hidrostáticos (Igual à Imagem 2)
+            
+            // Marca Inspeções
             if(chkPneumMano) chkPneumMano.checked = true;
             if(chkPneumValv) chkPneumValv.checked = true;
             if(chkHidroValv) chkHidroValv.checked = true;
             if(chkHidroMang) chkHidroMang.checked = true;
+            
+            // MARCA PINTURA AUTOMATICAMENTE
+            if(chkPintura) chkPintura.checked = true; 
         } 
-        // 2. Nível 2: Abaixo do atual no prazo de 5 anos (Ex: 2022 a 2025)
+        
+        // REGRA NÍVEL 2: Entre 1 e 4 anos de diferença
         else if (diferencaAnos > 0 && diferencaAnos < 5) {
             setLevel(2);
-            // Marca apenas Pneumáticos (Igual à Imagem 1)
             if(chkPneumMano) chkPneumMano.checked = true;
             if(chkPneumValv) chkPneumValv.checked = true;
         }
-        // 3. Outros casos -> 1º Nível
+        
+        // REGRA NÍVEL 1
         else {
             setLevel(1);
         }
     }
 }
-
-// Modifique sua função setLevel para garantir a consistência visual
+// Função setLevel atualizada com automação de Pintura e Badge
 function setLevel(lvl) {
-    selectedLevel = lvl;
+    selectedLevel = lvl; // Variável global
     
-    // Controle Visual dos Botões
+    // Atualiza visual dos botões NV1, NV2, NV3
     document.querySelectorAll('[data-level]').forEach((btn) => {
-        // Remove classes de ativo
         btn.classList.remove("active", "bg-indigo-600", "text-white");
-        // Adiciona classes de inativo
-        btn.classList.add("bg-slate-800/40", "text-slate-300");
-        
         if (parseInt(btn.dataset.level) === lvl) {
             btn.classList.add("active", "bg-indigo-600", "text-white");
         }
     });
 
-    // Lógica de bloqueio de campos do Teste Hidrostático (Nível 3)
-    const grupoHidro = document.querySelector('.ensaios-group-red');
-    const camposHidro = ["et_ensaio", "ep_ensaio", "ee_calculado", "ep_porcent_final"];
+    // --- LÓGICA DA PINTURA AUTOMÁTICA ---
+    const checkPintura = document.getElementById('comp_pintura');
+    if (checkPintura) {
+        // Se for nível 3, marca. Se não, desmarca.
+        checkPintura.checked = (lvl === 3);
+    }
 
+    // Lógica do Teste Hidrostático (Habilitar/Desabilitar campos)
+    const grupoHidro = document.querySelector('.ensaios-group-red');
     if (lvl === 3) {
         if(grupoHidro) grupoHidro.style.opacity = "1";
-        camposHidro.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.readOnly = false;
-        });
+        // ... habilita campos de ensaio
     } else {
-        // Níveis 1 e 2 desabilitam os campos de teste hidrostático
         if(grupoHidro) grupoHidro.style.opacity = "0.4";
-        camposHidro.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) {
-                el.readOnly = true;
-                el.value = ""; 
-            }
-        });
+        // ... limpa e desabilita campos de ensaio
     }
 }
-
 // Inicialização ao carregar a página
 window.addEventListener('DOMContentLoaded', () => {
     setLevel(2); // Define Nível 2 como padrão ao abrir
 });
 
 
+function atualizarBadgeComponentes() {
+    // Conta quantos checkboxes estão marcados dentro do modal
+    const totalMarcados = document.querySelectorAll('#container_checks_componentes input[type=\"checkbox\"]:checked').length;
+    const badge = document.getElementById('badge-comp');
+    
+    if (badge) {
+        badge.innerText = totalMarcados;
+        if (totalMarcados > 0) {
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+}

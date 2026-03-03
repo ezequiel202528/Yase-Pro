@@ -46,63 +46,39 @@ function setLevel(lvl) {
 window.addEventListener('DOMContentLoaded', () => {
     setLevel(2); 
 });
-
 function setStatus(valor, elemento) {
+    // 1. Salva o valor no campo que vai para o banco de dados
     document.getElementById("resultado_valor").value = valor;
     
+    // 2. Limpa o estado visual de todos os botões no mesmo grupo
     const botoes = elemento.parentElement.querySelectorAll('div');
     botoes.forEach(btn => {
         btn.classList.add('opacity-40');
-        btn.classList.remove('opacity-100', 'ring-2', 'ring-white');
+        btn.classList.remove('opacity-100', 'ring-2', 'ring-white', 'border-2');
     });
 
+    // 3. Ativa o botão selecionado
     elemento.classList.remove('opacity-40');
-    elemento.classList.add('opacity-100', 'ring-2', 'ring-white');
+    elemento.classList.add('opacity-100', 'border-2', 'border-white'); // Adicionei border-white para destacar
 }
 
-function limparFormulario() {
-    editandoID = null;
 
-    const campos = [
-        "cod_barras", "fabricante_id", "nr_cilindro", "ano_fab", "ult_reteste", 
-        "selo_anterior", "obs_ensaio", "tipo_carga", "capacidade", "nbr_id",
-        "lote_nitrogenio", "ampola_vinculada", "pallet", "deposito_galpao", "local_extintor",
-        "p_vazio_valvula", "p_cheio_valvula", "p_atual", "porcent_dif",
-        "tara_cilindro", "p_cil_vazio_kg", "perda_massa_porcent",
-        "vol_litros", "dvm_et", "dvp_ep", "ee_resultado",
-        "et_ensaio", "ep_ensaio", "ee_calculado", "ep_porcent_final"
-    ];
 
-    campos.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = "";
-    });
-    
-    document.querySelectorAll('input[type="checkbox"]').forEach(check => {
-        check.checked = false;
-    });
-    
-    const badgeFab = document.getElementById("badgeNomeFabricante");
-    if(badgeFab) badgeFab.classList.add("hidden");
-    
-    if(document.getElementById("display_prox_recarga")) document.getElementById("display_prox_recarga").innerText = "--/--/----";
-    if(document.getElementById("display_prox_reteste")) document.getElementById("display_prox_reteste").innerText = "----";
-    
-    // Reset para Nível 2 e Aprovado
-    setLevel(2); 
-    
-    const btnApr = document.querySelector('.bg-emerald-900\\/20');
-    if (btnApr) setStatus('APROVADO', btnApr);
-    
-    const btnRegistro = document.querySelector('button[onclick="registrarItem()"]');
-    if (btnRegistro) {
-        btnRegistro.innerHTML = '<i class="fa-solid fa-plus-circle"></i> REGISTRAR ITEM';
-        btnRegistro.classList.remove("bg-emerald-500");
-        btnRegistro.classList.add("bg-indigo-600");
+// modal de componentes subistituidos!
+function abrirModalComponentes() {
+    document.getElementById('modalComponentes').classList.remove('hidden');
+}
+
+function fecharModalComponentes() {
+    document.getElementById('modalComponentes').classList.add('hidden');
+    atualizarBadgeComponentes();
+}
+
+function atualizarBadgeComponentes() {
+    const selecionados = document.querySelectorAll('#container_checks_componentes input[type="checkbox"]:checked').length;
+    const badge = document.getElementById('badge-comp');
+    if (badge) {
+        badge.innerText = selecionados;
+        badge.classList.toggle('hidden', selecionados === 0);
     }
-
-    const campoFoco = document.getElementById("cod_barras");
-    if (campoFoco) campoFoco.focus();
 }
-
-

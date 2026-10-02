@@ -1,0 +1,296 @@
+/* ============================================================
+   YaSe PRO - Layout Adaptativo Premium (Cards + Tabela)
+   ============================================================ */
+
+/* 1. ESTRUTURA GLOBAL - TRAVAMENTO DE TELA */
+html, body {
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important; /* Impede o scroll na página inteira */
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #0f172a;
+    color: #f8fafc;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* SIDEBAR MANTIDA FIXA */
+aside {
+    width: 240px;
+    flex-shrink: 0;
+    background-color: #1e293b;
+    border-right: 1px solid #334155;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+/* ÁREA PRINCIPAL EM COLUNA FLEXÍVEL */
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #0b1120;
+    padding: 8px 12px;
+    overflow: hidden; 
+    gap: 10px;
+}
+
+/* 2. ÁREA SUPERIOR: CARDS (Layout Fixo) */
+main > div.grid {
+    display: grid !important;
+    flex: 0 0 auto !important; /* Não cresce nem diminui, mantém o tamanho dos cards */
+    grid-template-columns: repeat(4, 1fr) !important; /* Força as 4 colunas da imagem */
+    gap: 8px !important;
+    margin-bottom: 5px !important;
+}
+
+.card {
+    background-color: #111827 !important;
+    border: 1px solid #1f2937;
+    border-radius: 8px;
+    padding: 8px !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 3. INPUTS E FORMULÁRIOS COMPACTOS */
+input[type="text"], 
+input[type="number"], 
+input[type="date"], 
+select, 
+textarea {
+    width: 100%;
+    height: 26px !important; /* Altura ideal para notebooks */
+    padding: 0 8px !important;
+    font-size: 11px !important;
+    border-radius: 4px;
+    background-color: #0b0f1a !important;
+    border: 1px solid #334155 !important;
+    color: #e2e8f0 !important;
+    margin-bottom: 2px !important;
+}
+
+/* 4. GRUPOS DE ENSAIOS (CORES ORIGINAIS) */
+.ensaios-group-yellow, .ensaios-group-green, .ensaios-group-blue, .ensaios-group-red {
+    border-radius: 6px;
+    padding: 6px;
+    margin-bottom: 4px;
+    background: rgba(15, 23, 42, 0.4);
+}
+.ensaios-group-yellow { border: 1px solid #f59e0b; }
+.ensaios-group-green { border: 1px solid #10b981; }
+.ensaios-group-blue { border: 1px solid #3b82f6; }
+.ensaios-group-red { border: 1px solid #ef4444; }
+
+/* 5. ÁREA DA TABELA DINEÂMICA (OCUPA O RESTO DA TELA) */
+.flex-1.flex.flex-col.min-h-0.overflow-hidden {
+    flex: 1 !important; /* Esta linha faz a tabela "esticar" até o fim da página */
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0; /* Essencial para o scroll interno funcionar em notebooks */
+}
+
+.table-wrapper {
+    flex: 1;
+    background: #111827;
+    border-radius: 12px;
+    border: 1px solid #1f2937;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.scrollable-body {
+    flex: 1;
+    overflow-y: auto; /* Scroll apenas na lista de itens */
+    scrollbar-width: thin;
+}
+
+/* ESTILIZAÇÃO DA TABELA */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    background: #1f2937;
+    z-index: 20;
+}
+
+th {
+    padding: 10px 4px !important;
+    font-size: 9px !important;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    border-bottom: 2px solid #374151;
+    text-align: center;
+}
+
+td {
+    padding: 8px 6px !important;
+    font-size: 10px !important;
+    color: #ffffff !important;
+    border-bottom: 1px solid #1f2937;
+    text-align: center;
+}
+
+/* 6. AJUSTE FINO PARA NOTEBOOKS (TELAS PEQUENAS) */
+@media (max-height: 800px) {
+    input, select, .btn-level { 
+        height: 22px !important; 
+        font-size: 10px !important; 
+    }
+    .card h3 { 
+        font-size: 9px !important; 
+        margin-bottom: 4px !important; 
+    }
+    main { padding: 5px 10px; gap: 5px; }
+}
+
+/* SCROLLBAR PERSONALIZADA */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.comp-item { @apply flex items-center gap-3 p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:bg-slate-700/50 cursor-pointer transition-all; }
+.comp-item span { @apply text-[10px] font-bold uppercase text-slate-400 group-hover:text-white; }
+.comp-item input[type="checkbox"] { @apply w-4 h-4 rounded border-slate-600 bg-slate-700 text-indigo-600 focus:ring-0 focus:ring-offset-0; }
+
+
+/* ============================================================
+   AJUSTE DE SOBREPOSIÇÃO PARA COLUNAS FIXAS COM DESTAQUE
+   ============================================================ */
+
+/* 1. Base sólida para as colunas fixas (ID e Ações) */
+#itensList td:first-child, 
+th.sticky.left-0 {
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 30 !important;
+    background-color: #0f172a !important; /* Fundo sólido igual ao do main */
+    border-right: 1px solid #1e293b;
+}
+
+#itensList td:last-child, 
+th.sticky.right-0 {
+    position: sticky !important;
+    right: 0 !important;
+    z-index: 30 !important;
+    background-color: #0f172a !important; /* Fundo sólido */
+    border-left: 1px solid #1e293b;
+}
+
+/* 2. Manutenção do destaque azul nas colunas fixas */
+#itensList tr.linha-recente td {
+    background-color: #1e1b4b !important; /* Azul escuro sólido para a linha toda */
+    color: #fff !important;
+}
+
+/* Garante que as colunas fixas (ID e Ações) também fiquem azuis na linha de destaque */
+#itensList tr.linha-recente td:first-child,
+#itensList tr.linha-recente td:last-child {
+    background-color: #2e2a75 !important; /* Um tom levemente mais claro para destacar as pontas */
+    z-index: 35 !important; /* Fica acima das outras células */
+}
+
+/* 3. Sombra para profundidade (opcional, ajuda visualmente no scroll) */
+#itensList td:first-child {
+    box-shadow: 4px 0 8px -2px rgba(0,0,0,0.5);
+}
+
+#itensList td:last-child {
+    box-shadow: -4px 0 8px -2px rgba(0,0,0,0.5);
+}
+
+/* Estado de Destaque Fixo */
+.row-highlight-active {
+    background-color: rgba(99, 102, 241, 0.3) !important; /* Índigo suave */
+    border: 2px solid #6366f1 !important; /* Borda Índigo vibrante */
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+}
+
+/* Pequeno brilho extra nas células para destacar no modo escuro */
+.row-highlight-active td {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* Efeito de linha desativada para o YaSe PRO */
+.grayscale-\[0\.3\] td {
+    color: #64748b !important; /* Deixa o texto das células cinza */
+}
+
+.grayscale-\[0\.3\]:hover {
+    opacity: 1; /* Volta a opacidade ao passar o mouse para conferir os dados */
+    background-color: rgba(239, 68, 68, 0.08) !important;
+}
+
+/* Barra de rolagem customizada para a lista */
+.custom-scroll-fab {
+    max-height: 300px; /* Define a altura máxima antes de começar a rolar */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #f59e0b #1e293b; /* Amber e Slate */
+}
+
+.custom-scroll-fab::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scroll-fab::-webkit-scrollbar-track {
+    background: #1e293b;
+    border-radius: 10px;
+}
+
+.custom-scroll-fab::-webkit-scrollbar-thumb {
+    background-color: #f59e0b;
+    border-radius: 10px;
+}
+
+
+/* Remove as setas do input number */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+@keyframes slide-in-top {
+    0% { transform: translateY(-30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+.animate-in {
+    animation: slide-in-top 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Efeito de brilho pulsante na borda do erro */
+.input-error-shake {
+    animation: shake 0.4s focus-shadow 0.4s;
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2) !important;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}

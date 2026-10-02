@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YaSe PRO - Configurações da Empresa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+    body { 
+        font-family: "Plus Jakarta Sans", sans-serif; 
+        background-color: #020617; 
+        color: white; 
+    }
+
+    /* Cards seguindo o padrão da Aside do Rastreio */
+    .glass-card { 
+        background: #0f172a; 
+        border: 1px solid rgba(51, 65, 85, 0.5); 
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .input-field { 
+        background: #1e293b; /* Slate 800 */
+        border: 1px solid #334155; 
+        color: white; 
+    }
+</style>
+</head>
+<body class="p-6 md:p-12">
+
+    <main class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-10">
+            <div>
+                <button onclick="location.href='Dashboard.html'" class="text-neutral-500 hover:text-white mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-all">
+                    <i class="fas fa-arrow-left text-amber-500"></i> Voltar ao Painel
+                </button>
+                <h1 class="text-3xl font-black tracking-tighter text-white">Configurações da <span class="text-amber-500">Empresa</span></h1>
+            </div>
+            <i class="fas fa-building-circle-gear text-5xl text-white/5"></i>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="md:col-span-1 space-y-6">
+                <div class="glass-card p-6 rounded-[2.5rem] text-center">
+                    <p class="text-[10px] font-black uppercase text-amber-500 mb-6 tracking-widest">Logo da Etiqueta</p>
+                    
+                    <div class="w-32 h-32 mx-auto bg-white/5 rounded-3xl border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden mb-6 group relative">
+                        <img id="preview_logo" src="" class="hidden w-full h-full object-contain p-2">
+                        <i id="placeholder_icon" class="fas fa-image text-3xl text-white/10 group-hover:text-amber-500/50 transition-all"></i>
+                    </div>
+
+                    <input type="text" id="cfg_logo" class="input-field w-full h-10 px-4 rounded-xl text-[10px] mb-4" placeholder="URL da Imagem (.png)">
+                    <p class="text-[9px] text-neutral-500 leading-relaxed font-medium">Recomendamos logotipos com fundo transparente (PNG) e largura mínima de 400px.</p>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 space-y-6">
+                <div class="glass-card p-8 rounded-[2.5rem]">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">Nome Fantasia (Exibido na Etiqueta)</label>
+                            <input type="text" id="cfg_nome" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
+                        </div>
+
+                        <div>
+                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">CNPJ</label>
+                            <input type="text" id="cfg_cnpj" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
+                        </div>
+
+                        <div>
+                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">Telefone de Contato</label>
+                            <input type="text" id="cfg_fone" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">Endereço Completo</label>
+                            <input type="text" id="cfg_endereco" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
+                        </div>
+
+                        <div>
+                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">Cidade / UF</label>
+                            <input type="text" id="cfg_cidade" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
+                        </div>
+
+                        <div class="flex items-end">
+                            <button onclick="salvarDados()" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-4 rounded-2xl text-[10px] uppercase tracking-widest shadow-xl shadow-amber-500/20 transition-all">
+                                <i class="fas fa-check-circle mr-2"></i> Atualizar Identidade
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Carregar dados existentes ao iniciar
+        window.onload = () => {
+            document.getElementById('cfg_nome').value = localStorage.getItem('nome_empresa') || "";
+            document.getElementById('cfg_cnpj').value = localStorage.getItem('cnpj_empresa') || "";
+            document.getElementById('cfg_endereco').value = localStorage.getItem('endereco_empresa') || "";
+            document.getElementById('cfg_cidade').value = localStorage.getItem('cidade_empresa') || "";
+            document.getElementById('cfg_fone').value = localStorage.getItem('telefone_empresa') || "";
+            const logo = localStorage.getItem('empresa_logo') || "";
+            document.getElementById('cfg_logo').value = logo;
+            
+            if(logo) {
+                const img = document.getElementById('preview_logo');
+                img.src = logo;
+                img.classList.remove('hidden');
+                document.getElementById('placeholder_icon').classList.add('hidden');
+            }
+        };
+
+        function salvarDados() {
+            localStorage.setItem('nome_empresa', document.getElementById('cfg_nome').value);
+            localStorage.setItem('cnpj_empresa', document.getElementById('cfg_cnpj').value);
+            localStorage.setItem('endereco_empresa', document.getElementById('cfg_endereco').value);
+            localStorage.setItem('cidade_empresa', document.getElementById('cfg_cidade').value);
+            localStorage.setItem('telefone_empresa', document.getElementById('cfg_fone').value);
+            localStorage.setItem('empresa_logo', document.getElementById('cfg_logo').value);
+
+            alert("Os dados da etiqueta foram atualizados com sucesso!");
+            location.reload();
+        }
+    </script>
+</body>
+</html>

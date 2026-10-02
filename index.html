@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YaSe PRO - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <style>
+        body { 
+            font-family: "Plus Jakarta Sans", sans-serif; 
+            background-color: #010409; 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-container {
+            width: 900px;
+            height: 550px;
+            background: #0d1117;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            border: 1px solid #30363d;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        /* LADO ESQUERDO - DESIGN INCLINADO E LOGO */
+        .welcome-side {
+            flex: 1.2;
+            background: linear-gradient(135deg, #0f172a 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+            border-right: 2px solid #fbbf24;
+        }
+
+        .logo-yase {
+            font-size: 6rem;
+            font-weight: 800;
+            letter-spacing: -5px;
+            line-height: 1;
+            background: linear-gradient(to bottom, #fff 40%, #fbbf24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.3));
+        }
+
+        .logo-subtitle {
+            color: #8b949e;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            margin-top: -10px;
+            font-weight: 400;
+        }
+
+        /* FORMULÁRIOS */
+        .form-side {
+            flex: 1;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #0d1117;
+            z-index: 1;
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            padding: 0 4px;
+        }
+
+        .input-label {
+            color: #8b949e;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .label-row i { color: #fbbf24; font-size: 0.85rem; }
+
+        .login-input {
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid #30363d !important;
+            border-radius: 0 !important;
+            color: white !important;
+            padding: 10px 4px !important;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .login-input:focus { 
+            border-bottom-color: #fbbf24 !important; 
+            outline: none;
+            background: linear-gradient(to top, rgba(251, 191, 36, 0.05), transparent) !important;
+        }
+
+        /* BOTÃO ESTILO MODERNO */
+        .btn-action {
+            background: linear-gradient(90deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 50px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 10px;
+            border: 1px solid #475569;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.75rem;
+        }
+
+        .btn-action:hover {
+            background: #fbbf24;
+            color: #000;
+            border-color: #fbbf24;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(251, 191, 36, 0.5);
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="loader" class="fixed inset-0 z-50 flex items-center justify-center bg-[#000]">
+        <div class="w-12 h-12 border-4 border-[#fbbf24] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <main class="main-container">
+        
+        <div class="welcome-side">
+            <h1 class="logo-yase">YaSe</h1>
+            <span class="logo-subtitle">PRO SYSTEM</span>
+        </div>
+
+        <div id="loginCard" class="form-side fade-in hidden">
+            <h2 class="text-white text-2xl font-black mb-10 tracking-tighter">ACESSAR PAINEL</h2>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <div class="label-row"><span class="input-label">CNPJ da Unidade</span><i class="fas fa-building"></i></div>
+                    <input type="text" id="cnpj_login" required class="login-input" placeholder="00.000.000/0001-00" />
+                </div>
+
+                <div class="input-group">
+                    <div class="label-row"><span class="input-label">ID de Usuário</span><i class="fas fa-id-card"></i></div>
+                    <input type="text" id="codigo_id" required class="login-input" placeholder="Seu código de acesso" />
+                </div>
+
+                <div class="input-group">
+                    <div class="label-row"><span class="input-label">Senha de Segurança</span><i class="fas fa-lock"></i></div>
+                    <input type="password" id="senha" required class="login-input" placeholder="••••••••" />
+                </div>
+
+                <button type="submit" id="btnLogin" class="btn-action">
+                    ENTRAR AGORA <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </form>
+
+            <div class="mt-10 text-center border-t border-white/5 pt-6">
+                <p class="text-slate-500 text-[10px] uppercase tracking-widest font-bold">
+                    Nova Unidade? 
+                    <button onclick="toggleView('setupCard')" class="text-[#fbbf24] hover:underline ml-1">Configurar Empresa</button>
+                </p>
+            </div>
+        </div>
+
+        <div id="setupCard" class="form-side hidden">
+            <h2 class="text-white text-2xl font-black mb-6 tracking-tighter uppercase">Configuração <span class="text-[#fbbf24]">Inicial</span></h2>
+            <form id="setupForm" class="space-y-1">
+                <div class="input-group">
+                    <div class="label-row"><span class="input-label">CNPJ Institucional</span><i class="fas fa-fingerprint"></i></div>
+                    <input type="text" id="int_cnpj" required class="login-input" />
+                </div>
+                <div class="input-group">
+                    <div class="label-row"><span class="input-label">Nome Fantasia</span><i class="fas fa-store"></i></div>
+                    <input type="text" id="int_fantasia" required class="login-input" />
+                </div>
+                <div class="input-group">
+                    <div class="label-row"><span class="input-label">Nome do Gestor</span><i class="fas fa-user-tie"></i></div>
+                    <input type="text" id="int_gestor_nome" required class="login-input" />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <div class="label-row"><span class="input-label">ID Master</span><i class="fas fa-key"></i></div>
+                        <input type="text" id="int_gestor_id" required class="login-input" />
+                    </div>
+                    <div class="input-group">
+                        <div class="label-row"><span class="input-label">Senha</span><i class="fas fa-shield-alt"></i></div>
+                        <input type="password" id="int_gestor_pass" required class="login-input" />
+                    </div>
+                </div>
+                <button type="submit" id="btnInt" class="btn-action">FINALIZAR SETUP</button>
+            </form>
+            <button onclick="toggleView('loginCard')" class="mt-4 text-[9px] text-slate-500 font-black uppercase tracking-widest hover:text-white transition-all w-full text-center">
+                <i class="fas fa-chevron-left mr-1"></i> Voltar ao Login
+            </button>
+        </div>
+    </main>
+
+    <div id="dialogOverlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-[#0d1117] border border-[#fbbf24]/30 w-full max-w-sm rounded-[2rem] p-8 text-center shadow-2xl">
+            <div id="dialogIcon" class="w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto"></div>
+            <h3 id="dialogTitle" class="font-black uppercase tracking-tight text-white text-xl mb-2"></h3>
+            <p id="dialogMsg" class="text-slate-400 text-sm mb-8"></p>
+            <button onclick="Dialog.close()" class="btn-action">OK, ENTENDIDO</button>
+        </div>
+    </div>
+
+    <script>
+      // 1. Configuração Supabase (Suas chaves originais)
+      const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co"; 
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+      const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      // 2. UI Manager
+      const Dialog = {
+        show(title, msg, type = 'info') {
+          const overlay = document.getElementById('dialogOverlay');
+          const icon = document.getElementById('dialogIcon');
+          document.getElementById('dialogTitle').innerText = title;
+          document.getElementById('dialogMsg').innerText = msg;
+          
+          if(type === 'success') {
+            icon.className = "w-16 h-16 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center mb-6 mx-auto";
+            icon.innerHTML = '<i class="fas fa-check-circle text-3xl"></i>';
+          } else if(type === 'error') {
+            icon.className = "w-16 h-16 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mb-6 mx-auto";
+            icon.innerHTML = '<i class="fas fa-exclamation-circle text-3xl"></i>';
+          } else {
+            icon.className = "w-16 h-16 rounded-full bg-[#fbbf24]/10 text-[#fbbf24] flex items-center justify-center mb-6 mx-auto";
+            icon.innerHTML = '<i class="fas fa-info-circle text-3xl"></i>';
+          }
+          overlay.classList.remove('hidden');
+        },
+        close() { document.getElementById('dialogOverlay').classList.add('hidden'); }
+      };
+
+      function toggleView(targetId) {
+        document.getElementById('loginCard').classList.add('hidden');
+        document.getElementById('setupCard').classList.add('hidden');
+        document.getElementById(targetId).classList.remove('hidden');
+      }
+
+      // Função de Máscara CNPJ (Reinserida para os campos novos)
+      function applyCnpjMask(id) {
+          const input = document.getElementById(id);
+          input.addEventListener('input', (e) => {
+              let value = e.target.value.replace(/\D/g, '');
+              if (value.length > 14) value = value.slice(0, 14);
+              value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+              value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+              value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+              value = value.replace(/(\d{4})(\d)/, '$1-$2');
+              e.target.value = value;
+          });
+      }
+      applyCnpjMask('cnpj_login');
+      applyCnpjMask('int_cnpj');
+
+      // 3. Lógica de Login Original
+   document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnLogin');
+    const cnpj = document.getElementById('cnpj_login').value.trim();
+    const cid = document.getElementById('codigo_id').value.trim();
+    const pass = document.getElementById('senha').value;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> AUTENTICANDO...';
+
+    try {
+        // 1. Valida se o CNPJ existe na tabela de empresas
+        const { data: emp, error: errE } = await sb.from('empresas').select('id, nome_fantasia').eq('cnpj', cnpj).maybeSingle();
+        if (errE) throw errE;
+        if (!emp) throw new Error("CNPJ não encontrado em nossa base.");
+
+        // 2. Valida o usuário dentro dessa empresa específica
+        const { data, error } = await sb.from('usu_arios').select('*').eq('empresa_id', emp.id).eq('codigo_id', cid).eq('senha', pass).maybeSingle();
+        if (error) throw error;
+        if (!data) throw new Error("ID ou Senha incorretos.");
+
+        // --- INÍCIO DAS SUGESTÕES DE MEMÓRIA ---
+        
+        // Guarda o último CNPJ para facilitar o próximo login
+        localStorage.setItem('yase_last_cnpj', cnpj);
+        
+        // Dados padronizados para o rodapé e filtros de banco de dados
+        localStorage.setItem('nome_operador', data.nome_completo); // Ex: "Ezequiel"
+        localStorage.setItem('empresa_id', emp.id);                // O UUID da empresa
+        localStorage.setItem('user_cnpj', cnpj);                  // O CNPJ digitado
+        localStorage.setItem('nome_empresa', emp.nome_fantasia);   // Nome da empresa
+
+        // --- FIM DAS SUGESTÕES ---
+
+        if (data.nivel_permissao === 'Gestor' || data.nivel_permissao === 'Gerente') {
+            localStorage.setItem('yase_user', JSON.stringify(data));
+            Dialog.show("Acesso Liberado", "Bem-vindo ao painel administrativo.", "success");
+            setTimeout(() => window.location.href = 'Dashboard.html', 1200);
+        } else {
+            localStorage.setItem('yase_colab', JSON.stringify(data));
+            // Como ele é colaborador, levamos ele direto para o Rastreio
+            Dialog.show("Acesso Liberado", "Iniciando painel de rastreio...", "success");
+            setTimeout(() => window.location.href = 'Rastreio_Full.html', 1200);
+        }
+
+    } catch (err) {
+        Dialog.show("Falha de Login", err.message, "error");
+        btn.disabled = false;
+        btn.innerHTML = 'ENTRAR AGORA <i class="fas fa-arrow-right"></i>';
+    }
+});
+
+      // 4. Lógica de Setup Original
+      document.getElementById('setupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnInt');
+        btn.disabled = true;
+        btn.innerText = "REGISTRANDO...";
+
+        try {
+          const { data: emp, error: errE } = await sb.from('empresas').insert([{
+            cnpj: document.getElementById('int_cnpj').value.trim(),
+            nome_fantasia: document.getElementById('int_fantasia').value.trim()
+          }]).select().single();
+
+          if(errE) throw new Error("Conexão falhou ou CNPJ duplicado.");
+
+          const { error: errU } = await sb.from('usu_arios').insert([{
+            empresa_id: emp.id,
+            nome_completo: document.getElementById('int_gestor_nome').value.trim(),
+            codigo_id: document.getElementById('int_gestor_id').value.trim(),
+            senha: document.getElementById('int_gestor_pass').value,
+            nivel_permissao: 'Gestor'
+          }]);
+
+          if(errU) throw new Error("Erro ao criar credenciais master.");
+
+          localStorage.setItem('yase_last_cnpj', document.getElementById('int_cnpj').value.trim());
+          Dialog.show("Setup Finalizado", "Unidade pronta. Faça seu login.", "success");
+          setTimeout(() => location.reload(), 2000);
+        } catch (err) {
+          Dialog.show("Erro no Setup", err.message, "error");
+          btn.disabled = false;
+          btn.innerText = "FINALIZAR SETUP";
+        }
+      });
+
+      window.onload = () => {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('loginCard').classList.remove('hidden');
+        const lastCnpj = localStorage.getItem('yase_last_cnpj');
+        if (lastCnpj) document.getElementById('cnpj_login').value = lastCnpj;
+      };
+    </script>
+</body>
+</html>

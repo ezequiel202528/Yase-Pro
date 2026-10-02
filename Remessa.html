@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YaSe PRO - Cadastro de Remessas de Selos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      /* CSS PADRÃO CORRIGIDO - SEM SINTAXE TAILWIND DENTRO DO STYLE */
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: #020617;
+        color: white;
+        min-height: 100vh;
+        margin: 0;
+      }
+      aside {
+        width: 260px;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background: #0f172a;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        z-index: 50;
+        border-right: 1px solid rgba(51, 65, 85, 0.5);
+      }
+      main {
+        margin-left: 260px;
+        padding: 48px;
+      }
+
+      .glass-card {
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(51, 65, 85, 0.5);
+        border-radius: 24px;
+        padding: 24px;
+      }
+      .input-field {
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 14px;
+        width: 100%;
+        font-weight: 600;
+        font-size: 13px;
+        box-sizing: border-box;
+      }
+      .input-field:focus {
+        border-color: #fbbf24;
+        outline: none;
+      }
+
+      .label-mini {
+        font-size: 9px;
+        font-weight: 900;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 8px;
+        display: block;
+        margin-left: 4px;
+      }
+      .btn-action {
+        padding: 12px 20px;
+        border-radius: 14px;
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .table-header {
+        background: rgba(30, 41, 59, 0.5);
+        color: #94a3b8;
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+      .accent-text {
+        color: #fbbf24;
+      }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <div class="mb-10 flex items-center gap-3">
+        <div
+          class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20"
+        >
+          <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
+        </div>
+        <h1 class="text-xl font-extrabold tracking-tight">
+          YaSe <span class="accent-text">PRO</span>
+        </h1>
+      </div>
+      <nav class="space-y-3 flex-1">
+        <a
+          href="Dashboard.html"
+          class="flex items-center gap-3 p-3 text-slate-400 hover:text-white transition-all font-bold text-xs rounded-xl hover:bg-slate-800/50"
+        >
+          <i class="fa-solid fa-house accent-text"></i> Dashboard
+        </a>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="flex justify-between items-end mb-10">
+        <div>
+          <h2 class="text-3xl font-black text-white tracking-tighter">
+            Gestão de <span class="accent-text">Remessas</span>
+          </h2>
+          <p class="text-slate-500 text-sm font-medium">
+            Controle e Lote de Selos Inmetro
+          </p>
+        </div>
+        <div class="flex gap-3">
+          <button
+            onclick="salvarLote()"
+            class="btn-action bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white"
+          >
+            <i class="fa-solid fa-floppy-disk"></i> Gravar Lote
+          </button>
+          <button
+            onclick="limparCampos()"
+            class="btn-action bg-slate-800 text-slate-400 hover:text-white border border-slate-700"
+          >
+            <i class="fa-solid fa-eraser"></i> Limpar
+          </button>
+        </div>
+        <div class="mb-4">
+          <label class="label-mini">Buscar por NF-e</label>
+          <input
+            type="text"
+            id="busca_nfe"
+            class="input-field w-full md:w-64"
+            placeholder="Digite a nota fiscal..."
+          />
+        </div>
+      </header>
+
+      <div
+        class="glass-card grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8 border-t-4 border-t-amber-500"
+      >
+        <div>
+          <label class="label-mini">Recebimento</label>
+          <input type="date" id="data_rec" class="input-field" />
+        </div>
+        <div>
+          <label class="label-mini">Tipo de Selo</label>
+          <select id="tipo_selo" class="input-field">
+            <option>NUMÉRICO</option>
+            <option>ALFA-NUMÉRICO</option>
+          </select>
+        </div>
+        <div>
+          <label class="label-mini">Selo Inicial</label>
+          <input
+            type="number"
+            id="selo_inicio"
+            class="input-field"
+            placeholder="00000"
+          />
+        </div>
+        <div>
+          <label class="label-mini">Selo Final</label>
+          <input
+            type="number"
+            id="selo_fim"
+            class="input-field"
+            placeholder="00000"
+          />
+        </div>
+        <div>
+          <label class="label-mini">Qtd.</label>
+          <input
+            type="number"
+            id="qtd_selos"
+            class="input-field bg-slate-900/50 accent-text font-black"
+            readonly
+          />
+        </div>
+        <div>
+          <label class="label-mini">Prefixo</label>
+          <input
+            type="text"
+            id="prefixo"
+            class="input-field"
+            placeholder="ABC"
+          />
+        </div>
+        <div class="md:col-span-4">
+          <label class="label-mini">Solicitação / NF-e</label>
+          <input type="text" id="documento" class="input-field" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="label-mini">Situação</label>
+          <select id="status_lote" class="input-field">
+            <option value="ABERTO">ABERTO</option>
+            <option value="FECHADO">FECHADO</option>
+          </select>
+        </div>
+      </div>
+
+      <section class="glass-card !p-0 overflow-hidden mb-8">
+        <table class="w-full text-left border-collapse table-fixed">
+          <thead>
+            <tr class="table-header">
+              <th class="p-5 w-[12%]">Data</th>
+              <th class="p-5 w-[15%]">Selo Inicial</th>
+              <th class="p-5 w-[15%]">Selo Final</th>
+              <th class="p-5 w-[8%] text-center">Qtd.</th>
+              <th class="p-5 w-[25%]">Solicitação / NF-e</th>
+              <th class="p-5 w-[15%] text-center">Situação</th>
+              <th class="p-5 w-[10%] text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody
+            id="lista-remessas"
+            class="text-[11px] font-bold text-slate-300"
+          ></tbody>
+        </table>
+      </section>
+
+      <section class="glass-card bg-amber-500/5 border-amber-500/20">
+        <span class="label-mini accent-text mb-4">Estoque Geral de Selos</span>
+        <div class="flex flex-wrap items-end gap-6">
+          <div>
+            <label class="label-mini">Total Recebido</label>
+            <input
+              type="text"
+              id="resumo_total"
+              class="input-field w-32 bg-slate-900"
+              readonly
+            />
+          </div>
+          <div class="text-slate-600 text-2xl pb-1">−</div>
+          <div>
+            <label class="label-mini text-red-400">Utilizados</label>
+            <input
+              type="number"
+              id="resumo_utilizados"
+              class="input-field w-28 border-red-500/30 text-red-400"
+              value="0"
+            />
+          </div>
+          <div class="text-slate-600 text-2xl pb-1">=</div>
+          <div>
+            <label class="label-mini text-emerald-400">Estoque Atual</label>
+            <input
+              type="text"
+              id="resumo_estoque"
+              class="input-field w-40 bg-emerald-500 text-slate-950 font-black text-lg"
+              readonly
+            />
+          </div>
+          <button
+            onclick="atualizarResumoLotes()"
+            class="btn-action bg-amber-500 text-slate-950 hover:bg-amber-400 ml-auto font-black"
+          >
+            SINCRONIZAR ESTOQUE
+          </button>
+        </div>
+      </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script type="module" src="Remessas/entry.js"></script>
+  </body>
+</html>

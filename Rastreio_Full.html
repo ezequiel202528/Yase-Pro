@@ -744,55 +744,72 @@
 </div>
 
 <div id="modalEtiqueta" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-300 text-black">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-300 text-black">
         
         <div class="bg-slate-100 px-4 py-2 border-b flex justify-between items-center">
             <span class="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">Visualização de Etiqueta - YaSe PRO</span>
             <button onclick="fecharModalEtiqueta()" class="text-slate-400 hover:text-red-500 text-lg">&times;</button>
         </div>
 
-        <div class="p-8 flex justify-center">
-            <div id="areaImpressaoEtiqueta" class="bg-white border-[1.5px] border-black p-2" style="width: 100mm; height: 50mm; font-family: Arial, sans-serif;">
+        <div class="p-6 flex justify-center">
+            <!-- ETIQUETA COM DIMENSÕES REAIS (100mm x 50mm) E LAYOUT EM 2 COLUNAS (Conteúdo + Selo Vertical) -->
+            <div id="areaImpressaoEtiqueta" class="bg-white border-[1.5px] border-black p-2 flex justify-between items-stretch" style="width: 100mm; height: 50mm; font-family: Arial, sans-serif; box-sizing: border-box;">
                 
-                <div class="flex border-b border-black pb-1 mb-1">
-                    <div class="w-1/4 flex items-center justify-center border-r border-black mr-2">
-                         <img id="logo_empresa_etiqueta" src="" alt="Logo" class="max-h-10 max-w-full hidden">
-                         <i id="fallback_icon" class="fa-solid fa-fire-extinguisher text-2xl"></i>
+                <!-- COLUNA ESQUERDA: Dados, Avisos e Prazos -->
+                <div class="flex flex-col justify-between flex-1 pr-2">
+                    
+                    <!-- Cabeçalho Empresa -->
+                    <div class="flex border-b border-black pb-1 mb-1">
+                        <div class="w-1/4 flex items-center justify-center border-r border-black mr-1 pr-1">
+                             <img id="logo_empresa_etiqueta" src="" alt="Logo" class="max-h-8 max-w-full hidden">
+                             <i id="fallback_icon" class="fa-solid fa-fire-extinguisher text-xl"></i>
+                        </div>
+                        <div id="header_empresa" class="w-3/4 text-[6.5px] leading-tight font-bold">
+                            <div class="text-[8.5px] font-black uppercase">NOME DA EMPRESA LTDA</div>
+                            ENDEREÇO COMPLETO - CIDADE/UF<br>
+                            CNPJ: 00.000.000/0000-00 - (00) 0000-0000
+                        </div>
                     </div>
-                    <div id="header_empresa" class="w-3/4 text-[7px] leading-tight font-bold">
-                        <div class="text-[9px] font-black uppercase">NOME DA EMPRESA LTDA</div>
-                        ENDEREÇO COMPLETO - CIDADE/UF<br>
-                        CNPJ: 00.000.000/0000-00 - (00) 0000-0000
+
+                    <!-- Aviso Legal Inmetro -->
+                    <div class="text-[5.5px] text-center font-bold uppercase leading-none mb-1">
+                        PARA CONCESSÃO DE GARANTIA ESTE EXTINTOR DEVE SER VERIFICADO MENSALMENTE, GARANTIA DE 1 ANO, CONTRA A DESPRESSURIZAÇÃO. A VIOLAÇÃO DO LACRE INTERROMPE A GARANTIA.
+                    </div>
+
+                    <!-- Prazos e Nível -->
+                    <div class="grid grid-cols-3 gap-0 border border-black mb-1">
+                        <div class="border-r border-black text-center p-0.5">
+                            <div class="text-[5.5px] font-black uppercase">Próx. Manut.</div>
+                            <div id="etiqueta_val_manut" class="text-[9.5px] font-bold">---</div>
+                        </div>
+                        <div class="border-r border-black text-center p-0.5">
+                            <div class="text-[5.5px] font-black uppercase">Próx. Reteste</div>
+                            <div id="etiqueta_val_reteste" class="text-[9.5px] font-bold">---</div>
+                        </div>
+                        <div class="text-center p-0.5 bg-black text-white">
+                            <div class="text-[5.5px] font-black uppercase">Manut. Realizada</div>
+                            <div id="etiqueta_nivel" class="text-[9.5px] font-bold italic">NÍVEL 2</div>
+                        </div>
+                    </div>
+
+                    <!-- Rodapé com Tipo e Código de Barras -->
+                    <div class="flex justify-between items-end">
+                        <div class="text-[6.5px] font-bold italic">
+                            Tipo: <span id="etiqueta_tipo">---</span> | Cap: <span id="etiqueta_cap">---</span>
+                        </div>
+                        <div class="flex flex-col items-center scale-90 origin-bottom-right">
+                            <svg id="barcode_preview"></svg>
+                        </div>
                     </div>
                 </div>
 
-                <div class="text-[6px] text-center font-bold uppercase leading-none mb-2">
-                    PARA CONCESSÃO DE GARANTIA ESTE EXTINTOR DEVE SER VERIFICADO MENSALMENTE, GARANTIA DE 1 ANO, CONTRA A DESPRESSURIZAÇÃO. A VIOLAÇÃO DO LACRE INTERROMPE A GARANTIA.
+                <!-- COLUNA DIREITA: A Faixa Vertical com o Número do Selo -->
+                <div class="w-8 border-l-2 border-dashed border-black flex items-center justify-center bg-slate-50 py-1 select-none">
+                    <span id="etiqueta_selo" class="font-black text-xs tracking-widest whitespace-nowrap" style="writing-mode: vertical-rl; transform: rotate(180deg);">
+                        ${item?.prefixo_selo ? item.prefixo_selo + '-' : ''}${item?.selo_inmetro ?? '000000'}
+                    </span>
                 </div>
 
-                <div class="grid grid-cols-3 gap-0 border border-black mb-2">
-                    <div class="border-r border-black text-center p-1">
-                        <div class="text-[6px] font-black uppercase">Próx. Manut.</div>
-                        <div id="etiqueta_val_manut" class="text-[11px] font-bold">---</div>
-                    </div>
-                    <div class="border-r border-black text-center p-1">
-                        <div class="text-[6px] font-black uppercase">Próx. Reteste</div>
-                        <div id="etiqueta_val_reteste" class="text-[11px] font-bold">---</div>
-                    </div>
-                    <div class="text-center p-1 bg-black text-white">
-                        <div class="text-[6px] font-black uppercase">Manut. Realizada</div>
-                        <div id="etiqueta_nivel" class="text-[11px] font-bold italic">NÍVEL 2</div>
-                    </div>
-                </div>
-
-                <div class="flex justify-between items-end">
-                    <div class="text-[7px] font-bold italic">
-                        Tipo: <span id="etiqueta_tipo">---</span> | Cap: <span id="etiqueta_cap">---</span>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <svg id="barcode_preview"></svg>
-                    </div>
-                </div>
             </div>
         </div>
 

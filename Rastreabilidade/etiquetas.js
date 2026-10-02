@@ -51,6 +51,16 @@ function prepararModalEtiqueta(dados) {
   // Exibe o Modal
   document.getElementById("modalEtiqueta").classList.remove("hidden");
   document.getElementById("modalEtiqueta").classList.add("flex");
+
+
+  // Preenche o número do selo vertical na lateral
+  const elementoSelo = document.getElementById("etiqueta_selo");
+  if (elementoSelo) {
+    const prefixo = dados.prefixo_selo ? dados.prefixo_selo + "-" : "";
+    const numeroSelo = dados.selo_inmetro || "---";
+    elementoSelo.innerText = prefixo + numeroSelo;
+  }
+
 }
 
 // 2. Função para Fechar o Modal
@@ -86,6 +96,10 @@ function validarEImprimir() {
 
   fecharModalEtiqueta();
 }
+
+
+
+
 
 window.prepararModalEtiqueta = prepararModalEtiqueta;
 window.fecharModalEtiqueta = fecharModalEtiqueta;

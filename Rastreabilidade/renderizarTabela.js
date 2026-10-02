@@ -726,6 +726,16 @@ async function registrarItem() {
 
     if (resultado.error) throw resultado.error;
 
+    const deveImprimir = document.getElementById("switchEtiqueta")?.checked;
+    if (deveImprimir) {
+      // Se for inserção nova, o objeto retornado estará em resultado.data[0]
+      // Se for edição, você pode usar o ID ou o objeto atualizado
+      const itemSalvo = resultado.data ? resultado.data[0] : dados;
+      if (typeof prepararModalEtiqueta === "function" && itemSalvo) {
+        prepararModalEtiqueta(itemSalvo);
+      }
+    }
+
     await carregarItens();
     focarUltimoRegistro();
     limparCamposAposRegistro();

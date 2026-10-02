@@ -715,13 +715,10 @@
         </div>
         
        <div class="space-y-6"> <div>
-        <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1 mb-2 block">Código (ID)</label>
-        <input type="text" id="troca_codigo" 
-            class="w-full h-[52px] px-5 rounded-2xl text-white text-[13px] font-medium outline-none transition-all border border-white/10"
-            style="background: rgba(15, 23, 42, 0.8); font-family: 'Plus Jakarta Sans', sans-serif;"
-            placeholder="Ex: OPER-01"
-            onfocus="this.style.borderColor='#fbbf24'; this.style.boxShadow='0 0 0 1px #fbbf24';"
-            onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.boxShadow='none';">
+        <label class="block text-sm font-medium mb-1 text-slate-300">CÓDIGO (ID)</label>
+<select id="troca_codigo" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white">
+  <option value="">Carregando operadores...</option>
+</select>
     </div>
     <div>
         <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1 mb-2 block">Senha de Acesso</label>

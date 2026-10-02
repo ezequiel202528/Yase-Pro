@@ -1,59 +1,25 @@
-// 1. Função para Abrir e Preencher o Modal
 function prepararModalEtiqueta(dados) {
+  document.getElementById('etiqueta_empresa_nome').innerText = localStorage.getItem('nome_empresa') || "NOME DA EMPRESA LTDA";
+  document.getElementById('etiqueta_empresa_endereco').innerText = (localStorage.getItem('endereco_empresa') || "ENDEREÇO COMPLETO") + " - " + (localStorage.getItem('cidade_empresa') || "CIDADE/UF");
+  document.getElementById('etiqueta_empresa_cnpj').innerText = localStorage.getItem('cnpj_empresa') || "00.000.000/0000-00";
+  document.getElementById('etiqueta_empresa_fone').innerText = localStorage.getItem('telefone_empresa') || "(00) 0000-0000";
+
   const meses = [
-    "JAN",
-    "FEV",
-    "MAR",
-    "ABR",
-    "MAI",
-    "JUN",
-    "JUL",
-    "AGO",
-    "SET",
-    "OUT",
-    "NOV",
-    "DEZ",
+    "JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
+    "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"
   ];
+  
   const dRecarga = new Date(dados.prox_recarga + "T12:00:00");
   const dataEtiqueta = `${meses[dRecarga.getMonth()]} - ${dRecarga.getFullYear()}`;
 
-  // Preenche dados técnicos no Modal
   document.getElementById("etiqueta_val_manut").innerText = dataEtiqueta;
-  document.getElementById("etiqueta_val_reteste").innerText =
-    dados.prox_reteste || "---";
-  document.getElementById("etiqueta_nivel").innerText =
-    "NÍVEL " + (dados.nivel || 2);
-  document.getElementById("etiqueta_tipo").innerText =
-    dados.tipo_carga || "---";
+  document.getElementById("etiqueta_val_reteste").innerText = dados.prox_reteste || "---";
+  document.getElementById("etiqueta_nivel").innerText = "NÍVEL " + (dados.nivel || 2);
+  document.getElementById("etiqueta_tipo").innerText = dados.tipo_carga || "---";
   document.getElementById("etiqueta_cap").innerText = dados.capacidade || "---";
 
-  // Gerar Código de Barras (JsBarcode)
-  JsBarcode("#barcode_preview", dados.nr_cilindro, {
-    format: "CODE128",
-    width: 1.5,
-    height: 30,
-    displayValue: true,
-    fontSize: 8,
-    lineColor: "#000",
-  });
+  document.getElementById("etiqueta_cilindro").innerText = dados.nr_cilindro || dados.cilindro || "---";
 
-  // Gerenciar Logo Dinâmica
-  const urlLogo = localStorage.getItem("empresa_logo");
-  const imgLogo = document.getElementById("logo_empresa_etiqueta");
-  const iconFallback = document.getElementById("fallback_icon");
-
-  if (urlLogo && imgLogo) {
-    imgLogo.src = urlLogo;
-    imgLogo.classList.remove("hidden");
-    if (iconFallback) iconFallback.classList.add("hidden");
-  }
-
-  // Exibe o Modal
-  document.getElementById("modalEtiqueta").classList.remove("hidden");
-  document.getElementById("modalEtiqueta").classList.add("flex");
-
-
-  // Preenche o número do selo vertical na lateral
   const elementoSelo = document.getElementById("etiqueta_selo");
   if (elementoSelo) {
     const prefixo = dados.prefixo_selo ? dados.prefixo_selo + "-" : "";
@@ -61,18 +27,39 @@ function prepararModalEtiqueta(dados) {
     elementoSelo.innerText = prefixo + numeroSelo;
   }
 
+  const codigoBarrasReal = dados.cod_barras || dados.codigo_barras || dados.nr_cilindro;
+
+  JsBarcode("#barcode_preview", codigoBarrasReal, {
+    format: "CODE128",
+    width: 1.2,
+    height: 25,
+    displayValue: false,
+    lineColor: "#000",
+  });
+
+  document.getElementById("barcode_text_manual").innerText = codigoBarrasReal;
+
+  const urlLogo = localStorage.getItem("empresa_logo");
+  const imgLogoCentral = document.getElementById("logo_central_etiqueta");
+
+  if (urlLogo && imgLogoCentral) {
+    imgLogoCentral.src = urlLogo;
+    imgLogoCentral.classList.remove("hidden");
+  } else if (imgLogoCentral) {
+    imgLogoCentral.classList.add("hidden");
+  }
+
+  document.getElementById("modalEtiqueta").classList.remove("hidden");
+  document.getElementById("modalEtiqueta").classList.add("flex");
 }
 
-// 2. Função para Fechar o Modal
 function fecharModalEtiqueta() {
   const modal = document.getElementById("modalEtiqueta");
   modal.classList.add("hidden");
   modal.classList.remove("flex");
 }
 
-// 3. Função para Disparar a Impressão Real
 function validarEImprimir() {
-  // Alterado para coincidir com o HTML
   const conteudo = document.getElementById("areaImpressaoEtiqueta").innerHTML;
   const janela = window.open("", "", "width=800,height=600");
 
@@ -87,7 +74,7 @@ function validarEImprimir() {
                 </style>
             </head>
             <body onload="setTimeout(() => { window.print(); window.close(); }, 500)">
-                <div style="width: 100mm; height: 50mm; padding: 5px; color: black; background: white;">
+                <div style="width: 100mm; height: 50mm; padding: 5px; color: black; background: white; display: flex; justify-content: space-between; align-items: stretch; position: relative; overflow: hidden; box-sizing: border-box;">
                     ${conteudo}
                 </div>
             </body>
@@ -96,10 +83,6 @@ function validarEImprimir() {
 
   fecharModalEtiqueta();
 }
-
-
-
-
 
 window.prepararModalEtiqueta = prepararModalEtiqueta;
 window.fecharModalEtiqueta = fecharModalEtiqueta;

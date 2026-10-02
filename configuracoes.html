@@ -15,7 +15,6 @@
         color: white; 
     }
 
-    /* Cards seguindo o padrão da Aside do Rastreio */
     .glass-card { 
         background: #0f172a; 
         border: 1px solid rgba(51, 65, 85, 0.5); 
@@ -23,7 +22,7 @@
     }
 
     .input-field { 
-        background: #1e293b; /* Slate 800 */
+        background: #1e293b; 
         border: 1px solid #334155; 
         color: white; 
     }
@@ -48,13 +47,19 @@
                 <div class="glass-card p-6 rounded-[2.5rem] text-center">
                     <p class="text-[10px] font-black uppercase text-amber-500 mb-6 tracking-widest">Logo da Etiqueta</p>
                     
-                    <div class="w-32 h-32 mx-auto bg-white/5 rounded-3xl border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden mb-6 group relative">
+                    <!-- Área clicável que abre o explorador de arquivos do PC -->
+                    <div onclick="document.getElementById('input_file_logo').click()" class="w-32 h-32 mx-auto bg-white/5 rounded-3xl border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden mb-6 group relative cursor-pointer hover:border-amber-500/50 transition-all" title="Clique para escolher a logo do computador">
                         <img id="preview_logo" src="" class="hidden w-full h-full object-contain p-2">
-                        <i id="placeholder_icon" class="fas fa-image text-3xl text-white/10 group-hover:text-amber-500/50 transition-all"></i>
+                        <div id="placeholder_container" class="flex flex-col items-center justify-center">
+                            <i class="fas fa-cloud-arrow-up text-2xl text-white/20 group-hover:text-amber-500 transition-all mb-1"></i>
+                            <span class="text-[8px] font-bold text-neutral-400 group-hover:text-amber-500 uppercase">Enviar Logo</span>
+                        </div>
                     </div>
 
-                    <input type="text" id="cfg_logo" class="input-field w-full h-10 px-4 rounded-xl text-[10px] mb-4" placeholder="URL da Imagem (.png)">
-                    <p class="text-[9px] text-neutral-500 leading-relaxed font-medium">Recomendamos logotipos com fundo transparente (PNG) e largura mínima de 400px.</p>
+                    <!-- Input de arquivo oculto acionado pelo clique na caixa acima -->
+                    <input type="file" id="input_file_logo" accept="image/png, image/jpeg" class="hidden" onchange="processarArquivoLogo(event)">
+
+                    <p class="text-[9px] text-neutral-500 leading-relaxed font-medium">Recomendamos logotipos com fundo transparente (PNG) e boa resolução. Clique na caixa acima para carregar.</p>
                 </div>
             </div>
 
@@ -99,6 +104,8 @@
     </main>
 
     <script>
+        let logoBase64Temp = "";
+
         // Carregar dados existentes ao iniciar
         window.onload = () => {
             document.getElementById('cfg_nome').value = localStorage.getItem('nome_empresa') || "";
@@ -106,24 +113,46 @@
             document.getElementById('cfg_endereco').value = localStorage.getItem('endereco_empresa') || "";
             document.getElementById('cfg_cidade').value = localStorage.getItem('cidade_empresa') || "";
             document.getElementById('cfg_fone').value = localStorage.getItem('telefone_empresa') || "";
-            const logo = localStorage.getItem('empresa_logo') || "";
-            document.getElementById('cfg_logo').value = logo;
             
-            if(logo) {
+            const logoSalva = localStorage.getItem('empresa_logo') || "";
+            if(logoSalva) {
+                logoBase64Temp = logoSalva;
                 const img = document.getElementById('preview_logo');
-                img.src = logo;
+                img.src = logoSalva;
                 img.classList.remove('hidden');
-                document.getElementById('placeholder_icon').classList.add('hidden');
+                document.getElementById('placeholder_container').classList.add('hidden');
             }
         };
 
+        // Função para ler o arquivo do computador e converter para Base64
+        function processarArquivoLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoBase64Temp = e.target.result; // Guarda a imagem convertida
+                    
+                    // Exibe a pré-visualização instantânea na tela
+                    const img = document.getElementById('preview_logo');
+                    img.src = logoBase64Temp;
+                    img.classList.remove('hidden');
+                    document.getElementById('placeholder_container').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Salvar todos os dados e a logo no localStorage
         function salvarDados() {
             localStorage.setItem('nome_empresa', document.getElementById('cfg_nome').value);
             localStorage.setItem('cnpj_empresa', document.getElementById('cfg_cnpj').value);
             localStorage.setItem('endereco_empresa', document.getElementById('cfg_endereco').value);
             localStorage.setItem('cidade_empresa', document.getElementById('cfg_cidade').value);
             localStorage.setItem('telefone_empresa', document.getElementById('cfg_fone').value);
-            localStorage.setItem('empresa_logo', document.getElementById('cfg_logo').value);
+            
+            if (logoBase64Temp) {
+                localStorage.setItem('empresa_logo', logoBase64Temp);
+            }
 
             alert("Os dados da etiqueta foram atualizados com sucesso!");
             location.reload();

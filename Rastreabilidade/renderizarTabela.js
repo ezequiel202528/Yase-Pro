@@ -3,77 +3,7 @@
  */
 let selectedRowIndex = -1;
 
-/**
- * Carrega todos os itens vinculados à Ordem de Serviço atual do Supabase e renderiza a tabela.
- */
 
-// async function carregarItens() {
-//   try {
-//     // Aguarda um instante se o supabase ainda não estiver pronto (comum no Vercel)
-//     if (!window._supabase) {
-//       console.warn("⏳ Aguardando inicialização do Supabase...");
-//       // Aguarda até 5 segundos pelo Supabase
-//       let tentativas = 0;
-//       while (!window._supabase && tentativas < 20) {
-//         await new Promise((r) => setTimeout(r, 250));
-//         tentativas++;
-//       }
-//       if (!window._supabase) {
-//         console.error("❌ Supabase não disponível após espera");
-//         return;
-//       }
-//     }
-//     const _supabase = window._supabase;
-
-//     const osAtiva = window.currentOS || sessionStorage.getItem("currentOS");
-//     if (!osAtiva) {
-//       console.error("❌ Nenhuma OS ativa encontrada para carregar dados.");
-//       return;
-//     }
-
-//     // Tentativa de busca com Join de fabricantes
-//     let query = _supabase
-//       .from("itens_os")
-//       .select("*, fabricantes(nome)")
-//       .eq("os_number", osAtiva)
-//       .order("created_at", { ascending: true });
-
-//     let { data, error } = await query;
-
-//     // Tentativa de busca com Join de fabricantes
-
-//     // Se der erro no Join (comum se a FK não estiver configurada), tenta busca simples
-//     if (error) {
-//       console.warn(
-//         "⚠️ Falha na busca com relacionamento, tentando busca simples...",
-//         error.message,
-//       );
-//       const simples = await _supabase
-//         .from("itens_os")
-//         .select("*")
-//         .eq("os_number", osAtiva)
-//         .order("created_at", { ascending: true });
-
-//       if (simples.error) throw simples.error;
-//       data = simples.data;
-//     }
-
-//     if (!data || data.length === 0) {
-//       console.log(`ℹ️ Nenhum item encontrado para a OS ${osAtiva}`);
-//     } else {
-//       console.log(`📊 ${data.length} itens carregados com sucesso.`);
-//     }
-
-//     const contadorEl = document.getElementById("itemCounter");
-//     if (contadorEl) contadorEl.innerText = data ? data.length : 0;
-
-//     renderItens(data);
-//     configurarCliquesTabela();
-//     destacarUltimaLinha();
-//   } catch (err) {
-//     console.error("Erro ao carregar tabela:", err);
-//   }
-// }
 
 async function carregarItens() {
   try {
@@ -210,127 +140,7 @@ document.getElementById("nr_cilindro")?.addEventListener("input", () => {
   }
 });
 
-/**
- * Gera o HTML dinâmico das linhas da tabela com base no array de itens fornecido.
- */
 
-// function renderItens(itens) {
-//   const list = document.getElementById("itensList");
-//   if (!list) return;
-
-//   if (!itens || itens.length === 0) {
-//     list.innerHTML = `<tr><td colspan="40" class="p-10 text-center text-slate-500 italic">Nenhum registro encontrado.</td></tr>`;
-//     return;
-//   }
-
-//   const formatarDataLocal = (dataStr) => {
-//     if (!dataStr || dataStr === "" || dataStr === "-" || dataStr === "null")
-//       return "-";
-//     if (dataStr.length === 10) {
-//       const [ano, mes, dia] = dataStr.split("-");
-//       return `${dia}/${mes}/${ano}`;
-//     }
-//     const d = new Date(dataStr);
-//     if (isNaN(d.getTime())) return dataStr;
-//     return d.toLocaleString("pt-BR", {
-//       day: "2-digit",
-//       month: "2-digit",
-//       year: "numeric",
-//       hour: "2-digit",
-//       minute: "2-digit",
-//     });
-//   };
-
-//   list.innerHTML = itens
-//     .map((item, index) => {
-//       const s = (
-//         item.status_servico ||
-//         item.status ||
-//         "APROVADO"
-//       ).toUpperCase();
-//       const corDaLinha =
-//         s === "INUTILIZADO" ? "text-red-500 font-bold" : "text-slate-300";
-//       let classesStatus =
-//         "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-//       if (s === "REPROVADO" || s === "REP" || s === "INUTILIZADO") {
-//         classesStatus = "bg-red-500/10 text-red-400 border-red-500/20";
-//       } else if (s === "NOVO") {
-//         classesStatus = "bg-amber-500/10 text-amber-400 border-amber-500/20";
-//       }
-//       const dataLancamento = formatarDataLocal(item.created_at);
-//       const dataAlteracao = item.updated_at
-//         ? formatarDataLocal(item.updated_at)
-//         : "Sem alterações";
-
-//         let nomeExibicao = item.fabricante_id || "-";
-//       if (item.fabricantes) {
-//         const nomeBruto = Array.isArray(item.fabricantes)
-//           ? item.fabricantes[0]?.nome
-//           : item.fabricantes.nome;
-
-//         if (nomeBruto) nomeExibicao = String(nomeBruto).toUpperCase();
-//       }
-
-//       return `
-//       <tr data-index="${index}" data-id="${item.id}" class="group text-[11px] border-b border-slate-800 hover:bg-slate-800/40 transition-colors whitespace-nowrap ${corDaLinha}">
-//         <td class="p-3 sticky left-0 z-[40] bg-[#0f172a] border-r border-slate-700 font-bold group-hover:bg-[#1e293b] transition-colors">
-//           ${index + 1}
-//         </td>
-//         <td class="p-3 font-black text-amber-500 bg-amber-500/5">
-//             ${item.prefixo_selo ? item.prefixo_selo + "-" : ""}${item.selo_inmetro ?? "-"}
-//         </td>
-//         <td class="p-3 font-bold text-slate-200">${item.nr_cilindro || "S/N"}</td>
-//         <td class="p-3 font-bold text-slate-300 uppercase">${item.nbr || "-"}</td>
-//         <td class="p-3 font-bold text-slate-300">${nomeExibicao}</td>
-//         <td class="p-3">${item.ano_fab || "-"}</td>
-//         <td class="p-3">${item.ult_reteste || "-"}</td>
-//         <td class="px-4 py-3 text-xs font-bold text-orange-500">${item.prox_reteste || "-"}</td>
-//         <td class="p-3 text-amber-500 font-bold">${item.prox_recarga || "-"}</td>
-//         <td class="p-3 font-bold text-indigo-400">${item.tipo_carga || "-"} / ${item.capacidade || "-"}</td>
-//         <td class="p-3">${item.usuario_lancamento || "-"}</td>
-//         <td class="p-3 text-center">${item.nivel_manutencao || "2"}</td>
-//         <td class="p-3">
-//             <span class="px-2 py-0.5 rounded border font-bold text-[9px] ${classesStatus}">
-//                 ${s}
-//             </span>
-//         </td>
-//         <td class="p-3 bg-orange-500/5 border-l border-slate-800">${item.p_vazio_valvula || "-"}</td>
-//         <td class="p-3 bg-orange-500/5">${item.p_cheio_valvula || "-"}</td>
-//         <td class="p-3 bg-orange-500/5 font-bold text-orange-300">${item.p_atual || "-"}</td>
-//         <td class="p-3 bg-orange-500/5">${item.porcent_dif || "0"}%</td>
-//         <td class="p-3 bg-emerald-500/5 border-l border-slate-800">${item.tara_cilindro || "-"}</td>
-//         <td class="p-3 bg-emerald-500/5">${item.p_cil_vazio_kg || "-"}</td>
-//         <td class="p-3 bg-emerald-500/5 text-emerald-400">${item.perda_massa_porcent || "0"}%</td>
-//         <td class="p-3 bg-blue-500/5 border-l border-slate-800">${item.vol_litros || "-"}</td>
-//         <td class="p-3 bg-blue-500/5">${item.dvh || "-"}</td>
-//         <td class="p-3 bg-blue-500/5">${item.dvp || "-"}</td>
-//         <td class="p-3 bg-blue-500/5">${item.ee || "-"}</td>
-//         <td class="p-3 bg-red-500/5 border-l border-slate-800">${item.dvm_et || "-"}</td>
-//         <td class="p-3 bg-red-500/5">${item.dvp_ep || "-"}</td>
-//         <td class="p-3 bg-red-500/5">${item.ee_calculado || "-"}</td>
-//         <td class="p-3 bg-red-500/5 font-bold text-red-400">${item.ep_porcent_final || "0"}%</td>
-//         <td class="p-3 text-slate-400 text-[10px]">${dataLancamento}</td>
-//         <td class="p-3 text-[10px]">${item.cod_barras || "-"}</td>
-//         <td class="p-4">${item.lote_nitrogenio || "-"}</td>
-//         <td class="p-3">${item.ampola_vinculada || "-"}</td>
-//         <td class="p-3">${item.deposito_galpao || "-"}</td>
-//         <td class="p-3 font-bold text-indigo-400 bg-indigo-500/5 text-center border-x border-slate-800/20">${item.num_patrimonio || "-"}</td>
-//         <td class="p-3">${item.local_especifico || item.local_extintor || "-"}</td>
-//         <td class="p-3 text-[9px] text-slate-500 italic">${dataAlteracao}</td>
-//         <td class="p-3 text-[9px] font-bold text-amber-600/80">${item.usuario_alteracao || "-"}</td>
-//         <td class="p-3 sticky right-0 z-20 bg-[#0f172a] border-l border-slate-700 text-right pr-4 shadow-[-5px_0_10px_rgba(0,0,0,0.3)] group-hover:bg-[#1e293b] transition-colors">
-//             <div class="flex gap-2 justify-end">
-//               <button onclick="prepararEdicao('${item.id}')" class="text-amber-500 hover:text-amber-400"><i class="fa-solid fa-pen-to-square"></i></button>
-//               <button onclick="deletarItem('${item.id}')" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
-//               <button onclick="abrirModalInutilizar('${item.id}')" class="text-gray-400 hover:text-gray-300">
-//                 <i class="fa-solid fa-ban text-[10px]"></i>
-//               </button>
-//             </div>
-//         </td>
-//       </tr>`;
-//     })
-//     .join("");
-// }
 
 function renderItens(itens) {
   const list = document.getElementById("itensList");
@@ -726,15 +536,42 @@ async function registrarItem() {
 
     if (resultado.error) throw resultado.error;
 
-    const deveImprimir = document.getElementById("switchEtiqueta")?.checked;
-    if (deveImprimir) {
-      // Se for inserção nova, o objeto retornado estará em resultado.data[0]
-      // Se for edição, você pode usar o ID ou o objeto atualizado
-      const itemSalvo = resultado.data ? resultado.data[0] : dados;
-      if (typeof prepararModalEtiqueta === "function" && itemSalvo) {
-        prepararModalEtiqueta(itemSalvo);
-      }
+    // const deveImprimir = document.getElementById("switchEtiqueta")?.checked;
+    // if (deveImprimir) {
+    //   const itemSalvo = resultado.data ? resultado.data[0] : dados;
+      
+    //   // Se a função de fila existir, adiciona nela de forma silenciosa
+    //   if (typeof adicionarFilaEtiqueta === "function") {
+    //     adicionarFilaEtiqueta(itemSalvo);
+    //     console.log("🏷️ Etiqueta adicionada à fila de impressão em lote.");
+    //   } else if (typeof prepararModalEtiqueta === "function" && itemSalvo) {
+    //     // Fallback caso a fila não esteja carregada no escopo
+    //     prepararModalEtiqueta(itemSalvo);
+    //   }
+    // }
+
+    // No final, logo após o insert/update bem-sucedido no Supabase:
+    if (resultado.error) throw resultado.error;
+
+    // VERIFICAÇÃO DO MODO DE IMPRESSÃO
+    const switchAvulsaAtivo = document.getElementById("switchEtiqueta")?.checked; // Ajuste o ID se necessário para o seu switch avulso
+
+    if (switchAvulsaAtivo) {
+        // FLUXO AVULSO: Imprime imediatamente o item recém-criado
+        const itemSalvo = resultado.data ? resultado.data[0] : dados;
+        if (typeof prepararModalEtiqueta === "function" && itemSalvo) {
+            prepararModalEtiqueta(itemSalvo);
+            console.log("🏷️ Impressão avulsa acionada para o item.");
+        }
+    } else {
+        // FLUXO POR LOTE: Não faz nada na hora do registro individual.
+        // O sistema apenas grava em 'itens_os' e o operador gerencia o lote pelo modal de pendentes quando atingir a quantidade (ex: 10).
+        console.log("📦 Modo lote ativo: Item registrado e guardado para o próximo lote em massa.");
     }
+
+    await carregarItens();
+    focarUltimoRegistro();
+    limparCamposAposRegistro();
 
     await carregarItens();
     focarUltimoRegistro();
@@ -923,6 +760,8 @@ document.addEventListener("keydown", function (e) {
     }
   }
 });
+
+
 
 window.fixData = fixData;
 window.carregarItens = carregarItens;

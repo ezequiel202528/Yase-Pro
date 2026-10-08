@@ -64,14 +64,15 @@ function prepararModalEtiqueta(dados) {
   setElementText("barcode_text_manual", codigoBarrasReal);
 
   // Logo da empresa
+
   const urlLogo = localStorage.getItem("empresa_logo");
   const imgLogoCentral = document.getElementById("logo_central_etiqueta");
 
   if (urlLogo && imgLogoCentral) {
     imgLogoCentral.src = urlLogo;
-    imgLogoCentral.classList.remove("hidden");
+    imgLogoCentral.style.display = "block";
   } else if (imgLogoCentral) {
-    imgLogoCentral.classList.add("hidden");
+    imgLogoCentral.style.display = "none";
   }
 
   // Exibir o modal (suporta tanto flex quanto block conforme seu layout)
@@ -326,20 +327,23 @@ window.imprimirFilaEtiquetas = async function(idsEspecificos = []) {
     const codigoBarrasReal = dados.codigo_barras || dados.numero_cilindro || "---";
     const numeroSelo = dados.selo_inmetro || "---";
 
-    htmlEtiquetas += `
+  htmlEtiquetas += `
       <div class="etiqueta-pagina" style="width: 100mm; height: 50mm; padding: 5px; color: black; background: white; display: flex; justify-content: space-between; align-items: stretch; position: relative; overflow: hidden; box-sizing: border-box; page-break-after: always; break-after: page;">
-          <div style="position: absolute; inset: 0; display: flex; align-items: end; justify-content: start; pointer-events: none; padding-bottom: 2rem; padding-left: 1.5rem; z-index: 1;">
-              ${urlLogo ? `<img src="${urlLogo}" style="max-height: 20mm; max-width: 35mm; object-fit: contain; opacity: 0.25;">` : ''}
-          </div>
           <div style="display: flex; flex-direction: column; justify-content: space-between; flex: 1; padding-right: 8px; position: relative; z-index: 10;">
+              
+              <!-- Cabeçalho -->
               <div style="border-bottom: 1px solid black; padding-bottom: 3px; margin-bottom: 3px; text-align: center;">
                   <div style="font-size: 9px; font-weight: 900; text-transform: uppercase;">${empresaNome}</div>
                   <span style="font-size: 7px; font-weight: bold;">${empresaEndereco}</span><br>
                   <span style="font-size: 7px;">CNPJ: ${empresaCnpj} - ${empresaFone}</span>
               </div>
+
+              <!-- Aviso Inmetro -->
               <div style="font-size: 5.5px; text-align: center; font-weight: bold; text-transform: uppercase; line-height: 1; margin-bottom: 3px;">
                   PARA CONCESSÃO DE GARANTIA ESTE EXTINTOR DEVE SER VERIFICADO MENSALMENTE, GARANTIA DE 1 ANO, CONTRA A DESPRESSURIZAÇÃO. A VIOLAÇÃO DO LACRE INTERROMPE A GARANTIA.
               </div>
+
+              <!-- Tabela de Prazos -->
               <div style="display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid black; margin-bottom: 3px; background: rgba(255,255,255,0.8);">
                   <div style="border-right: 1px solid black; text-align: center; padding: 2px;">
                       <div style="font-size: 5.5px; font-weight: 900; text-transform: uppercase;">Próx. Manut.</div>
@@ -354,24 +358,35 @@ window.imprimirFilaEtiquetas = async function(idsEspecificos = []) {
                       <div style="font-size: 9.5px; font-weight: bold; font-style: italic;">NÍVEL ${dados.nivel || 2}</div>
                   </div>
               </div>
+
+              <!-- 🎯 LOGO EXATAMENTE NO ESPAÇO DO RETÂNGULO VERMELHO -->
+              <div style="width: 100%; height: 11mm; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+                  ${urlLogo ? `<img src="${urlLogo}" style="max-width: 35mm; max-height: 10mm; object-fit: contain;">` : ''}
+              </div>
+
+              <!-- Rodapé: Tipo/Cilindro à esquerda e Código de Barras à direita -->
               <div style="display: flex; justify-content: space-between; align-items: flex-end;">
                   <div style="font-size: 6.5px; font-weight: bold; font-style: italic; line-height: 1.2;">
                       Tipo: ${dados.tipo_carga || "---"} | Cap: ${dados.capacidade || "---"}<br>
                       Nº Cilindro: <span style="font-weight: 900;">${dados.numero_cilindro}</span>
                   </div>
+
                   <div style="display: flex; flex-direction: column; align-items: center;">
                       <svg id="barcode_fila_${idx}"></svg>
                       <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px;">${codigoBarrasReal}</span>
                   </div>
               </div>
           </div>
+
+          <!-- Coluna do Selo (Direita) -->
           <div style="width: 32px; border-left: 2px dashed black; display: flex; align-items: center; justify-content: center; background: #f8fafc; position: relative; z-index: 10;">
               <span style="font-weight: 900; font-size: 12px; letter-spacing: 2px; writing-mode: vertical-rl; transform: rotate(180deg);">
                   ${numeroSelo}
               </span>
           </div>
       </div>
-    `;
+  `;
+   
   });
 
   const janela = window.open("", "", "width=800,height=600");

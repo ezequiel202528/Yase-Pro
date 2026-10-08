@@ -14,13 +14,11 @@
         background-color: #020617; 
         color: white; 
     }
-
     .glass-card { 
         background: #0f172a; 
         border: 1px solid rgba(51, 65, 85, 0.5); 
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
-
     .input-field { 
         background: #1e293b; 
         border: 1px solid #334155; 
@@ -42,12 +40,10 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
             <div class="md:col-span-1 space-y-6">
                 <div class="glass-card p-6 rounded-[2.5rem] text-center">
                     <p class="text-[10px] font-black uppercase text-amber-500 mb-6 tracking-widest">Logo da Etiqueta</p>
                     
-                    <!-- Área clicável que abre o explorador de arquivos do PC -->
                     <div onclick="document.getElementById('input_file_logo').click()" class="w-32 h-32 mx-auto bg-white/5 rounded-3xl border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden mb-6 group relative cursor-pointer hover:border-amber-500/50 transition-all" title="Clique para escolher a logo do computador">
                         <img id="preview_logo" src="" class="hidden w-full h-full object-contain p-2">
                         <div id="placeholder_container" class="flex flex-col items-center justify-center">
@@ -56,9 +52,7 @@
                         </div>
                     </div>
 
-                    <!-- Input de arquivo oculto acionado pelo clique na caixa acima -->
                     <input type="file" id="input_file_logo" accept="image/png, image/jpeg" class="hidden" onchange="processarArquivoLogo(event)">
-
                     <p class="text-[9px] text-neutral-500 leading-relaxed font-medium">Recomendamos logotipos com fundo transparente (PNG) e boa resolução. Clique na caixa acima para carregar.</p>
                 </div>
             </div>
@@ -99,40 +93,60 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 
     <script>
-        let logoBase64Temp = "";
+        // Inicialize o Supabase com suas credenciais
+       const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co";
+       const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
 
-        // Carregar dados existentes ao iniciar
-        window.onload = () => {
-            document.getElementById('cfg_nome').value = localStorage.getItem('nome_empresa') || "";
-            document.getElementById('cfg_cnpj').value = localStorage.getItem('cnpj_empresa') || "";
-            document.getElementById('cfg_endereco').value = localStorage.getItem('endereco_empresa') || "";
-            document.getElementById('cfg_cidade').value = localStorage.getItem('cidade_empresa') || "";
-            document.getElementById('cfg_fone').value = localStorage.getItem('telefone_empresa') || "";
-            
-            const logoSalva = localStorage.getItem('empresa_logo') || "";
-            if(logoSalva) {
-                logoBase64Temp = logoSalva;
-                const img = document.getElementById('preview_logo');
-                img.src = logoSalva;
-                img.classList.remove('hidden');
-                document.getElementById('placeholder_container').classList.add('hidden');
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let logoBase64Temp = "";
+        let empresaIdAtual = null; // Guardará o ID do registro existente
+
+        // Carregar dados existentes do Supabase ao iniciar a página
+        window.onload = async () => {
+            // Buscando o primeiro registro da tabela empresas (ou adapte conforme sua lógica de seleção)
+            const { data, error } = await supabase
+                .from('empresas')
+                .select('*')
+                .limit(1);
+
+            if (error) {
+                console.error("Erro ao carregar dados:", error);
+                return;
+            }
+
+            if (data && data.length > 0) {
+                const empresa = data[0];
+                empresaIdAtual = empresa.id; // Guarda o ID existente para atualizar depois
+
+                document.getElementById('cfg_nome').value = empresa.nome_fantasia || "";
+                document.getElementById('cfg_cnpj').value = empresa.cnpj || "";
+                document.getElementById('cfg_endereco').value = empresa.endereco || "";
+                document.getElementById('cfg_cidade').value = empresa.cidade || "";
+                document.getElementById('cfg_fone').value = empresa.telefone || "";
+                
+                if (empresa.logo) {
+                    logoBase64Temp = empresa.logo;
+                    const img = document.getElementById('preview_logo');
+                    img.src = logoBase64Temp;
+                    img.classList.remove('hidden');
+                    document.getElementById('placeholder_container').classList.add('hidden');
+                }
             }
         };
 
-        // Função para ler o arquivo do computador e converter para Base64
+        // Função para ler a logo e converter em Base64
         function processarArquivoLogo(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    logoBase64Temp = e.target.result; // Guarda a imagem convertida
-                    
-                    // Exibe a pré-visualização instantânea na tela
+                    logoBase64Temp = e.target.result;
                     const img = document.getElementById('preview_logo');
                     img.src = logoBase64Temp;
                     img.classList.remove('hidden');
@@ -142,19 +156,41 @@
             }
         }
 
-        // Salvar todos os dados e a logo no localStorage
-        function salvarDados() {
-            localStorage.setItem('nome_empresa', document.getElementById('cfg_nome').value);
-            localStorage.setItem('cnpj_empresa', document.getElementById('cfg_cnpj').value);
-            localStorage.setItem('endereco_empresa', document.getElementById('cfg_endereco').value);
-            localStorage.setItem('cidade_empresa', document.getElementById('cfg_cidade').value);
-            localStorage.setItem('telefone_empresa', document.getElementById('cfg_fone').value);
-            
-            if (logoBase64Temp) {
-                localStorage.setItem('empresa_logo', logoBase64Temp);
+        // Salvar ou atualizar os dados no Supabase
+        async function salvarDados() {
+            const dadosParaSalvar = {
+                nome_fantasia: document.getElementById('cfg_nome').value,
+                cnpj: document.getElementById('cfg_cnpj').value,
+                endereco: document.getElementById('cfg_endereco').value,
+                cidade: document.getElementById('cfg_cidade').value,
+                telefone: document.getElementById('cfg_fone').value,
+                logo: logoBase64Temp
+            };
+
+            let error;
+
+            if (empresaIdAtual) {
+                // Se já existe um registro carregado, fazemos o UPDATE usando o ID
+                const response = await supabase
+                    .from('empresas')
+                    .update(dadosParaSalvar)
+                    .eq('id', empresaIdAtual);
+                error = response.error;
+            } else {
+                // Se a tabela estiver vazia, criamos um novo registro (INSERT)
+                const response = await supabase
+                    .from('empresas')
+                    .insert([dadosParaSalvar]);
+                error = response.error;
             }
 
-            alert("Os dados da etiqueta foram atualizados com sucesso!");
+            if (error) {
+                console.error("Erro ao salvar no Supabase:", error);
+                alert("Erro ao salvar no banco de dados: " + error.message);
+                return;
+            }
+
+            alert("Os dados da empresa foram salvos com sucesso no Supabase!");
             location.reload();
         }
     </script>

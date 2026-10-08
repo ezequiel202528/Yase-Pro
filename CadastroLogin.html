@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro - Vitta</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+      width: 340px;
+      text-align: center;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(-10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #0072ff;
+    }
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    input:focus {
+      border-color: #0072ff;
+      box-shadow: 0 0 5px rgba(0,114,255,0.3);
+      outline: none;
+    }
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0072ff, #00c6ff);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .message {
+      font-weight: 600;
+      margin-bottom: 1rem;
+      min-height: 20px;
+    }
+    .error { color: #ff3333; }
+    .success { color: #33cc33; }
+    .link {
+      color: #0077ff;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+    <!-- 🔒 Carregar a proteção de login ANTES de exibir a página -->
+<script src="/auth.js"></script>
+  <div class="container">
+    <h2>Cadastrar</h2>
+    <div id="registerMsg" class="message success"></div>
+    <div id="registerError" class="message error"></div>
+
+    <input type="text" id="registerUsername" placeholder="Usuário" autocomplete="username" />
+    <input type="text" id="registerName" placeholder="Nome completo" />
+    <input type="password" id="registerPassword" placeholder="Senha" />
+
+    <button id="registerBtn">Cadastrar</button>
+
+    <p style="margin-top:1rem;">Já tem uma conta? 
+      <a href="index.html" class="link">Faça Login</a>
+    </p>
+  </div>
+
+  <script>
+  const API_URL = 'https://ezequiel202528.vercel.app/';
+
+  document.getElementById('registerBtn').addEventListener('click', async () => {
+    const msg = document.getElementById('registerMsg');
+    const err = document.getElementById('registerError');
+    msg.textContent = '';
+    err.textContent = '';
+
+    const username = document.getElementById('registerUsername').value.trim();
+    const name = document.getElementById('registerName').value.trim();
+    const password = document.getElementById('registerPassword').value;
+
+    if (!username || !name || !password) {
+      err.textContent = 'Preencha todos os campos.';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ username, name, password })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        err.textContent = data.error || 'Erro no cadastro.';
+        return;
+      }
+
+      msg.textContent = 'Usuário cadastrado com sucesso!';
+      document.getElementById('registerUsername').value = '';
+      document.getElementById('registerName').value = '';
+      document.getElementById('registerPassword').value = '';
+
+      setTimeout(() => window.location.href = 'login.html', 1500);
+    } catch {
+      err.textContent = 'Erro de conexão.';
+    }
+  });
+  </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 // auth.js – protege apenas páginas que exigem login
 (function () {
   // Páginas que são públicas (não exigem login)
-  const paginasPublicas = ["/login.html", "/index.html", "/"];
+  const paginasPublicas = ["/index.html", "/index.html", "/"];
 
   const caminho = window.location.pathname.toLowerCase();
 
@@ -19,7 +19,7 @@
   // ❌ Se não existir token permanente → login inválido → para login
   if (!tokenLocal) {
     console.warn("Sem token local. Indo para login...");
-    window.location.href = "/login.html";
+    window.location.href = "/index.html";
     return;
   }
 
@@ -27,7 +27,7 @@
   // significa que o usuário FECHOU A ABA.
   if (!tokenSessao) {
     console.warn("Aba nova detectada. Login necessário novamente.");
-    window.location.href = "/login.html";
+    window.location.href = "/index.html";
     return;
   }
 

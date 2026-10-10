@@ -1,198 +1,331 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>YaSe PRO - Configurações da Empresa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-    body { 
-        font-family: "Plus Jakarta Sans", sans-serif; 
-        background-color: #020617; 
-        color: white; 
-    }
-    .glass-card { 
-        background: #0f172a; 
-        border: 1px solid rgba(51, 65, 85, 0.5); 
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: #020617;
+        color: white;
+      }
+
+      .glass-card {
+        background: #0f172a;
+        border: 1px solid rgba(51, 65, 85, 0.5);
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-    .input-field { 
-        background: #1e293b; 
-        border: 1px solid #334155; 
-        color: white; 
-    }
-</style>
-</head>
-<body class="p-6 md:p-12">
+      }
+
+      .input-field {
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: white;
+      }
+    </style>
+  </head>
+  <body class="p-6 md:p-12 relative">
+    
+    <!-- CONTÊINER DE ALERTAS MODERNOS (TOAST) -->
+    <div id="toast-container" class="fixed top-6 right-6 z-[99999] flex flex-col gap-3 pointer-events-none"></div>
 
     <main class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-10">
-            <div>
-                <button onclick="location.href='Dashboard.html'" class="text-neutral-500 hover:text-white mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-all">
-                    <i class="fas fa-arrow-left text-amber-500"></i> Voltar ao Painel
+      <div class="flex justify-between items-center mb-10">
+        <div>
+          <button
+            onclick="location.href = 'Dashboard.html'"
+            class="text-neutral-500 hover:text-white mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-all"
+          >
+            <i class="fas fa-arrow-left text-amber-500"></i> Voltar ao Painel
+          </button>
+          <h1 class="text-3xl font-black tracking-tighter text-white">
+            Configurações da <span class="text-amber-500">Empresa</span>
+          </h1>
+        </div>
+        <i class="fas fa-building-circle-gear text-5xl text-white/5"></i>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-1 space-y-6">
+          <div class="glass-card p-6 rounded-[2.5rem] text-center">
+            <p
+              class="text-[10px] font-black uppercase text-amber-500 mb-6 tracking-widest"
+            >
+              Logo da Etiqueta
+            </p>
+
+            <!-- Área clicável que abre o explorador de arquivos do PC -->
+            <div
+              onclick="document.getElementById('input_file_logo').click()"
+              class="w-32 h-32 mx-auto bg-white/5 rounded-3xl border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden mb-6 group relative cursor-pointer hover:border-amber-500/50 transition-all"
+              title="Clique para escolher a logo do computador"
+            >
+              <img
+                id="preview_logo"
+                src=""
+                class="hidden w-full h-full object-contain p-2"
+              />
+              <div
+                id="placeholder_container"
+                class="flex flex-col items-center justify-center"
+              >
+                <i
+                  class="fas fa-cloud-arrow-up text-2xl text-white/20 group-hover:text-amber-500 transition-all mb-1"
+                ></i>
+                <span
+                  class="text-[8px] font-bold text-neutral-400 group-hover:text-amber-500 uppercase"
+                  >Enviar Logo</span
+                >
+              </div>
+            </div>
+
+            <!-- Input de arquivo oculto acionado pelo clique na caixa acima -->
+            <input
+              type="file"
+              id="input_file_logo"
+              accept="image/png, image/jpeg"
+              class="hidden"
+              onchange="processarArquivoLogo(event)"
+            />
+
+            <p class="text-[9px] text-neutral-500 leading-relaxed font-medium">
+              Recomendamos logotipos com fundo transparente (PNG) e boa
+              resolução. Clique na caixa acima para carregar.
+            </p>
+          </div>
+        </div>
+
+        <div class="md:col-span-2 space-y-6">
+          <div class="glass-card p-8 rounded-[2.5rem]">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="md:col-span-2">
+                <label
+                  class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block"
+                  >Nome Fantasia (Exibido na Etiqueta)</label
+                >
+                <input
+                  type="text"
+                  id="cfg_nome"
+                  class="input-field w-full h-12 px-4 rounded-2xl font-bold"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block"
+                  >CNPJ</label
+                >
+                <input
+                  type="text"
+                  id="cfg_cnpj"
+                  class="input-field w-full h-12 px-4 rounded-2xl font-bold"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block"
+                  >Telefone de Contato</label
+                >
+                <input
+                  type="text"
+                  id="cfg_fone"
+                  class="input-field w-full h-12 px-4 rounded-2xl font-bold"
+                />
+              </div>
+
+              <div class="md:col-span-2">
+                <label
+                  class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block"
+                  >Endereço Completo</label
+                >
+                <input
+                  type="text"
+                  id="cfg_endereco"
+                  class="input-field w-full h-12 px-4 rounded-2xl font-bold"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block"
+                  >Cidade / UF</label
+                >
+                <input
+                  type="text"
+                  id="cfg_cidade"
+                  class="input-field w-full h-12 px-4 rounded-2xl font-bold"
+                />
+              </div>
+
+              <div class="flex items-end">
+                <button
+                  onclick="salvarDados()"
+                  class="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-4 rounded-2xl text-[10px] uppercase tracking-widest shadow-xl shadow-amber-500/20 transition-all cursor-pointer"
+                >
+                  <i class="fas fa-check-circle mr-2"></i> Atualizar Identidade
                 </button>
-                <h1 class="text-3xl font-black tracking-tighter text-white">Configurações da <span class="text-amber-500">Empresa</span></h1>
+              </div>
             </div>
-            <i class="fas fa-building-circle-gear text-5xl text-white/5"></i>
+          </div>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="md:col-span-1 space-y-6">
-                <div class="glass-card p-6 rounded-[2.5rem] text-center">
-                    <p class="text-[10px] font-black uppercase text-amber-500 mb-6 tracking-widest">Logo da Etiqueta</p>
-                    
-                    <div onclick="document.getElementById('input_file_logo').click()" class="w-32 h-32 mx-auto bg-white/5 rounded-3xl border-2 border-dashed border-white/10 flex items-center justify-center overflow-hidden mb-6 group relative cursor-pointer hover:border-amber-500/50 transition-all" title="Clique para escolher a logo do computador">
-                        <img id="preview_logo" src="" class="hidden w-full h-full object-contain p-2">
-                        <div id="placeholder_container" class="flex flex-col items-center justify-center">
-                            <i class="fas fa-cloud-arrow-up text-2xl text-white/20 group-hover:text-amber-500 transition-all mb-1"></i>
-                            <span class="text-[8px] font-bold text-neutral-400 group-hover:text-amber-500 uppercase">Enviar Logo</span>
-                        </div>
-                    </div>
-
-                    <input type="file" id="input_file_logo" accept="image/png, image/jpeg" class="hidden" onchange="processarArquivoLogo(event)">
-                    <p class="text-[9px] text-neutral-500 leading-relaxed font-medium">Recomendamos logotipos com fundo transparente (PNG) e boa resolução. Clique na caixa acima para carregar.</p>
-                </div>
-            </div>
-
-            <div class="md:col-span-2 space-y-6">
-                <div class="glass-card p-8 rounded-[2.5rem]">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2">
-                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">Nome Fantasia (Exibido na Etiqueta)</label>
-                            <input type="text" id="cfg_nome" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
-                        </div>
-
-                        <div>
-                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">CNPJ</label>
-                            <input type="text" id="cfg_cnpj" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
-                        </div>
-
-                        <div>
-                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">Telefone de Contato</label>
-                            <input type="text" id="cfg_fone" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">Endereço Completo</label>
-                            <input type="text" id="cfg_endereco" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
-                        </div>
-
-                        <div>
-                            <label class="text-[9px] font-black text-neutral-500 uppercase tracking-widest ml-1 mb-2 block">Cidade / UF</label>
-                            <input type="text" id="cfg_cidade" class="input-field w-full h-12 px-4 rounded-2xl font-bold">
-                        </div>
-
-                        <div class="flex items-end">
-                            <button onclick="salvarDados()" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-black py-4 rounded-2xl text-[10px] uppercase tracking-widest shadow-xl shadow-amber-500/20 transition-all">
-                                <i class="fas fa-check-circle mr-2"></i> Atualizar Identidade
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </main>
 
     <script>
-        // Inicialize o Supabase com suas credenciais
-       const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co";
-       const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+      let logoBase64Temp = "";
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // Função para exibir alertas modernos flutuantes (Toast)
+      function mostrarAlerta(mensagem, tipo = 'sucesso') {
+        const container = document.getElementById('toast-container');
+        const alertBox = document.createElement('div');
+        
+        const isSucesso = tipo === 'sucesso';
+        const bgClass = isSucesso ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200' : 'bg-rose-950/90 border-rose-500/50 text-rose-200';
+        const icon = isSucesso ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-rose-400';
 
-        let logoBase64Temp = "";
-        let empresaIdAtual = null; // Guardará o ID do registro existente
+        alertBox.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-300 translate-x-10 opacity-0 ${bgClass}`;
+        alertBox.innerHTML = `
+          <i class="fas ${icon} text-lg"></i>
+          <span class="text-xs font-bold tracking-wide">${mensagem}</span>
+        `;
 
-        // Carregar dados existentes do Supabase ao iniciar a página
-        window.onload = async () => {
-            // Buscando o primeiro registro da tabela empresas (ou adapte conforme sua lógica de seleção)
-            const { data, error } = await supabase
-                .from('empresas')
-                .select('*')
-                .limit(1);
+        container.appendChild(alertBox);
 
-            if (error) {
-                console.error("Erro ao carregar dados:", error);
-                return;
-            }
+        // Animação de entrada
+        setTimeout(() => {
+          alertBox.classList.remove('translate-x-10', 'opacity-0');
+        }, 10);
 
-            if (data && data.length > 0) {
-                const empresa = data[0];
-                empresaIdAtual = empresa.id; // Guarda o ID existente para atualizar depois
+        // Remove após 3.5 segundos com animação de saída
+        setTimeout(() => {
+          alertBox.classList.add('translate-x-10', 'opacity-0');
+          setTimeout(() => alertBox.remove(), 300);
+        }, 3500);
+      }
 
-                document.getElementById('cfg_nome').value = empresa.nome_fantasia || "";
-                document.getElementById('cfg_cnpj').value = empresa.cnpj || "";
-                document.getElementById('cfg_endereco').value = empresa.endereco || "";
-                document.getElementById('cfg_cidade').value = empresa.cidade || "";
-                document.getElementById('cfg_fone').value = empresa.telefone || "";
-                
-                if (empresa.logo) {
-                    logoBase64Temp = empresa.logo;
-                    const img = document.getElementById('preview_logo');
-                    img.src = logoBase64Temp;
-                    img.classList.remove('hidden');
-                    document.getElementById('placeholder_container').classList.add('hidden');
-                }
-            }
-        };
+      // Carregar dados existentes ao iniciar
+      window.onload = () => {
+        document.getElementById("cfg_nome").value =
+          localStorage.getItem("nome_empresa") || "";
+        document.getElementById("cfg_cnpj").value =
+          localStorage.getItem("cnpj_empresa") || "";
+        document.getElementById("cfg_endereco").value =
+          localStorage.getItem("endereco_empresa") || "";
+        document.getElementById("cfg_cidade").value =
+          localStorage.getItem("cidade_empresa") || "";
+        document.getElementById("cfg_fone").value =
+          localStorage.getItem("telefone_empresa") || "";
 
-        // Função para ler a logo e converter em Base64
-        function processarArquivoLogo(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    logoBase64Temp = e.target.result;
-                    const img = document.getElementById('preview_logo');
-                    img.src = logoBase64Temp;
-                    img.classList.remove('hidden');
-                    document.getElementById('placeholder_container').classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
+        const logoSalva = localStorage.getItem("empresa_logo") || "";
+        if (logoSalva) {
+          logoBase64Temp = logoSalva;
+          const img = document.getElementById("preview_logo");
+          img.src = logoSalva;
+          img.classList.remove("hidden");
+          document
+            .getElementById("placeholder_container")
+            .classList.add("hidden");
         }
+      };
 
-        // Salvar ou atualizar os dados no Supabase
-        async function salvarDados() {
-            const dadosParaSalvar = {
-                nome_fantasia: document.getElementById('cfg_nome').value,
-                cnpj: document.getElementById('cfg_cnpj').value,
-                endereco: document.getElementById('cfg_endereco').value,
-                cidade: document.getElementById('cfg_cidade').value,
-                telefone: document.getElementById('cfg_fone').value,
-                logo: logoBase64Temp
-            };
+      // Função para ler o arquivo, redimensionar e converter para Base64 de forma segura
+      function processarArquivoLogo(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-            let error;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+            const maxDimension = 300;
 
-            if (empresaIdAtual) {
-                // Se já existe um registro carregado, fazemos o UPDATE usando o ID
-                const response = await supabase
-                    .from('empresas')
-                    .update(dadosParaSalvar)
-                    .eq('id', empresaIdAtual);
-                error = response.error;
+            if (width > height) {
+              if (width > maxDimension) {
+                height *= maxDimension / width;
+                width = maxDimension;
+              }
             } else {
-                // Se a tabela estiver vazia, criamos um novo registro (INSERT)
-                const response = await supabase
-                    .from('empresas')
-                    .insert([dadosParaSalvar]);
-                error = response.error;
+              if (height > maxDimension) {
+                width *= maxDimension / height;
+                height = maxDimension;
+              }
             }
 
-            if (error) {
-                console.error("Erro ao salvar no Supabase:", error);
-                alert("Erro ao salvar no banco de dados: " + error.message);
-                return;
-            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
 
-            alert("Os dados da empresa foram salvos com sucesso no Supabase!");
+            logoBase64Temp = canvas.toDataURL("image/png");
+
+            const previewImg = document.getElementById("preview_logo");
+            previewImg.src = logoBase64Temp;
+            previewImg.classList.remove("hidden");
+            document
+              .getElementById("placeholder_container")
+              .classList.add("hidden");
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        event.target.value = "";
+      }
+
+      // Salvar dados e tratar sucesso/erro com o alerta flutuante
+      function salvarDados() {
+        try {
+          localStorage.setItem(
+            "nome_empresa",
+            document.getElementById("cfg_nome").value,
+          );
+          localStorage.setItem(
+            "cnpj_empresa",
+            document.getElementById("cfg_cnpj").value,
+          );
+          localStorage.setItem(
+            "endereco_empresa",
+            document.getElementById("cfg_endereco").value,
+          );
+          localStorage.setItem(
+            "cidade_empresa",
+            document.getElementById("cfg_cidade").value,
+          );
+          localStorage.setItem(
+            "telefone_empresa",
+            document.getElementById("cfg_fone").value,
+          );
+
+          if (logoBase64Temp) {
+            localStorage.setItem("empresa_logo", logoBase64Temp);
+          }
+
+          mostrarAlerta("Dados da empresa atualizados com sucesso!", "sucesso");
+          
+          // Recarrega a página após breve intervalo para dar tempo de ver a mensagem
+          setTimeout(() => {
             location.reload();
+          }, 1500);
+
+        } catch (error) {
+          console.error(error);
+          mostrarAlerta("Erro ao salvar dados. Verifique o armazenamento!", "erro");
         }
+      }
     </script>
-</body>
+  </body>
 </html>

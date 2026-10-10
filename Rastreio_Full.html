@@ -737,11 +737,6 @@
         <div class="p-6 flex justify-center">
             <div id="areaImpressaoEtiqueta" class="bg-white border-[1.5px] border-black p-2 flex justify-between items-stretch relative overflow-hidden" style="width: 100mm; height: 50mm; font-family: Arial, sans-serif; box-sizing: border-box;">
                 
-                <!-- LOGO CENTRALIZADA NO ESPAÇO VAZIO -->
-                <div class="absolute inset-0 flex items-end justify-start pointer-events-none pb-8 pl-6" style="z-index: 1;">
-                    <img id="logo_central_etiqueta" src="" alt="Logo Fundo" class="max-h-[20mm] max-w-[35mm] object-contain opacity-500 hidden">
-                </div>
-
                 <!-- COLUNA ESQUERDA: Dados, Avisos e Prazos -->
                 <div class="flex flex-col justify-between flex-1 pr-2 relative z-10">
                     
@@ -758,6 +753,10 @@
                     <div class="text-[5.5px] text-center font-bold uppercase leading-none mb-1">
                         PARA CONCESSÃO DE GARANTIA ESTE EXTINTOR DEVE SER VERIFICADO MENSALMENTE, GARANTIA DE 1 ANO, CONTRA A DESPRESSURIZAÇÃO. A VIOLAÇÃO DO LACRE INTERROMPE A GARANTIA.
                     </div>
+
+                    <!-- 🎯 LOGO EXATAMENTE NO ESPAÇO DO RETÂNGULO VERMELHO -->
+                    <div style="width: 100%; height: 11mm; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+                    <img id="logo_central_etiqueta" src="" alt="Logo da Empresa" style="max-width: 35mm; max-height: 10mm; object-fit: contain; display: none; mix-blend-mode: multiply;">                    </div>
 
                     <!-- Prazos e Nível -->
                     <div class="grid grid-cols-3 gap-0 border border-black mb-1 bg-white/80">
@@ -796,22 +795,20 @@
                 </div>
 
             </div>
-
             <!-- FIM DA ETIQUETA -->
-</div>
+        </div>
 
-<!-- RODAPÉ APENAS COM O BOTÃO DE IMPRESSÃO DIRETA -->
-<div style="padding: 15px 20px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-    <button onclick="fecharModalEtiqueta()" style="padding: 8px 16px; background-color: #e2e8f0; color: #334155; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
-        Fechar
-    </button>
-    <button onclick="validarEImprimir()" style="padding: 10px 24px; background-color: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-        🖨️ Imprimir Etiqueta
-    </button>
-</div>
+        <!-- RODAPÉ APENAS COM O BOTÃO DE IMPRESSÃO DIRETA -->
+        <div style="padding: 15px 20px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <button onclick="fecharModalEtiqueta()" style="padding: 8px 16px; background-color: #e2e8f0; color: #334155; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                Fechar
+            </button>
+            <button onclick="validarEImprimir()" style="padding: 10px 24px; background-color: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                🖨️ Imprimir Etiqueta
+            </button>
+        </div>
 
-<!-- Fim do container do modal -->
-</div>
+    </div>
 </div>
 
 <!-- MODAL DE LOTES E EXTINTORES PENDENTES -->

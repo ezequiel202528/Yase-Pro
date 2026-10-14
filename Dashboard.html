@@ -46,7 +46,7 @@
             <p class="text-neutral-500 font-medium">Bem-vindo ao centro de comando, <span id="userName" class="text-white font-bold italic">...</span></p>
         </div>
 
-        <div class="flex items-center gap-4 glass-card p-4 rounded-3xl">
+        <!-- <div class="flex items-center gap-4 glass-card p-4 rounded-3xl">
             <div class="text-right border-r border-white/10 pr-4">
                 <p id="unidadeNome" class="text-xs font-black uppercase tracking-widest text-[#fbbf24]">Carregando...</p>
                 <p id="userNivel" class="text-[10px] text-neutral-500 font-bold uppercase tracking-tighter italic">Nível de Acesso</p>
@@ -54,7 +54,24 @@
             <button onclick="logout()" class="w-10 h-10 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors">
                 <i class="fas fa-power-off"></i>
             </button>
+        </div> -->
+<div class="flex items-center gap-4 glass-card p-4 rounded-3xl">
+    <!-- Bloco Clicável para Abrir o Modal de Troca de Usuário -->
+    <div onclick="abrirModalTrocaUsuario()" class="text-right border-r border-white/10 pr-4 cursor-pointer group" title="Clique para trocar de usuário">
+        <div class="flex items-center justify-end gap-2">
+            <p id="unidadeNome" class="text-xs font-black uppercase tracking-widest text-[#fbbf24] group-hover:underline">Carregando...</p>
+            <i class="fa-solid fa-right-left text-[10px] text-slate-400 group-hover:text-[#fbbf24] transition-colors"></i>
         </div>
+        <p id="userNivel" class="text-[10px] text-neutral-500 font-bold uppercase tracking-tighter italic">Nível de Acesso</p>
+    </div>
+
+    <!-- Botão de Sair (Logout) -->
+    <button onclick="logout()" class="w-10 h-10 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors" title="Encerrar Sessão">
+        <i class="fas fa-power-off"></i>
+    </button>
+</div>
+
+
     </header>
 
     <!-- Menu de Blocos (Grid Dinâmico) -->
@@ -116,6 +133,8 @@
                 </div>
             </button>
 
+            
+
             <button onclick="location.href='CadastroUsuario.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
                 <i class="fas fa-user-shield text-3xl accent-text"></i>
                 <div class="text-left">
@@ -127,45 +146,382 @@
         </div>
     </main>
 
-    <script>
-        // Supabase Init (As chaves devem estar aqui conforme corrigido)
-       const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co"; 
-      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
+<!-- MODAL DE TROCA DE USUÁRIO -->
+<div id="modalTrocaUsuario" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+  <div class="glass-card w-full max-w-md p-8 rounded-[32px] border border-white/10 shadow-2xl bg-slate-900/90">
+    <div class="text-center mb-6">
+      <div class="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-amber-500/20">
+        <i class="fa-solid fa-user-lock text-amber-400 text-xl"></i>
+      </div>
+      <h3 class="text-xl font-black text-white tracking-tight">ALTERNAR OPERADOR</h3>
+      <p class="text-xs text-slate-400 mt-1">Selecione o seu utilizador e digite a senha</p>
+    </div>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Código (ID)</label>
+        <select id="troca_codigo" class="login-input w-full h-12 px-4 rounded-xl text-sm appearance-none bg-slate-950 border border-white/10 text-white">
+          <option value="">A carregar operadores...</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Senha de Acesso</label>
+        <input type="password" id="troca_senha" class="login-input w-full h-12 px-4 rounded-xl text-sm bg-slate-950 border border-white/10 text-white" placeholder="••••••" />
+      </div>
 
-        async function checkSession() {
-            const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
-            
-            if (!userJson) {
-                window.location.href = 'index.html';
-                return;
-            }
+      <div id="msgErroTroca" class="hidden text-center text-[11px] font-bold py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20"></div>
 
-            const user = JSON.parse(userJson);
-            const nivel = user.nivel_permissao; // Gestor, Gerente ou Operador
+      <div class="flex gap-4 pt-2">
+        <button type="button" onclick="fecharModalTrocaUsuario()" class="w-1/2 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs transition-all">CANCELAR</button>
+        <button type="button" id="btnConfirmarTroca" onclick="confirmarTrocaUsuario()" class="w-1/2 h-12 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl font-bold text-xs transition-all shadow-lg">CONFIRMAR</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- <script>
+    // Supabase Init
+    const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co"; 
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            // Preencher UI
-            document.getElementById('userName').innerText = user.nome_completo;
-            document.getElementById('userNivel').innerText = nivel;
-            
-            // Buscar nome da Unidade
-            const { data: emp } = await sb.from('empresas').select('nome_fantasia').eq('id', user.empresa_id).single();
-            if (emp) document.getElementById('unidadeNome').innerText = emp.nome_fantasia;
-
-            // Lógica de Bloqueio por Nível
-            if (nivel !== 'Gestor' && nivel !== 'Gerente') {
-                const blocosGestao = document.querySelectorAll('.access-gestor');
-                blocosGestao.forEach(bloco => bloco.classList.add('hidden-access'));
-            }
+    async function checkSession() {
+        const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+        
+        if (!userJson) {
+            window.location.href = 'index.html';
+            return;
         }
 
-        function logout() {
+        const user = JSON.parse(userJson);
+        const nivel = user.nivel_permissao;
+
+        // Preencher UI
+        document.getElementById('userName').innerText = user.nome_completo;
+        document.getElementById('userNivel').innerText = nivel;
+        
+        // Buscar nome da Unidade
+        const { data: emp } = await sb.from('empresas').select('nome_fantasia').eq('id', user.empresa_id).single();
+        if (emp) document.getElementById('unidadeNome').innerText = emp.nome_fantasia;
+
+        // 🛑 Buscar permissões de telas e status atualizados do banco de dados
+        const { data: usuarioAtual } = await sb.from('usu_arios').select('permissoes_telas, status').eq('id', user.id).single();
+
+        // 1. Validação de bloqueio geral
+        if (usuarioAtual && usuarioAtual.status === 'bloqueado') {
+            alert("O seu acesso foi bloqueado pelo gestor.");
             localStorage.clear();
             window.location.href = 'index.html';
+            return;
         }
 
-        window.onload = checkSession;
-    </script>
+        // 2. Filtragem de telas (Gestor tem acesso livre a tudo)
+        if (nivel !== 'Gestor') {
+            let telasPermitidas = [];
+            try {
+                telasPermitidas = usuarioAtual?.permissoes_telas ? JSON.parse(usuarioAtual.permissoes_telas) : [];
+            } catch (e) {
+                telasPermitidas = [];
+            }
+
+            // Seleciona todos os botões do grid de módulos
+            const botoesMenu = document.querySelectorAll('#menuGrid button');
+
+           botoesMenu.forEach(botao => {
+                const onclickAttr = botao.getAttribute('onclick') || '';
+                
+                // Extrai o nome do arquivo da ação
+                const match = onclickAttr.match(/'([^']+)'/);
+                const arquivoDestino = match ? match[1] : '';
+
+                if (arquivoDestino) {
+                    // O módulo 'Equipe' (CadastroUsuario.html) permanece exclusivo de Gerente/Gestor
+                    if (arquivoDestino === 'CadastroUsuario.html') {
+                        if (nivel !== 'Gerente' && nivel !== 'Gestor') {
+                            botao.style.display = 'none';
+                            return;
+                        }
+                    }
+
+                    // Verifica se a tela está liberada na lista de permissões gravadas no banco
+                    const temPermissao = telasPermitidas.includes(arquivoDestino);
+                    if (!temPermissao) {
+                        botao.style.display = 'none';
+                    } else {
+                        botao.style.display = 'flex'; // Garante que exibe caso tenha permissão
+                    }
+                }
+            });
+        }
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+
+    window.onload = checkSession;
+</script> -->
+
+<script>
+    // Supabase Init
+    const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co"; 
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function checkSession() {
+        const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+        
+        if (!userJson) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const user = JSON.parse(userJson);
+        const nivel = user.nivel_permissao || '';
+
+        // Preencher UI
+        document.getElementById('userName').innerText = user.nome_completo;
+        document.getElementById('userNivel').innerText = nivel;
+        
+        // Buscar nome da Unidade
+        const { data: emp } = await sb.from('empresas').select('nome_fantasia').eq('id', user.empresa_id).single();
+        if (emp) document.getElementById('unidadeNome').innerText = emp.nome_fantasia;
+
+        // 🛑 Buscar permissões de telas e status atualizados do banco de dados
+        const { data: usuarioAtual } = await sb.from('usu_arios').select('permissoes_telas, status, nivel_permissao').eq('id', user.id).single();
+
+        // 1. Validação de bloqueio geral
+        if (usuarioAtual && usuarioAtual.status === 'bloqueado') {
+            alert("O seu acesso foi bloqueado pelo gestor.");
+            localStorage.clear();
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Se for Gestor ou Gerente (independente de maiúsculas/minúsculas), libera acesso total
+        const nivelNormalizado = (usuarioAtual?.nivel_permissao || nivel).toLowerCase();
+        const isGestorOuGerente = nivelNormalizado.includes('gestor') || nivelNormalizado.includes('gerente') || nivelNormalizado.includes('admin');
+
+        if (!isGestorOuGerente) {
+            let telasPermitidas = [];
+            try {
+                telasPermitidas = usuarioAtual?.permissoes_telas ? JSON.parse(usuarioAtual.permissoes_telas) : [];
+            } catch (e) {
+                telasPermitidas = [];
+            }
+
+            // Seleciona todos os botões do grid de módulos
+            const botoesMenu = document.querySelectorAll('#menuGrid button');
+
+            botoesMenu.forEach(botao => {
+                const onclickAttr = botao.getAttribute('onclick') || '';
+                
+                // Extrai o nome do arquivo da ação (ex: location.href='CadastroUsuario.html')
+                const match = onclickAttr.match(/'([^']+)'/);
+                const arquivoDestino = match ? match[1] : '';
+
+                if (arquivoDestino) {
+                    // Verifica se a tela está liberada na lista de permissões
+                    const temPermissao = telasPermitidas.includes(arquivoDestino);
+                    if (!temPermissao) {
+                        botao.style.display = 'none';
+                    } else {
+                        botao.style.display = 'flex';
+                    }
+                }
+            });
+        } else {
+            // Se for Gestor/Gerente, garante que todos os botões fiquem visíveis
+            const botoesMenu = document.querySelectorAll('#menuGrid button');
+            botoesMenu.forEach(botao => botao.style.display = 'flex');
+        }
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+
+    // ==========================================
+// MÓDULO DE TROCA DE OPERADOR NO DASHBOARD
+// ==========================================
+function obterSupabase() {
+  return sb || null; // Utiliza a instância 'sb' já criada no Dashboard
+}
+
+async function abrirModalTrocaUsuario() {
+  const modal = document.getElementById("modalTrocaUsuario");
+  if (modal) {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+  
+  const msgErro = document.getElementById("msgErroTroca");
+  if (msgErro) msgErro.classList.add("hidden");
+  
+  const senhaInput = document.getElementById("troca_senha");
+  if (senhaInput) senhaInput.value = "";
+
+  const _supabaseClient = obterSupabase();
+  const selectEl = document.getElementById("troca_codigo");
+  if (!selectEl) return;
+
+  selectEl.innerHTML = '<option value="">A carregar operadores...</option>';
+
+  if (!_supabaseClient) {
+    selectEl.innerHTML = '<option value="">Erro de conexão com o Supabase</option>';
+    return;
+  }
+
+  let empresaIdLocal = null;
+  let usuarioLogadoId = null;
+  try {
+    const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+    if (userJson) {
+      const parsedUser = JSON.parse(userJson);
+      empresaIdLocal = parsedUser.empresa_id;
+      usuarioLogadoId = parsedUser.id; // Pega o ID do usuário atual para ocultá-lo
+    }
+  } catch (e) {
+    console.error("Erro ao ler sessão:", e);
+  }
+
+  if (!empresaIdLocal) {
+    selectEl.innerHTML = '<option value="">Empresa não identificada</option>';
+    return;
+  }
+
+  // Busca operadores ativos da empresa, excluindo o usuário atualmente logado e os bloqueados
+  let query = _supabaseClient
+    .from("usu_arios")
+    .select("id, codigo_id, nome_completo, nivel_permissao, status")
+    .eq("empresa_id", empresaIdLocal)
+    .neq("status", "bloqueado");
+
+  if (usuarioLogadoId) {
+    query = query.neq("id", usuarioLogadoId); // Oculta o usuário atual
+  }
+
+  const { data: usuarios, error } = await query;
+
+  if (error) {
+    console.error("Erro ao buscar operadores:", error);
+    selectEl.innerHTML = '<option value="">Erro ao carregar operadores</option>';
+    return;
+  }
+
+  selectEl.innerHTML = '<option value="">Selecione o operador...</option>';
+  
+  if (usuarios && usuarios.length > 0) {
+    usuarios.forEach(u => {
+      const option = document.createElement("option");
+      option.value = u.codigo_id; 
+      option.textContent = `${u.nome_completo} (${u.nivel_permissao || 'Operador'} - ID: ${u.codigo_id})`;
+      selectEl.appendChild(option);
+    });
+  } else {
+    selectEl.innerHTML = '<option value="">Nenhum outro operador ativo disponível</option>';
+  }
+}
+
+function fecharModalTrocaUsuario() {
+  const modal = document.getElementById("modalTrocaUsuario");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+  const codigoEl = document.getElementById("troca_codigo");
+  const senhaEl = document.getElementById("troca_senha");
+  if (codigoEl) codigoEl.value = "";
+  if (senhaEl) senhaEl.value = "";
+}
+
+async function confirmarTrocaUsuario() {
+  const _supabaseClient = obterSupabase();
+  if (!_supabaseClient) {
+    alert("Sistema não conectado. Aguarde um momento e tente novamente.");
+    return;
+  }
+
+  const codigo = document.getElementById("troca_codigo").value;
+  const senha = document.getElementById("troca_senha").value;
+  const btn = document.getElementById("btnConfirmarTroca");
+  const msg = document.getElementById("msgErroTroca");
+
+  if (!codigo || !senha) return;
+
+  let empresaIdLocal = null;
+  try {
+    const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+    if (userJson) {
+      const parsedUser = JSON.parse(userJson);
+      empresaIdLocal = parsedUser.empresa_id;
+    }
+  } catch (e) {
+    console.error("Erro ao ler dados da sessão:", e);
+  }
+
+  if (!empresaIdLocal) {
+    alert("Sessão expirada. Faça login novamente.");
+    window.location.replace('index.html');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = "VERIFICANDO...";
+  if (msg) msg.classList.add("hidden");
+
+  try {
+    const { data, error } = await _supabaseClient
+      .from("usu_arios")
+      .select("*") 
+      .eq("empresa_id", empresaIdLocal) 
+      .eq("codigo_id", codigo)
+      .eq("senha", senha)
+      .single();
+
+    if (error || !data) {
+      throw new Error("Credenciais inválidas");
+    }
+
+    if (data.status === 'bloqueado') {
+      if (msg) {
+        msg.innerText = "⚠️ Acesso Bloqueado: Este usuário está bloqueado pelo administrador.";
+        msg.classList.remove("hidden");
+      }
+      btn.disabled = false;
+      btn.innerText = "CONFIRMAR";
+      return; 
+    }
+
+    // Atualiza o localStorage com o novo usuário
+    localStorage.setItem("yase_user", JSON.stringify(data));
+    localStorage.setItem("yase_colab", JSON.stringify(data));
+    localStorage.setItem("nome_operador", data.nome_completo);
+
+    fecharModalTrocaUsuario();
+    location.reload(); 
+
+  } catch (err) {
+    console.error(err);
+    if (msg) {
+      msg.innerText = "ID ou Senha incorretos!";
+      msg.classList.remove("hidden");
+    }
+    btn.disabled = false;
+    btn.innerText = "CONFIRMAR";
+  }
+}
+
+// Vincula ao escopo global
+window.abrirModalTrocaUsuario = abrirModalTrocaUsuario;
+window.fecharModalTrocaUsuario = fecharModalTrocaUsuario;
+window.confirmarTrocaUsuario = confirmarTrocaUsuario;
+window.onload = checkSession;
+</script>
+
+
 </body>
  <!-- <script src="/auth.js"></script> colocar em todas as paginas (deixar ele na pasta public)  --> 
 </html>

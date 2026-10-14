@@ -289,6 +289,59 @@
       applyCnpjMask('int_cnpj');
 
       // 3. Lógica de Login Original
+//    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+//     e.preventDefault();
+//     const btn = document.getElementById('btnLogin');
+//     const cnpj = document.getElementById('cnpj_login').value.trim();
+//     const cid = document.getElementById('codigo_id').value.trim();
+//     const pass = document.getElementById('senha').value;
+
+//     btn.disabled = true;
+//     btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i> AUTENTICANDO...';
+
+//     try {
+//         // 1. Valida se o CNPJ existe na tabela de empresas
+//         const { data: emp, error: errE } = await sb.from('empresas').select('id, nome_fantasia').eq('cnpj', cnpj).maybeSingle();
+//         if (errE) throw errE;
+//         if (!emp) throw new Error("CNPJ não encontrado em nossa base.");
+
+//         // 2. Valida o usuário dentro dessa empresa específica
+//         const { data, error } = await sb.from('usu_arios').select('*').eq('empresa_id', emp.id).eq('codigo_id', cid).eq('senha', pass).maybeSingle();
+//         if (error) throw error;
+//         if (!data) throw new Error("ID ou Senha incorretos.");
+
+//         // --- INÍCIO DAS SUGESTÕES DE MEMÓRIA ---
+        
+//         // Guarda o último CNPJ para facilitar o próximo login
+//         localStorage.setItem('yase_last_cnpj', cnpj);
+        
+//         // Dados padronizados para o rodapé e filtros de banco de dados
+//         localStorage.setItem('nome_operador', data.nome_completo); // Ex: "Ezequiel"
+//         localStorage.setItem('empresa_id', emp.id);                // O UUID da empresa
+//         localStorage.setItem('user_cnpj', cnpj);                  // O CNPJ digitado
+//         localStorage.setItem('nome_empresa', emp.nome_fantasia);   // Nome da empresa
+
+//         // --- FIM DAS SUGESTÕES ---
+
+//         if (data.nivel_permissao === 'Gestor' || data.nivel_permissao === 'Gerente') {
+//             localStorage.setItem('yase_user', JSON.stringify(data));
+//             Dialog.show("Acesso Liberado", "Bem-vindo ao painel administrativo.", "success");
+//             setTimeout(() => window.location.href = 'Dashboard.html', 1200);
+//         } else {
+//             localStorage.setItem('yase_colab', JSON.stringify(data));
+//             // Como ele é colaborador, levamos ele direto para o Rastreio
+//             Dialog.show("Acesso Liberado", "Iniciando painel de rastreio...", "success");
+//             setTimeout(() => window.location.href = 'Rastreio_Full.html', 1200);
+//         }
+
+//     } catch (err) {
+//         Dialog.show("Falha de Login", err.message, "error");
+//         btn.disabled = false;
+//         btn.innerHTML = 'ENTRAR AGORA <i class="fas fa-arrow-right"></i>';
+//     }
+// });
+
+      // 3. Lógica de Login Original com Verificação de Bloqueio
    document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('btnLogin');
@@ -310,6 +363,11 @@
         if (error) throw error;
         if (!data) throw new Error("ID ou Senha incorretos.");
 
+        // 🛑 3. VERIFICAÇÃO DE BLOQUEIO DE ACESSO
+        if (data.status === 'bloqueado') {
+            throw new Error("Acesso negado! Este usuário foi bloqueado pelo gestor.");
+        }
+
         // --- INÍCIO DAS SUGESTÕES DE MEMÓRIA ---
         
         // Guarda o último CNPJ para facilitar o próximo login
@@ -317,8 +375,8 @@
         
         // Dados padronizados para o rodapé e filtros de banco de dados
         localStorage.setItem('nome_operador', data.nome_completo); // Ex: "Ezequiel"
-        localStorage.setItem('empresa_id', emp.id);                // O UUID da empresa
-        localStorage.setItem('user_cnpj', cnpj);                  // O CNPJ digitado
+        localStorage.setItem('empresa_id', emp.id);              // O UUID da empresa
+        localStorage.setItem('user_cnpj', cnpj);                 // O CNPJ digitado
         localStorage.setItem('nome_empresa', emp.nome_fantasia);   // Nome da empresa
 
         // --- FIM DAS SUGESTÕES ---

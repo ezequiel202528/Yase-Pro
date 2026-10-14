@@ -104,6 +104,23 @@
             <i class="fa-solid fa-house"></i> Dashboard
           </a>
         </nav>
+
+<!-- Rodapé do Aside com Operador e Empresa Dinâmicos -->
+<div class="mt-auto pt-6 border-t border-white/5 p-4">
+  <div class="px-3 mb-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">Operador Ativo</div>
+  <div onclick="abrirModalTrocaUsuario()" class="bg-slate-900/60 p-3 rounded-2xl border border-white/5 cursor-pointer hover:border-amber-500/30 transition-all group">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+        <div>
+          <p id="nome-operador-logado" class="text-xs font-bold text-white uppercase group-hover:text-amber-400 transition-colors">OPERADOR</p>
+          <span id="nome-unidade-logada" class="text-[10px] text-slate-400 uppercase tracking-wide">A carregar empresa...</span>
+        </div>
+      </div>
+      <i class="fa-solid fa-right-left text-xs text-slate-500 group-hover:text-amber-400 transition-colors"></i>
+    </div>
+  </div>
+</div>
       </aside>
 
       <main class="flex-1 flex flex-col overflow-hidden bg-slate-950">
@@ -408,7 +425,40 @@
       </div>
     </div>
 
-    <script>
+    <!-- MODAL DE TROCA DE USUÁRIO -->
+<div id="modalTrocaUsuario" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+  <div class="glass-card w-full max-w-md p-8 rounded-[32px] border border-white/10 shadow-2xl bg-slate-900/90">
+    <div class="text-center mb-6">
+      <div class="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-amber-500/20">
+        <i class="fa-solid fa-user-lock text-amber-400 text-xl"></i>
+      </div>
+      <h3 class="text-xl font-black text-white tracking-tight">ALTERNAR OPERADOR</h3>
+      <p class="text-xs text-slate-400 mt-1">Selecione o seu utilizador e digite a senha</p>
+    </div>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Código (ID)</label>
+        <select id="troca_codigo" class="login-input w-full h-12 px-4 rounded-xl text-sm appearance-none bg-slate-950 border border-white/10 text-white">
+          <option value="">A carregar operadores...</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Senha de Acesso</label>
+        <input type="password" id="troca_senha" class="login-input w-full h-12 px-4 rounded-xl text-sm bg-slate-950 border border-white/10 text-white" placeholder="••••••" />
+      </div>
+
+      <div id="msgErroTroca" class="hidden text-center text-[11px] font-bold py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20"></div>
+
+      <div class="flex gap-4 pt-2">
+        <button type="button" onclick="fecharModalTrocaUsuario()" class="w-1/2 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs transition-all">CANCELAR</button>
+        <button type="button" id="btnConfirmarTroca" onclick="confirmarTrocaUsuario()" class="w-1/2 h-12 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl font-bold text-xs transition-all shadow-lg">CONFIRMAR</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- <script>
       // ==========================================
       // 1. CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
       // ==========================================
@@ -790,6 +840,597 @@
 
       // Inicialização
       document.addEventListener("DOMContentLoaded", carregarOS);
+    </script> -->
+  
+  <script>
+      // ==========================================
+      // 1. CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
+      // ==========================================
+      const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co";
+      const SUPABASE_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+      const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      
+      // Disponibiliza o supabase globalmente para as funções de troca
+      window._supabase = _supabase;
+
+      const SENHA_GERENTE_DEFINIDA = "1234"; // Senha mestra para operações críticas
+      let dadosTemporariosDesmembramento = null;
+      let idOSPendenteAcao = null; // ID da OS que aguarda autorização
+      let tipoAcaoPendente = null; // Armazena se é 'CANCELAR', 'ENCERRAR' ou 'REATIVAR'
+
+      // ==========================================
+      // 2. CARREGAMENTO E RENDERIZAÇÃO (READ)
+      // ==========================================
+      async function carregarOS() {
+        const statusFiltro = document.getElementById("filtroStatus").value;
+        let query = _supabase
+          .from("ordens_servico")
+          .select("*")
+          .order("numero_os", { ascending: true });
+
+        // Aplica o filtro lateral de status
+        if (statusFiltro !== "TODAS") {
+          query = query.eq("status", statusFiltro);
+        }
+
+        const { data, error } = await query;
+        if (error) return console.error("Erro ao carregar OS:", error);
+
+        const tbody = document.getElementById("osList");
+        tbody.innerHTML = data
+          .map((os) => {
+            const isCancelada = os.status === "CANCELADA";
+            const isEncerrada = os.status === "ENCERRADA";
+            const isAberta = os.status === "ABERTA";
+
+            return `
+            <tr class="border-b border-slate-800/50 transition-colors ${isCancelada ? "linha-cancelada" : "hover:bg-slate-800/30"}">
+                <td class="font-black text-white">#${os.numero_os}</td>
+                <td class="uppercase text-[10px] font-bold">
+                    <span class="text-amber-500 mr-1">${os.cod_cliente || "0"}</span>
+                    <span class="text-slate-300">${os.cliente || "---"}</span>
+                </td>
+                <td class="text-amber-500 font-black uppercase">${os.mes_referencia}</td>
+                <td class="text-slate-400 text-[10px]">${new Date(os.data_abertura).toLocaleString("pt-BR")}</td>
+                <td>
+                    <span class="status-badge ${
+                      isAberta
+                        ? "status-aberta"
+                        : isEncerrada
+                          ? "status-encerrada"
+                          : "status-cancelada"
+                    }">${os.status}</span>
+                </td>
+                <td class="text-right pr-4">
+                    <div class="flex items-center justify-end gap-2">
+                        
+                        <button onclick="visualizarItens('${os.numero_os}')" class="w-8 h-8 flex items-center justify-center btn-visualizar rounded-lg transition-all" title="Espiar Itens">
+                            <i class="fa-solid fa-eye text-[10px]"></i>
+                        </button>
+
+                        ${
+                          isAberta
+                            ? `
+                            <button onclick="solicitarSenhaGerente('${os.id}', 'ENCERRAR')" class="w-8 h-8 flex items-center justify-center bg-green-500/10 text-green-500 border border-green-500/20 rounded-lg hover:bg-green-500 hover:text-white" title="Encerrar OS">
+                                <i class="fa-solid fa-check text-[10px]"></i>
+                            </button>
+                            <button onclick="abrirModalDesmembrar('${os.id}', '${os.numero_os}')" class="w-8 h-8 flex items-center justify-center bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-lg hover:bg-amber-500 hover:text-slate-900" title="Desmembrar">
+                                <i class="fa-solid fa-scissors text-[10px]"></i>
+                            </button>
+                            <button onclick="editarOS('${os.id}', '${os.numero_os}')" class="w-8 h-8 flex items-center justify-center bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-lg hover:bg-blue-500 hover:text-white" title="Editar">
+                                <i class="fa-solid fa-pen text-[10px]"></i>
+                            </button>
+                            <button onclick="solicitarSenhaGerente('${os.id}', 'CANCELAR')" class="w-8 h-8 flex items-center justify-center bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg hover:bg-red-500 hover:text-white" title="Cancelar">
+                                <i class="fa-solid fa-trash text-[10px]"></i>
+                            </button>
+                        `
+                            : `
+                            <button onclick="reativarOS('${os.id}')" class="w-8 h-8 flex items-center justify-center bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-lg hover:bg-indigo-500 hover:text-white" title="Reativar OS">
+                                <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                            </button>
+                        `
+                        }
+
+                        <a href="Rastreio_Full.html?os=${os.numero_os}" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-2 ml-2">
+                            DETALHES
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            `;
+          })
+          .join("");
+      }
+
+      // ==========================================
+      // 3. MÓDULO DE SEGURANÇA E STATUS (UPDATE)
+      // ==========================================
+      function solicitarSenhaGerente(id, acao) {
+        idOSPendenteAcao = id;
+        tipoAcaoPendente = acao;
+
+        const modal = document.getElementById("modalSenhaGerente");
+        const titulo = modal.querySelector("h3");
+        const desc = modal.querySelector("p");
+        const btnConfirmar = modal.querySelector(
+          'button[onclick="confirmarCancelamento()"]',
+        );
+
+        if (acao === "ENCERRAR") {
+          titulo.innerText = "Encerrar Ordem de Serviço";
+          desc.innerHTML =
+            "A OS será marcada como <span class='text-green-400'>ENCERRADA</span>. Edições serão bloqueadas.";
+          btnConfirmar.className =
+            "flex-1 bg-green-600 text-white py-3 rounded-xl text-[10px] font-black uppercase";
+        } else if (acao === "REATIVAR") {
+          titulo.innerText = "Reativar Ordem de Serviço";
+          desc.innerHTML =
+            "A OS voltará para o status <span class='text-indigo-400'>ABERTA</span> e poderá ser editada.";
+          btnConfirmar.className =
+            "flex-1 bg-indigo-600 text-white py-3 rounded-xl text-[10px] font-black uppercase";
+        } else {
+          titulo.innerText = "Autorização de Gerente";
+          desc.innerHTML =
+            "Confirme para <span class='text-red-400'>CANCELAR</span> esta OS definitivamente.";
+          btnConfirmar.className =
+            "flex-1 bg-red-600 text-white py-3 rounded-xl text-[10px] font-black uppercase";
+        }
+
+        document.getElementById("senhaGerente").value = "";
+        modal.classList.replace("hidden", "flex");
+      }
+
+      async function confirmarCancelamento() {
+        const senha = document.getElementById("senhaGerente").value;
+        if (senha !== SENHA_GERENTE_DEFINIDA) return alert("Senha incorreta!");
+
+        let novoStatus = "ABERTA";
+        if (tipoAcaoPendente === "ENCERRAR") novoStatus = "ENCERRADA";
+        if (tipoAcaoPendente === "CANCELAR") novoStatus = "CANCELADA";
+        if (tipoAcaoPendente === "REATIVAR") novoStatus = "ABERTA";
+
+        const { error } = await _supabase
+          .from("ordens_servico")
+          .update({ status: novoStatus })
+          .eq("id", idOSPendenteAcao);
+
+        if (error) alert("Erro: " + error.message);
+        else {
+          fecharModalSenha();
+          carregarOS();
+        }
+      }
+
+      function reativarOS(id) {
+        solicitarSenhaGerente(id, "REATIVAR");
+      }
+
+      function fecharModalSenha() {
+        document
+          .getElementById("modalSenhaGerente")
+          .classList.replace("flex", "hidden");
+      }
+
+      // ==========================================
+      // 4. MÓDULO DE CONSULTA RÁPIDA (VISUALIZAÇÃO)
+      // ==========================================
+      async function visualizarItens(numOS) {
+        await abrirModalDesmembrar(null, numOS);
+
+        document.getElementById("descDesmembrar").innerText =
+          `MODO VISUALIZAÇÃO: ITENS DA OS #${numOS}`;
+
+        const footer = document.querySelector(
+          "#modalDesmembrar .p-6.bg-slate-900.border-t",
+        );
+        if (footer) footer.style.display = "none";
+
+        document
+          .querySelectorAll(".item-check")
+          .forEach((el) => (el.style.display = "none"));
+        document.getElementById("selectAll").style.display = "none";
+      }
+
+      // ==========================================
+      // 5. CRUD DE OS (CREATE/UPDATE)
+      // ==========================================
+      function abrirModalNovaOS() {
+        document.getElementById("edit_os_id").value = "";
+        document.getElementById("modalTitle").innerText = "Criar Nova OS";
+        document.getElementById("add_numero_os").value = "";
+        document.getElementById("add_numero_os").disabled = false;
+        document.getElementById("add_cod_cliente").value = "";
+        document.getElementById("add_nome_cliente").value = "";
+        document
+          .getElementById("modalNovaOS")
+          .classList.replace("hidden", "flex");
+      }
+
+      async function editarOS(id, num) {
+        const { data: os } = await _supabase
+          .from("ordens_servico")
+          .select("*")
+          .eq("id", id)
+          .single();
+        document.getElementById("edit_os_id").value = id;
+        document.getElementById("modalTitle").innerText = `Editando OS #${num}`;
+        document.getElementById("add_numero_os").value = os.numero_os;
+        document.getElementById("add_numero_os").disabled = true;
+        document.getElementById("add_cod_cliente").value = os.cod_cliente;
+        document.getElementById("add_nome_cliente").value = os.cliente;
+        document.getElementById("add_mes_ref").value = os.mes_referencia;
+        document
+          .getElementById("modalNovaOS")
+          .classList.replace("hidden", "flex");
+      }
+
+      function fecharModalNovaOS() {
+        document
+          .getElementById("modalNovaOS")
+          .classList.replace("flex", "hidden");
+      }
+
+      async function salvarNovaOS() {
+        const idEdicao = document.getElementById("edit_os_id").value;
+        const payload = {
+          numero_os: String(document.getElementById("add_numero_os").value),
+          cod_cliente: parseInt(
+            document.getElementById("add_cod_cliente").value,
+          ),
+          cliente: document
+            .getElementById("add_nome_cliente")
+            .value.toUpperCase(),
+          mes_referencia: document
+            .getElementById("add_mes_ref")
+            .value.toUpperCase(),
+        };
+
+        let res;
+        if (idEdicao)
+          res = await _supabase
+            .from("ordens_servico")
+            .update(payload)
+            .eq("id", idEdicao);
+        else {
+          payload.status = "ABERTA";
+          payload.data_abertura = new Date().toISOString();
+          res = await _supabase.from("ordens_servico").insert([payload]);
+        }
+
+        if (res.error) alert("Erro: " + res.error.message);
+        else {
+          fecharModalNovaOS();
+          carregarOS();
+        }
+      }
+
+      // ==========================================
+      // 6. MÓDULO DE DESMEMBRAMENTO
+      // ==========================================
+      async function abrirModalDesmembrar(id, num) {
+        document.getElementById("descDesmembrar").innerText =
+          `Itens da OS #${num}`;
+        document
+          .getElementById("modalDesmembrar")
+          .classList.replace("hidden", "flex");
+
+        const { data: itens } = await _supabase
+          .from("itens_os")
+          .select("*, fabricantes:fabricante_id(nome)")
+          .eq("os_number", num);
+        document.getElementById("listaItensDesmembramento").innerHTML = (
+          itens || []
+        )
+          .map(
+            (item) => `
+            <tr class="border-b border-slate-300">
+                <td class="p-2"><input type="checkbox" class="item-check" value="${item.id_item}" onchange="atualizarContagem()"></td>
+                <td class="p-2 font-black text-blue-700">${item.nr_cilindro || "---"}</td>
+                <td class="p-2">${item.fabricantes?.nome || "---"}</td>
+                <td class="p-2 font-bold">${item.tipo_carga || "---"}</td>
+                <td class="p-2 font-bold">${item.capacidade || "---"}</td>
+                <td class="p-2">${item.cod_barras || "---"}</td>
+                <td class="p-2 italic text-slate-400">${item.prefixo_selo ? item.prefixo_selo + "-" : ""}${item.selo_inmetro || "---"}</td>
+            </tr>
+        `,
+          )
+          .join("");
+      }
+
+      function fecharModalDesmembrar() {
+        document
+          .getElementById("modalDesmembrar")
+          .classList.replace("flex", "hidden");
+        const footer = document.querySelector(
+          "#modalDesmembrar .p-6.bg-slate-900.border-t",
+        );
+        if (footer) footer.style.display = "block";
+        document.getElementById("selectAll").style.display = "inline-block";
+        document
+          .querySelectorAll(".item-check")
+          .forEach((el) => (el.style.display = "inline-block"));
+      }
+
+      function atualizarContagem() {
+        document.getElementById("countSelected").innerText =
+          document.querySelectorAll(".item-check:checked").length;
+      }
+
+      function selecionarTodos(source) {
+        document
+          .querySelectorAll(".item-check")
+          .forEach((cb) => (cb.checked = source.checked));
+        atualizarContagem();
+      }
+
+      async function executarDesmembramento() {
+        const cod = document.getElementById("novo_cod_desmemb").value;
+        const nome = document.getElementById("novo_nome_desmemb").value;
+        const selecionados = Array.from(
+          document.querySelectorAll(".item-check:checked"),
+        ).map((cb) => cb.value);
+        if (!cod || !nome || selecionados.length === 0)
+          return alert("Preencha todos os campos e selecione os itens!");
+
+        dadosTemporariosDesmembramento = { cod, nome, selecionados };
+        document
+          .getElementById("modalNumeroOS")
+          .classList.replace("hidden", "flex");
+      }
+
+      async function confirmarVinculoNovaOS() {
+        const numNova = document.getElementById("inputNumeroNovaOS").value;
+        const { cod, nome, selecionados } = dadosTemporariosDesmembramento;
+        const descTexto = document.getElementById("descDesmembrar").innerText;
+        const numOSMestra = descTexto.replace(/\D/g, "");
+
+        const { data: osMestra } = await _supabase
+          .from("ordens_servico")
+          .select("mes_referencia")
+          .eq("numero_os", numOSMestra)
+          .single();
+
+        await _supabase.from("ordens_servico").insert([
+          {
+            numero_os: String(numNova),
+            cod_cliente: parseInt(cod),
+            cliente: nome.toUpperCase(),
+            mes_referencia: osMestra ? osMestra.mes_referencia : "MARÇO",
+            status: "ABERTA",
+            data_abertura: new Date().toISOString(),
+          },
+        ]);
+
+        await _supabase
+          .from("itens_os")
+          .update({ os_number: String(numNova) })
+          .in("id_item", selecionados.map(Number));
+
+        alert("Sucesso!");
+        document
+          .getElementById("modalNumeroOS")
+          .classList.replace("flex", "hidden");
+        fecharModalDesmembrar();
+        carregarOS();
+      }
+
+      // ==========================================
+      // 7. MÓDULO DE TROCA DE OPERADOR
+      // ==========================================
+      function obterSupabase() {
+        return window._supabase || null;
+      }
+
+      async function abrirModalTrocaUsuario() {
+        const modal = document.getElementById("modalTrocaUsuario");
+        if (modal) {
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+        }
+        
+        const msgErro = document.getElementById("msgErroTroca");
+        if (msgErro) msgErro.classList.add("hidden");
+        
+        const senhaInput = document.getElementById("troca_senha");
+        if (senhaInput) senhaInput.value = "";
+
+        const _supabaseClient = obterSupabase();
+        const selectEl = document.getElementById("troca_codigo");
+        if (!selectEl) return;
+
+        selectEl.innerHTML = '<option value="">A carregar operadores...</option>';
+
+        if (!_supabaseClient) {
+          selectEl.innerHTML = '<option value="">Erro de conexão com o Supabase</option>';
+          return;
+        }
+
+        let empresaIdLocal = null;
+        let usuarioLogadoId = null;
+        try {
+          const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+          if (userJson) {
+            const parsedUser = JSON.parse(userJson);
+            empresaIdLocal = parsedUser.empresa_id;
+            usuarioLogadoId = parsedUser.id; // Pega o ID do usuário atualmente logado
+          }
+        } catch (e) {
+          console.error("Erro ao ler sessão:", e);
+        }
+
+        if (!empresaIdLocal) {
+          selectEl.innerHTML = '<option value="">Empresa não identificada</option>';
+          return;
+        }
+
+        // Seleciona também a coluna 'id' para poder filtrar
+        let query = _supabaseClient
+          .from("usu_arios")
+          .select("id, codigo_id, nome_completo, nivel_permissao, status")
+          .eq("empresa_id", empresaIdLocal)
+          .neq("status", "bloqueado");
+
+        // Oculta o usuário atualmente logado da lista
+        if (usuarioLogadoId) {
+          query = query.neq("id", usuarioLogadoId);
+        }
+
+        const { data: usuarios, error } = await query;
+
+        if (error) {
+          console.error("Erro ao buscar operadores:", error);
+          selectEl.innerHTML = '<option value="">Erro ao carregar operadores</option>';
+          return;
+        }
+
+        selectEl.innerHTML = '<option value="">Selecione o operador...</option>';
+        
+        if (usuarios && usuarios.length > 0) {
+          usuarios.forEach(u => {
+            const option = document.createElement("option");
+            option.value = u.codigo_id; 
+            // Texto formatado de forma limpa e correta
+            option.textContent = `${u.nome_completo} (${u.nivel_permissao || 'Operador'} - ID: ${u.codigo_id})`;
+            selectEl.appendChild(option);
+          });
+        } else {
+          selectEl.innerHTML = '<option value="">Nenhum outro operador ativo disponível</option>';
+        }
+      }
+
+
+      function fecharModalTrocaUsuario() {
+        const modal = document.getElementById("modalTrocaUsuario");
+        if (modal) {
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+        }
+        const codigoEl = document.getElementById("troca_codigo");
+        const senhaEl = document.getElementById("troca_senha");
+        if (codigoEl) codigoEl.value = "";
+        if (senhaEl) senhaEl.value = "";
+      }
+
+      async function confirmarTrocaUsuario() {
+        const _supabaseClient = obterSupabase();
+        if (!_supabaseClient) {
+          alert("Sistema não conectado. Aguarde um momento e tente novamente.");
+          return;
+        }
+
+        const codigo = document.getElementById("troca_codigo").value;
+        const senha = document.getElementById("troca_senha").value;
+        const btn = document.getElementById("btnConfirmarTroca");
+        const msg = document.getElementById("msgErroTroca");
+
+        if (!codigo || !senha) return;
+
+        let empresaIdLocal = null;
+        try {
+          const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+          if (userJson) {
+            const parsedUser = JSON.parse(userJson);
+            empresaIdLocal = parsedUser.empresa_id;
+          }
+        } catch (e) {
+          console.error("Erro ao ler dados da sessão:", e);
+        }
+
+        if (!empresaIdLocal) {
+          alert("Sessão expirada. Faça login novamente.");
+          window.location.replace('index.html');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "VERIFICANDO...";
+        if (msg) msg.classList.add("hidden");
+
+        try {
+          const { data, error } = await _supabaseClient
+            .from("usu_arios")
+            .select("*") 
+            .eq("empresa_id", empresaIdLocal) 
+            .eq("codigo_id", codigo)
+            .eq("senha", senha)
+            .single();
+
+          if (error || !data) {
+            throw new Error("Credenciais inválidas");
+          }
+
+          if (data.status === 'bloqueado') {
+            if (msg) {
+              msg.innerText = "⚠️ Acesso Bloqueado: Este usuário está bloqueado pelo administrador.";
+              msg.classList.remove("hidden");
+            }
+            btn.disabled = false;
+            btn.innerText = "CONFIRMAR TROCA";
+            return; 
+          }
+
+          const displayElement = document.getElementById("nome-operador-logado");
+          if (displayElement) {
+            displayElement.innerText = data.nome_completo.toUpperCase();
+          }
+
+          localStorage.setItem("yase_user", JSON.stringify(data));
+          localStorage.setItem("yase_colab", JSON.stringify(data));
+          localStorage.setItem("nome_operador", data.nome_completo);
+
+          window.nomeOperadorLogado = data.nome_completo;
+
+          fecharModalTrocaUsuario();
+          location.reload(); 
+
+        } catch (err) {
+          console.error(err);
+          if (msg) {
+            msg.innerText = "ID ou Senha incorretos!";
+            msg.classList.remove("hidden");
+          }
+          btn.disabled = false;
+          btn.innerText = "CONFIRMAR TROCA";
+        }
+      }
+
+      // ==========================================
+      // 8. INICIALIZAÇÃO DA PÁGINA
+      // ==========================================
+      document.addEventListener("DOMContentLoaded", async () => {
+        carregarOS();
+
+        const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+        if (userJson) {
+          try {
+            const user = JSON.parse(userJson);
+            
+            // Preenche o nome do operador
+            const displayElement = document.getElementById("nome-operador-logado");
+            if (displayElement && user.nome_completo) {
+              displayElement.innerText = user.nome_completo.toUpperCase();
+            }
+
+            // Busca e preenche o nome real da empresa/unidade
+            if (user.empresa_id) {
+              const { data: empData } = await _supabase
+                .from('empresas')
+                .select('nome_fantasia')
+                .eq('id', user.empresa_id)
+                .single();
+
+              const unidadeElement = document.getElementById("nome-unidade-logada");
+              if (unidadeElement && empData?.nome_fantasia) {
+                unidadeElement.innerText = empData.nome_fantasia.toUpperCase();
+              }
+            }
+          } catch (e) {
+            console.error("Erro ao carregar dados do usuário/empresa:", e);
+          }
+        }
+      });
     </script>
+  
   </body>
 </html>

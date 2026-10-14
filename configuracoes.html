@@ -182,10 +182,19 @@
       </div>
     </main>
 
-    <script>
+<script>
       let logoBase64Temp = "";
+      let empresaIdAtual = null;
 
-      // Função para exibir alertas modernos flutuantes (Toast)
+      // Inicialização do Supabase
+      const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co";
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+ 
+      const db = window.supabase && window.supabase.createClient 
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) 
+        : window.supabase;
+
+      // Função para exibir alertas flutuantes (Toast)
       function mostrarAlerta(mensagem, tipo = 'sucesso') {
         const container = document.getElementById('toast-container');
         const alertBox = document.createElement('div');
@@ -202,44 +211,57 @@
 
         container.appendChild(alertBox);
 
-        // Animação de entrada
         setTimeout(() => {
           alertBox.classList.remove('translate-x-10', 'opacity-0');
         }, 10);
 
-        // Remove após 3.5 segundos com animação de saída
         setTimeout(() => {
           alertBox.classList.add('translate-x-10', 'opacity-0');
           setTimeout(() => alertBox.remove(), 300);
         }, 3500);
       }
 
-      // Carregar dados existentes ao iniciar
-      window.onload = () => {
-        document.getElementById("cfg_nome").value =
-          localStorage.getItem("nome_empresa") || "";
-        document.getElementById("cfg_cnpj").value =
-          localStorage.getItem("cnpj_empresa") || "";
-        document.getElementById("cfg_endereco").value =
-          localStorage.getItem("endereco_empresa") || "";
-        document.getElementById("cfg_cidade").value =
-          localStorage.getItem("cidade_empresa") || "";
-        document.getElementById("cfg_fone").value =
-          localStorage.getItem("telefone_empresa") || "";
+      // Carrega os dados estritamente usando o ID da empresa guardado no login
+      window.onload = async () => {
+        try {
+          if (!db || typeof db.from !== 'function') return;
 
-        const logoSalva = localStorage.getItem("empresa_logo") || "";
-        if (logoSalva) {
-          logoBase64Temp = logoSalva;
-          const img = document.getElementById("preview_logo");
-          img.src = logoSalva;
-          img.classList.remove("hidden");
-          document
-            .getElementById("placeholder_container")
-            .classList.add("hidden");
+          // Pega o UUID exato da empresa que acabou de fazer login
+          empresaIdAtual = localStorage.getItem('empresa_id');
+
+          if (!empresaIdAtual) {
+            mostrarAlerta("Sessão da empresa não encontrada. Faça login novamente!", "erro");
+            return;
+          }
+
+          // Busca direto na tabela 'empresas' pelo ID único vinculado ao login
+          const { data, error } = await db
+            .from('empresas')
+            .select('*')
+            .eq('id', empresaIdAtual)
+            .maybeSingle();
+
+          if (!error && data) {
+            document.getElementById("cfg_nome").value = data.nome_fantasia || "";
+            document.getElementById("cfg_cnpj").value = data.cnpj || "";
+            document.getElementById("cfg_endereco").value = data.endereco || "";
+            document.getElementById("cfg_cidade").value = data.cidade || "";
+            document.getElementById("cfg_fone").value = data.telefone || "";
+
+            if (data.logo) {
+              logoBase64Temp = data.logo;
+              const img = document.getElementById("preview_logo");
+              img.src = data.logo;
+              img.classList.remove("hidden");
+              document.getElementById("placeholder_container").classList.add("hidden");
+            }
+          }
+        } catch (err) {
+          console.error("Erro ao carregar dados da empresa:", err);
         }
       };
 
-      // Função para ler o arquivo, redimensionar e converter para Base64 de forma segura
+      // Função para ler a logo e converter para Base64
       function processarArquivoLogo(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -275,55 +297,55 @@
             const previewImg = document.getElementById("preview_logo");
             previewImg.src = logoBase64Temp;
             previewImg.classList.remove("hidden");
-            document
-              .getElementById("placeholder_container")
-              .classList.add("hidden");
+            document.getElementById("placeholder_container").classList.add("hidden");
           };
           img.src = e.target.result;
         };
         reader.readAsDataURL(file);
-
         event.target.value = "";
       }
 
-      // Salvar dados e tratar sucesso/erro com o alerta flutuante
-      function salvarDados() {
+      // Salva os dados na nuvem vinculados exclusivamente à empresa logada
+      async function salvarDados() {
         try {
-          localStorage.setItem(
-            "nome_empresa",
-            document.getElementById("cfg_nome").value,
-          );
-          localStorage.setItem(
-            "cnpj_empresa",
-            document.getElementById("cfg_cnpj").value,
-          );
-          localStorage.setItem(
-            "endereco_empresa",
-            document.getElementById("cfg_endereco").value,
-          );
-          localStorage.setItem(
-            "cidade_empresa",
-            document.getElementById("cfg_cidade").value,
-          );
-          localStorage.setItem(
-            "telefone_empresa",
-            document.getElementById("cfg_fone").value,
-          );
+          const nomeVal = document.getElementById("cfg_nome").value.trim();
+          const cnpjVal = document.getElementById("cfg_cnpj").value.trim();
+          const enderecoVal = document.getElementById("cfg_endereco").value.trim();
+          const cidadeVal = document.getElementById("cfg_cidade").value.trim();
+          const foneVal = document.getElementById("cfg_fone").value.trim();
 
-          if (logoBase64Temp) {
-            localStorage.setItem("empresa_logo", logoBase64Temp);
+          if (!empresaIdAtual) {
+            mostrarAlerta("ID da empresa não localizado na sessão!", "erro");
+            return;
           }
 
-          mostrarAlerta("Dados da empresa atualizados com sucesso!", "sucesso");
-          
-          // Recarrega a página após breve intervalo para dar tempo de ver a mensagem
-          setTimeout(() => {
-            location.reload();
-          }, 1500);
+          const dadosParaSupabase = {
+            cnpj: cnpjVal,
+            nome_fantasia: nomeVal,
+            endereco: enderecoVal,
+            cidade: cidadeVal,
+            telefone: foneVal,
+            logo: logoBase64Temp
+          };
+
+          if (db && typeof db.from === 'function') {
+            const { error } = await db
+              .from('empresas')
+              .update(dadosParaSupabase)
+              .eq('id', empresaIdAtual);
+
+            if (error) throw error;
+          }
+
+          // Atualiza também o nome da empresa na sessão caso tenha sido alterado
+          localStorage.setItem('nome_empresa', nomeVal);
+          localStorage.setItem('user_cnpj', cnpjVal);
+
+          mostrarAlerta("Identidade da empresa atualizada com sucesso!", "sucesso");
 
         } catch (error) {
-          console.error(error);
-          mostrarAlerta("Erro ao salvar dados. Verifique o armazenamento!", "erro");
+          console.error("Erro ao salvar:", error);
+          mostrarAlerta("Erro ao salvar dados no banco!", "erro");
         }
       }
     </script>

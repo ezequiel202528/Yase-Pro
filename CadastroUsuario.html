@@ -1,28 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Novo Usuário - YaSe PRO</title>
+    <title>Gestão de Equipe - YaSe PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-      body { font-family: "Plus Jakarta Sans", sans-serif; background: radial-gradient(circle at top right, #1e293b, #0f172a); height: 100vh; overflow: hidden; }
-      .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-      .sidebar { width: 280px; background: rgba(15, 23, 42, 0.8); border-right: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
-      .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: #94a3b8; text-decoration: none; border-radius: 12px; transition: all 0.3s ease; margin-bottom: 4px; font-weight: 500; }
-      .nav-link.active { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
-      .login-input { background: rgba(15, 23, 42, 0.6) !important; border: 1px solid rgba(255, 255, 255, 0.1); color: white !important; transition: all 0.3s; }
-      .login-input:focus { border-color: #fbbf24; box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1); outline: none; }
-      .shimmer { position: relative; overflow: hidden; }
-      .shimmer::after { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent); transform: rotate(45deg); animation: shimmer 3s infinite; }
-      @keyframes shimmer { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
-      select.login-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.25rem; }
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: radial-gradient(circle at top right, #1e293b, #0f172a);
+        height: 100vh;
+        overflow: hidden;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      }
+      .sidebar {
+        width: 280px;
+        background: rgba(15, 23, 42, 0.8);
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+      }
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        color: #94a3b8;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        margin-bottom: 4px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .nav-link.active {
+        background: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+      }
+      .login-input {
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white !important;
+        transition: all 0.3s;
+      }
+      .login-input:focus {
+        border-color: #fbbf24;
+        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1);
+        outline: none;
+      }
+      .shimmer {
+        position: relative;
+        overflow: hidden;
+      }
+      .shimmer::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+        transform: rotate(45deg);
+        animation: shimmer 3s infinite;
+      }
+      @keyframes shimmer {
+        0% { transform: translateX(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) rotate(45deg); }
+      }
+      select.login-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.25rem;
+      }
     </style>
   </head>
   <body class="flex">
+
+    <!-- Sidebar com o Submenu Completo -->
     <aside class="sidebar h-screen flex flex-col p-6 z-20">
       <div class="mb-10">
         <div class="flex items-center gap-3 mb-2">
@@ -36,18 +99,47 @@
         </div>
         <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-slate-700 to-transparent mt-6"></div>
       </div>
+
       <nav class="flex-1 space-y-2">
-        <a href="Dashboard.html" class="nav-link group">
-          <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-amber-500/10">
-            <i class="fa-solid fa-right-to-bracket text-sm"></i>
+        <a href="Dashboard.html" class="nav-link">
+          <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+            <i class="fa-solid fa-arrow-left text-sm"></i>
           </div>
           <span>Voltar ao Dashboard</span>
-        </a>        
+        </a>
+
+        <div class="pt-4 pb-2">
+          <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest px-3 mb-2">Gestão de Equipe</p>
+          
+          <a onclick="mudarAba('cadastro')" id="btnMenuCadastro" class="nav-link active">
+            <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+              <i class="fa-solid fa-user-plus text-sm"></i>
+            </div>
+            <span>Novo Usuário</span>
+          </a>
+
+          <a onclick="mudarAba('lista')" id="btnMenuListagem" class="nav-link">
+            <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+              <i class="fa-solid fa-users-gear text-sm"></i>
+            </div>
+            <span>Visualizar Usuários</span>
+          </a>
+
+          <a onclick="mudarAba('permissoes')" id="btnMenuPermissoes" class="nav-link">
+            <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+              <i class="fa-solid fa-shield-halved text-sm"></i>
+            </div>
+            <span>Permissões de Telas</span>
+          </a>
+        </div>
       </nav>
     </aside>
 
-    <main class="flex-1 flex flex-col items-center justify-center relative overflow-y-auto py-10">
-      <div class="glass-card w-full max-w-[520px] p-10 rounded-[32px] relative z-10 shimmer">
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 flex flex-col items-center justify-center relative overflow-y-auto py-10 px-6">
+      
+      <!-- SEÇÃO 1: FORMULÁRIO DE CADASTRO -->
+      <div id="secaoCadastro" class="glass-card w-full max-w-[520px] p-10 rounded-[32px] relative z-10 shimmer">
         <div class="text-center mb-8">
           <h2 class="text-2xl font-black text-white mb-2 tracking-tight">Novo Usuário</h2>
           <p id="instrucao-conexao" class="text-slate-400 text-sm italic">Verificando ligação...</p>
@@ -85,87 +177,504 @@
           </button>
         </form>
       </div>
+
+      <!-- SEÇÃO 2: TABELA DE LISTAGEM DE USUÁRIOS -->
+      <div id="secaoListagem" class="glass-card w-full max-w-6xl p-8 rounded-[32px] relative z-10 hidden">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-black text-white tracking-tight">Equipe Cadastrada & Permissões</h2>
+          <button onclick="mudarAba('cadastro')" class="px-4 py-2 bg-amber-500 text-slate-900 rounded-xl font-bold text-xs hover:bg-amber-400 transition-all">
+            + Novo Usuário
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-white/10 text-[10px] text-slate-400 uppercase tracking-widest">
+                <th class="py-3 px-4">Nome Completo</th>
+                <th class="py-3 px-4">Código (ID)</th>
+                <th class="py-3 px-4">Senha</th>
+                <th class="py-3 px-4">Nível</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-center">Ações / Bloqueio</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaUsuarios" class="text-sm text-slate-200">
+              <!-- Preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SEÇÃO 3: GERENCIAMENTO DE PERMISSÕES DE TELAS -->
+      <div id="secaoPermissoes" class="glass-card w-full max-w-6xl p-8 rounded-[32px] relative z-10 hidden">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h2 class="text-2xl font-black text-white tracking-tight">Liberação de Telas por Funcionário</h2>
+            <p class="text-slate-400 text-xs mt-1">Marque quais módulos cada colaborador pode aceder no sistema.</p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-white/10 text-[10px] text-slate-400 uppercase tracking-widest">
+                <th class="py-3 px-4">Colaborador</th>
+                <th class="py-3 px-4">Cargo</th>
+                <th class="py-3 px-4">Telas Liberadas (Marque para permitir)</th>
+                <th class="py-3 px-4 text-center">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaPermissoesTelas" class="text-sm text-slate-200">
+              <!-- Preenchido via JS dinamicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </main>
 
+
+    <!-- MODAL MODERNO DE CONFIRMAÇÃO DE BLOQUEIO/LIBERAÇÃO -->
+<div id="modalConfirmarBloqueio" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+  <div class="glass-card w-full max-w-md p-8 rounded-[32px] border border-white/10 shadow-2xl bg-slate-900/90 text-center">
+    <div id="iconeModalBloqueio" class="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 border text-xl">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <h3 id="tituloModalBloqueio" class="text-xl font-black text-white tracking-tight">CONFIRMAR AÇÃO</h3>
+    <p id="textoModalBloqueio" class="text-xs text-slate-400 mt-2 mb-6">Deseja realmente alterar o status deste utilizador?</p>
+    
+    <div class="flex gap-4">
+      <button type="button" onclick="fecharModalBloqueio()" class="w-1/2 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs transition-all">CANCELAR</button>
+      <button type="button" id="btnExecutarBloqueio" onclick="executarAlternarBloqueio()" class="w-1/2 h-12 rounded-xl font-bold text-xs transition-all shadow-lg text-slate-900">CONFIRMAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTAINER DE NOTIFICAÇÕES (TOAST) NO CANTO SUPERIOR DIREITO -->
+<div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- MODAL DE EDIÇÃO -->
+    <div id="modalEdicao" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+      <div class="glass-card w-full max-w-md p-8 rounded-[32px] border border-white/10">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-black text-white">Editar Usuário</h3>
+          <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+        
+        <form id="formEdicao" class="space-y-4">
+          <input type="hidden" id="edit_id" />
+          <div>
+            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Nome Completo</label>
+            <input type="text" id="edit_nome" required class="login-input w-full h-12 px-4 rounded-xl text-sm" />
+          </div>
+          <div>
+            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Código (ID)</label>
+            <input type="text" id="edit_codigo" required class="login-input w-full h-12 px-4 rounded-xl text-sm" />
+          </div>
+          <div>
+            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Senha</label>
+            <input type="text" id="edit_senha" required class="login-input w-full h-12 px-4 rounded-xl text-sm" />
+          </div>
+          <div>
+            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Permissão</label>
+            <select id="edit_nivel" class="login-input w-full h-12 px-4 rounded-xl text-sm appearance-none">
+              <option value="Operador">Operador de Pátio</option>
+              <option value="Gerente">Gerente de Unidade</option>
+            </select>
+          </div>
+          <div class="flex gap-4 pt-2">
+            <button type="button" onclick="fecharModal()" class="w-1/2 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs transition-all">Cancelar</button>
+            <button type="submit" class="w-1/2 h-12 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl font-bold text-xs transition-all">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
-      // === CHAVES CONFIGURADAS COM SUCESSO ===
-      const URL_SB = 'https://gzojpxgpgjapsegerscb.supabase.co';
-      const KEY_SB = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s';
+      const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
+      const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
 
       let sb = null;
-      const txtStatus = document.getElementById('instrucao-conexao');
-      const userJson = localStorage.getItem('yase_user');
-      let usuarioLogado = null;
       let empresaId = null;
+      let usuariosCache = [];
+      const txtStatus = document.getElementById("instrucao-conexao");
 
-      try {
-        usuarioLogado = userJson ? JSON.parse(userJson) : null;
-      } catch (e) {
-        console.error("Não foi possível ler a sessão do usuário:", e);
-      }
-
-      if (!usuarioLogado || !['Gestor', 'Gerente'].includes(usuarioLogado.nivel_permissao)) {
-        window.location.replace('index.html');
-      } else {
-        empresaId = usuarioLogado.empresa_id;
-      }
+      // Lista de módulos disponíveis no sistema para liberar/bloquear
+      const modulosDisponiveis = [
+        { arquivo: 'Remessa.html', nome: 'Remessas' },
+        { arquivo: 'Vinculacao.html', nome: 'Vinculação' },
+        { arquivo: 'GestaoOS.html', nome: 'Gestão OS' },
+        { arquivo: 'ControleDeCargas.html', nome: 'Cargas' },
+        { arquivo: 'AnexoOeP.html', nome: 'Anexo O e P' },
+        { arquivo: 'configuracoes.html', nome:'Minha empresa'}
+      ];
 
       function init() {
         try {
-          if (!empresaId) {
-            throw new Error("Não foi possível identificar a empresa da sessão. Saia e entre novamente.");
-          }
+          const userJson = localStorage.getItem("yase_user") || localStorage.getItem("yase_colab");
+          const usuarioLogado = userJson ? JSON.parse(userJson) : null;
+          empresaId = usuarioLogado ? usuarioLogado.empresa_id : null;
+
+          if (!empresaId) throw new Error("Empresa não identificada.");
+
           sb = supabase.createClient(URL_SB, KEY_SB);
           txtStatus.innerText = "✅ Sistema Pronto para Cadastro";
           txtStatus.className = "text-emerald-400 text-sm";
         } catch (e) {
           console.error(e);
           txtStatus.innerText = "❌ Erro ao ligar ao Banco de Dados.";
+          txtStatus.className = "text-red-400 text-sm";
         }
       }
 
       init();
 
-      document.getElementById('cadastroForm').addEventListener('submit', async (e) => {
+      // Alternar Abas no Submenu
+      function mudarAba(aba) {
+        const secCadastro = document.getElementById("secaoCadastro");
+        const secListagem = document.getElementById("secaoListagem");
+        const secPermissoes = document.getElementById("secaoPermissoes");
+        
+        const btnCadastro = document.getElementById("btnMenuCadastro");
+        const btnListagem = document.getElementById("btnMenuListagem");
+        const btnPermissoes = document.getElementById("btnMenuPermissoes");
+
+        // Esconde todas
+        secCadastro.classList.add("hidden");
+        secListagem.classList.add("hidden");
+        secPermissoes.classList.add("hidden");
+        btnCadastro.classList.remove("active");
+        btnListagem.classList.remove("active");
+        btnPermissoes.classList.remove("active");
+
+        if (aba === "cadastro") {
+          secCadastro.classList.remove("hidden");
+          btnCadastro.classList.add("active");
+        } else if (aba === "lista") {
+          secListagem.classList.remove("hidden");
+          btnListagem.classList.add("active");
+          carregarUsuarios();
+        } else if (aba === "permissoes") {
+          secPermissoes.classList.remove("hidden");
+          btnPermissoes.classList.add("active");
+          carregarTabelaPermissoes();
+        }
+      }
+
+      // Carregar Usuários na Aba de Listagem Geral
+      async function carregarUsuarios() {
+        const tbody = document.getElementById("tabelaUsuarios");
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400 italic">A carregar equipe...</td></tr>';
+
+        try {
+          const { data, error } = await sb.from("usu_arios").select("*").eq("empresa_id", empresaId);
+          if (error) throw error;
+          usuariosCache = data || [];
+
+          if (usuariosCache.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Nenhum usuário encontrado.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = "";
+          usuariosCache.forEach(user => {
+            const isAtivo = user.status !== 'bloqueado';
+            tbody.innerHTML += `
+              <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <td class="py-4 px-4 font-bold text-white">${user.nome_completo || '-'}</td>
+                <td class="py-4 px-4 text-slate-400">${user.codigo_id || '-'}</td>
+                <td class="py-4 px-4 font-mono text-xs text-amber-300">
+                  <span id="senha_${user.id}" class="hidden">${user.senha || ''}</span>
+                  <span id="oculta_${user.id}" class="text-slate-500">••••••••</span>
+                  <button onclick="alternarSenha('${user.id}')" class="ml-2 text-slate-400 hover:text-white"><i id="icone_${user.id}" class="fa-solid fa-eye"></i></button>
+                </td>
+                <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">${user.nivel_permissao || 'Operador'}</span></td>
+                <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${isAtivo ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${isAtivo ? 'Ativo' : 'Bloqueado'}</span></td>
+                <td class="py-4 px-4 text-center space-x-1">
+                  <button onclick="alternarBloqueio('${user.id}', '${user.status || 'ativo'}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isAtivo ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'}">
+                    <i class="fa-solid ${isAtivo ? 'fa-ban' : 'fa-check'}"></i> ${isAtivo ? 'Bloquear' : 'Liberar'}
+                  </button>
+                  <button onclick="abrirEdicao('${user.id}')" class="text-slate-400 hover:text-amber-400 transition-colors p-2"><i class="fa-solid fa-pen-to-square"></i></button>
+                  <button onclick="excluirUsuario('${user.id}')" class="text-slate-400 hover:text-red-400 transition-colors p-2"><i class="fa-solid fa-trash-can"></i></button>
+                </td>
+              </tr>
+            `;
+          });
+        } catch (err) {
+          console.error(err);
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-red-400">Erro ao carregar dados.</td></tr>';
+        }
+      }
+
+      // Carregar Tabela Dinâmica de Permissões de Telas
+      async function carregarTabelaPermissoes() {
+        const tbody = document.getElementById("tabelaPermissoesTelas");
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400 italic">A carregar permissões...</td></tr>';
+
+        try {
+          const { data, error } = await sb.from("usu_arios").select("*").eq("empresa_id", empresaId);
+          if (error) throw error;
+          usuariosCache = data || [];
+
+          if (usuariosCache.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400">Nenhum funcionário encontrado.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = "";
+          usuariosCache.forEach(user => {
+            // Tenta ler as permissões salvas (ex: JSON string ou array)
+            let telasSalvas = [];
+            try {
+              telasSalvas = user.permissoes_telas ? JSON.parse(user.permissoes_telas) : [];
+            } catch(e) {
+              telasSalvas = [];
+            }
+
+            let checkboxesHtml = '<div class="flex flex-wrap gap-3">';
+            modulosDisponiveis.forEach(mod => {
+              const marcado = telasSalvas.includes(mod.arquivo) ? 'checked' : '';
+              checkboxesHtml += `
+                <label class="flex items-center gap-2 text-xs text-slate-300 bg-slate-900/50 px-3 py-2 rounded-xl border border-white/5 cursor-pointer hover:border-amber-500/30">
+                  <input type="checkbox" value="${mod.arquivo}" data-userid="${user.id}" class="chk-tela rounded bg-slate-800 border-slate-700 text-amber-500 focus:ring-amber-500" ${marcado}>
+                  ${mod.nome}
+                </label>
+              `;
+            });
+            checkboxesHtml += '</div>';
+
+            tbody.innerHTML += `
+              <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                <td class="py-4 px-4 font-bold text-white">${user.nome_completo || '-'}</td>
+                <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400">${user.nivel_permissao || 'Operador'}</span></td>
+                <td class="py-4 px-4">${checkboxesHtml}</td>
+                <td class="py-4 px-4 text-center">
+                  <button onclick="salvarPermissoesTelas('${user.id}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl font-bold text-xs transition-all shadow-lg">
+                    Salvar
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        } catch (err) {
+          console.error(err);
+          tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-red-400">Erro ao carregar permissões.</td></tr>';
+        }
+      }
+
+
+// Salvar as Permissões de Telas marcadas para o usuário específico
+      async function salvarPermissoesTelas(userId) {
+        // Pega todos os checkboxes marcados daquele usuário específico
+        const checkboxes = document.querySelectorAll(`.chk-tela[data-userid="${userId}"]:checked`);
+        const telasPermitidas = Array.from(checkboxes).map(cb => cb.value);
+
+        try {
+          const { error } = await sb.from("usu_arios").update({
+            permissoes_telas: JSON.stringify(telasPermitidas)
+          }).eq("id", userId);
+
+          if (error) throw error;
+          
+          // Exibe o toast verde moderno no canto superior direito
+          mostrarToast("✅ Permissões de telas atualizadas com sucesso!");
+        } catch (err) {
+          console.error(err);
+          mostrarToast("❌ Erro ao salvar permissões: " + (err.message || "Erro desconhecido"), "erro");
+        }
+      }
+      // Funções auxiliares (Senha, Bloqueio, Edição e Cadastro)
+      function alternarSenha(id) {
+        const spanSenha = document.getElementById(`senha_${id}`);
+        const spanOculta = document.getElementById(`oculta_${id}`);
+        const icone = document.getElementById(`icone_${id}`);
+        if (spanSenha.classList.contains("hidden")) {
+          spanSenha.classList.remove("hidden");
+          spanOculta.classList.add("hidden");
+          icone.className = "fa-solid fa-eye-slash";
+        } else {
+          spanSenha.classList.add("hidden");
+          spanOculta.classList.remove("hidden");
+          icone.className = "fa-solid fa-eye";
+        }
+      }
+
+      
+      let dadosBloqueioTemporario = { id: null, novoStatus: null };
+
+      // Dispara ao clicar no botão da tabela
+      function alternarBloqueio(id, statusAtual) {
+        const novoStatus = statusAtual === 'bloqueado' ? 'ativo' : 'bloqueado';
+        dadosBloqueioTemporario = { id, novoStatus };
+
+        const modal = document.getElementById("modalConfirmarBloqueio");
+        const iconeDiv = document.getElementById("iconeModalBloqueio");
+        const titulo = document.getElementById("tituloModalBloqueio");
+        const texto = document.getElementById("textoModalBloqueio");
+        const btnConfirmar = document.getElementById("btnExecutarBloqueio");
+
+        if (novoStatus === 'bloqueado') {
+          titulo.innerText = "BLOQUEAR UTILIZADOR";
+          texto.innerHTML = "O utilizador selecionado perderá o acesso imediato ao sistema até que seja liberado novamente.";
+          iconeDiv.className = "w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 border text-xl bg-red-500/10 border-red-500/20 text-red-400";
+          btnConfirmar.className = "w-1/2 h-12 rounded-xl font-bold text-xs transition-all shadow-lg bg-red-500 hover:bg-red-400 text-white";
+          btnConfirmar.innerText = "SIM, BLOQUEAR";
+        } else {
+          titulo.innerText = "LIBERAR UTILIZADOR";
+          texto.innerHTML = "O utilizador selecionado voltará a ter permissão de acesso ao sistema com as suas credenciais.";
+          iconeDiv.className = "w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 border text-xl bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+          btnConfirmar.className = "w-1/2 h-12 rounded-xl font-bold text-xs transition-all shadow-lg bg-emerald-500 hover:bg-emerald-400 text-slate-900";
+          btnConfirmar.innerText = "SIM, LIBERAR";
+        }
+
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function fecharModalBloqueio() {
+        const modal = document.getElementById("modalConfirmarBloqueio");
+        if (modal) {
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+        }
+        dadosBloqueioTemporario = { id: null, novoStatus: null };
+      }
+
+      // Executa a alteração no Supabase após a confirmação no modal central
+      async function executarAlternarBloqueio() {
+        const { id, novoStatus } = dadosBloqueioTemporario;
+        if (!id || !novoStatus) return;
+
+        fecharModalBloqueio();
+
+        try {
+          const { error } = await sb.from("usu_arios").update({ status: novoStatus }).eq("id", id);
+          if (error) throw error;
+
+          carregarUsuarios();
+          
+          // Exibe o alerta verde bonito no canto superior direito
+          const acaoTexto = novoStatus === 'bloqueado' ? 'bloqueado' : 'liberado';
+          mostrarToast(`✅ Utilizador ${acaoTexto} com sucesso!`);
+        } catch (err) {
+          console.error(err);
+          mostrarToast("❌ Erro ao alterar status do utilizador.", "erro");
+        }
+      }
+
+      // Função para exibir o alerta flutuante moderno no canto superior direito
+      function mostrarToast(mensagem, tipo = "sucesso") {
+        const container = document.getElementById("toastContainer");
+        if (!container) return;
+
+        const toast = document.createElement("div");
+        const corFundo = tipo === "sucesso" 
+          ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" 
+          : "bg-red-950/90 text-red-400 border-red-500/30";
+
+        toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-300 translate-x-10 opacity-0 ${corFundo}`;
+        toast.innerHTML = `<span class="text-xs font-black tracking-wide">${mensagem}</span>`;
+
+        container.appendChild(toast);
+
+        // Animação de entrada
+        setTimeout(() => {
+          toast.classList.remove("translate-x-10", "opacity-0");
+        }, 10);
+
+        // Remove após 3.5 segundos com animação de saída
+        setTimeout(() => {
+          toast.classList.add("translate-x-10", "opacity-0");
+          setTimeout(() => toast.remove(), 300);
+        }, 3500);
+      }
+
+
+
+
+      function abrirEdicao(id) {
+        const user = usuariosCache.find(u => u.id == id);
+        if (!user) return;
+        document.getElementById("edit_id").value = user.id;
+        document.getElementById("edit_nome").value = user.nome_completo || "";
+        document.getElementById("edit_codigo").value = user.codigo_id || "";
+        document.getElementById("edit_senha").value = user.senha || "";
+        document.getElementById("edit_nivel").value = user.nivel_permissao || "Operador";
+        document.getElementById("modalEdicao").classList.remove("hidden");
+      }
+
+      function fecharModal() { document.getElementById("modalEdicao").classList.add("hidden"); }
+
+      document.getElementById("formEdicao").addEventListener("submit", async (e) => {
         e.preventDefault();
-        const btn = document.getElementById('btnCadastrar');
-        const msg = document.getElementById('statusMsg');
+        const id = document.getElementById("edit_id").value;
+        try {
+          const { error } = await sb.from("usu_arios").update({
+            nome_completo: document.getElementById("edit_nome").value,
+            codigo_id: document.getElementById("edit_codigo").value,
+            senha: document.getElementById("edit_senha").value,
+            nivel_permissao: document.getElementById("edit_nivel").value
+          }).eq("id", id);
+          if (error) throw error;
+          alert("✅ Atualizado com sucesso!");
+          fecharModal();
+          carregarUsuarios();
+        } catch (err) {
+          alert("Erro ao atualizar.");
+        }
+      });
 
-        if (!sb || !empresaId) return alert("Não foi possível identificar a empresa da sessão. Saia e entre novamente.");
+      async function excluirUsuario(id) {
+        if (!confirm("Tem certeza que deseja excluir permanentemente este usuário?")) return;
+        try {
+          const { error } = await sb.from("usu_arios").delete().eq("id", id);
+          if (error) throw error;
+          carregarUsuarios();
+        } catch (err) {
+          alert("Erro ao excluir.");
+        }
+      }
 
-        const senha = document.getElementById('campo_senha').value;
-        const conf = document.getElementById('campo_confirmar').value;
+      document.getElementById("cadastroForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("btnCadastrar");
+        const msg = document.getElementById("statusMsg");
+
+        const senha = document.getElementById("campo_senha").value;
+        const conf = document.getElementById("campo_confirmar").value;
 
         if (senha !== conf) {
-            msg.innerText = "As senhas não coincidem!";
-            msg.className = "text-red-400 bg-red-500/10 py-3 rounded-xl block";
-            msg.classList.remove('hidden');
-            return;
+          msg.innerText = "As senhas não coincidem!";
+          msg.className = "text-red-400 bg-red-500/10 py-3 rounded-xl block";
+          msg.classList.remove("hidden");
+          return;
         }
 
         btn.disabled = true;
         btn.innerText = "A GUARDAR...";
 
         try {
-          const { error } = await sb.from('usu_arios').insert([{
+          const { error } = await sb.from("usu_arios").insert([{
             empresa_id: empresaId,
-            nome_completo: document.getElementById('campo_nome').value,
-            codigo_id: document.getElementById('campo_codigo').value,
+            nome_completo: document.getElementById("campo_nome").value,
+            codigo_id: document.getElementById("campo_codigo").value,
             senha: senha,
-            nivel_permissao: document.getElementById('campo_nivel').value
+            nivel_permissao: document.getElementById("campo_nivel").value,
+            status: "ativo",
+            permissoes_telas: JSON.stringify([]) // Inicia sem telas marcadas
           }]);
 
           if (error) throw error;
 
           msg.innerText = "✅ Usuário criado com sucesso!";
           msg.className = "text-emerald-400 bg-emerald-500/10 py-3 rounded-xl block";
-          msg.classList.remove('hidden');
-          document.getElementById('cadastroForm').reset();
+          msg.classList.remove("hidden");
+          document.getElementById("cadastroForm").reset();
         } catch (err) {
-          console.error(err);
-          msg.innerText = "Erro: " + (err.message || "Falha na ligação");
+          msg.innerText = "Erro: " + (err.message || "Falha ao salvar");
           msg.className = "text-red-400 bg-red-500/10 py-3 rounded-xl block";
-          msg.classList.remove('hidden');
+          msg.classList.remove("hidden");
         } finally {
           btn.disabled = false;
           btn.innerText = "CADASTRAR USUÁRIO";

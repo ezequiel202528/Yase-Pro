@@ -2,8 +2,71 @@
 // MÓDULO DE ETIQUETAS E GESTÃO DE LOTES (YASe PRO)
 // ==========================================
 
+// Função auxiliar para buscar os dados atualizados da empresa direto do Supabase
+async function buscarDadosEmpresaSupabase() {
+  let dadosEmpresa = {
+    nome: "NOME DA EMPRESA LTDA",
+    endereco: "ENDEREÇO COMPLETO",
+    cidade: "CIDADE/UF",
+    cnpj: "00.000.000/0000-00",
+    fone: "(00) 0000-0000",
+    logo: ""
+  };
+
+  try {
+    let empresaIdLocal = localStorage.getItem('empresa_id');
+
+    if (!empresaIdLocal) {
+      const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+      if (userJson) {
+        const parsedUser = JSON.parse(userJson);
+        empresaIdLocal = parsedUser.empresa_id || parsedUser.empresaId;
+      }
+    }
+
+    if (empresaIdLocal && typeof window._supabase !== 'undefined') {
+      const { data: empData, error } = await window._supabase
+        .from('empresas')
+        .select('*')
+        .eq('id', empresaIdLocal)
+        .maybeSingle();
+
+      if (!error && empData) {
+        dadosEmpresa.nome = empData.nome_fantasia || empData.razao_social || dadosEmpresa.nome;
+        dadosEmpresa.endereco = empData.endereco || dadosEmpresa.endereco;
+        dadosEmpresa.cidade = empData.cidade || empData.cidade_uf || dadosEmpresa.cidade;
+        dadosEmpresa.cnpj = empData.cnpj || dadosEmpresa.cnpj;
+        dadosEmpresa.fone = empData.telefone || dadosEmpresa.fone;
+        dadosEmpresa.logo = empData.logo || empData.logo_url || "";
+      }
+    }
+  } catch (err) {
+    console.error("Erro ao buscar dados da empresa no Supabase:", err);
+  }
+
+  // Fallback para o localStorage se necessário
+  if (dadosEmpresa.nome === "NOME DA EMPRESA LTDA") {
+    dadosEmpresa.nome = localStorage.getItem('nome_empresa') || dadosEmpresa.nome;
+    dadosEmpresa.endereco = localStorage.getItem('endereco_empresa') || dadosEmpresa.endereco;
+    dadosEmpresa.cidade = localStorage.getItem('cidade_empresa') || dadosEmpresa.cidade;
+    dadosEmpresa.cnpj = localStorage.getItem('cnpj_empresa') || dadosEmpresa.cnpj;
+    dadosEmpresa.fone = localStorage.getItem('telefone_empresa') || dadosEmpresa.fone;
+    dadosEmpresa.logo = localStorage.getItem("empresa_logo") || dadosEmpresa.logo;
+  }
+
+  const enderecoFinal = `${dadosEmpresa.endereco} - ${dadosEmpresa.cidade}`;
+
+  return {
+    nome: dadosEmpresa.nome,
+    endereco: enderecoFinal,
+    cnpj: dadosEmpresa.cnpj,
+    fone: dadosEmpresa.fone,
+    logo: dadosEmpresa.logo
+  };
+}
+
 // 1. PREPARAR E ABRIR MODAL DE ETIQUETA UNITÁRIA
-function prepararModalEtiqueta(dados) {
+async function prepararModalEtiqueta(dados) {
   console.log("Preparando modal com os dados:", dados);
 
   if (!dados) {
@@ -17,17 +80,19 @@ function prepararModalEtiqueta(dados) {
     else console.warn(`Elemento com ID '${id}' não foi encontrado no HTML.`);
   };
 
-  // Dados da empresa do localStorage
-  setElementText('etiqueta_empresa_nome', localStorage.getItem('nome_empresa') || "NOME DA EMPRESA LTDA");
-  setElementText('etiqueta_empresa_endereco', (localStorage.getItem('endereco_empresa') || "ENDEREÇO COMPLETO") + " - " + (localStorage.getItem('cidade_empresa') || "CIDADE/UF"));
-  setElementText('etiqueta_empresa_cnpj', localStorage.getItem('cnpj_empresa') || "00.000.000/0000-00");
-  setElementText('etiqueta_empresa_fone', localStorage.getItem('telefone_empresa') || "(00) 0000-0000");
+  // Busca os dados reais da empresa atualizada
+  const emp = await buscarDadosEmpresaSupabase();
+
+  setElementText('etiqueta_empresa_nome', emp.nome);
+  setElementText('etiqueta_empresa_endereco', emp.endereco);
+  setElementText('etiqueta_empresa_cnpj', emp.cnpj);
+  setElementText('etiqueta_empresa_fone', emp.fone);
 
   const meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
   
   const dataRecargaStr = dados.prox_recarga || new Date().toISOString().split('T')[0];
   const dRecarga = new Date(dataRecargaStr + "T12:00:00");
-  const dataEtiqueta = `${meses[dRecarga.getMonth()]} - ${dRecarga.getFullYear()}`;
+  const dataEtiqueta = `${meses[dRecarga.getMonth()]} ${dRecarga.getFullYear()}`;
 
   setElementText("etiqueta_val_manut", dataEtiqueta);
   setElementText("etiqueta_val_reteste", dados.prox_reteste || "---");
@@ -64,18 +129,16 @@ function prepararModalEtiqueta(dados) {
   setElementText("barcode_text_manual", codigoBarrasReal);
 
   // Logo da empresa
-
-  const urlLogo = localStorage.getItem("empresa_logo");
   const imgLogoCentral = document.getElementById("logo_central_etiqueta");
 
-  if (urlLogo && imgLogoCentral) {
-    imgLogoCentral.src = urlLogo;
+  if (emp.logo && imgLogoCentral) {
+    imgLogoCentral.src = emp.logo;
     imgLogoCentral.style.display = "block";
   } else if (imgLogoCentral) {
     imgLogoCentral.style.display = "none";
   }
 
-  // Exibir o modal (suporta tanto flex quanto block conforme seu layout)
+  // Exibir o modal
   const modalEtiqueta = document.getElementById("modalEtiqueta");
   if (modalEtiqueta) {
     modalEtiqueta.classList.remove("hidden");
@@ -101,20 +164,31 @@ function validarEImprimir() {
   }
   
   const conteudo = areaImpressao.innerHTML;
+  
+  // Pega o código de barras atual para replicar na janela de impressão
+  const codigoBarasTexto = document.getElementById("barcode_text_manual") ? document.getElementById("barcode_text_manual").innerText : "---";
+
   const janela = window.open("", "", "width=800,height=600");
 
   janela.document.write(`
         <html>
             <head>
                 <title>Imprimir Etiqueta</title>
+                <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <style>
                     @page { size: 100mm 50mm; margin: 0; }
                     body { margin: 0; padding: 0; background: white; }
                 </style>
             </head>
-            <body onload="setTimeout(() => { window.print(); window.close(); }, 500)">
-                <div style="width: 100mm; height: 50mm; padding: 5px; color: black; background: white; display: flex; justify-content: space-between; align-items: stretch; position: relative; overflow: hidden; box-sizing: border-box;">
+            <body onload="setTimeout(() => { 
+                try {
+                    JsBarcode('#barcode_preview', '${codigoBarasTexto}', { format: 'CODE128', width: 1.2, height: 18, displayValue: false, lineColor: '#000' });
+                } catch(e) { console.error(e); }
+                window.print(); 
+                window.close(); 
+            }, 500)">
+                <div style="width: 100mm; height: 50mm; padding: 2px; color: black; background: white; box-sizing: border-box;">
                     ${conteudo}
                 </div>
             </body>
@@ -204,7 +278,6 @@ window.carregarExtintoresPendentes = async function() {
     }
 
     try {
-        // 1. Busca os IDs que já foram vinculados a algum lote para não repetir
         const { data: lotesItens, error: errLotes } = await window._supabase
             .from('lotes_etiquetas_itens')
             .select('extintor_id');
@@ -215,18 +288,15 @@ window.carregarExtintoresPendentes = async function() {
 
         const idsJaImpressos = (lotesItens || []).map(item => item.extintor_id).filter(Boolean);
 
-        // 2. Constrói a consulta básica nos itens da OS
         let query = window._supabase
             .from('itens_os') 
             .select('*')
             .order('id', { ascending: false });
 
-        // Se houver itens já impressos, exclui eles da listagem
         if (idsJaImpressos.length > 0) {
             query = query.not('id', 'in', `(${idsJaImpressos.join(',')})`);
         }
 
-        // Limita à quantidade desejada pelo usuário
         const { data, error } = await query.limit(quantidadeDesejada);
 
         if (error) {
@@ -260,14 +330,9 @@ function renderizarTabelaPendentes(itens) {
     const tbody = document.getElementById('tabelaExtintoresPendentesBody');
     
     if (!tbody) {
-        console.warn("Elemento 'tabelaExtintoresPendentesBody' ainda não está no DOM. Tentando novamente em breve...");
         setTimeout(() => {
             const tbodyRetry = document.getElementById('tabelaExtintoresPendentesBody');
-            if (tbodyRetry) {
-                renderizarTabelaPendentes(itens);
-            } else {
-                console.error("Erro definitivo: Elemento 'tabelaExtintoresPendentesBody' não foi encontrado no HTML do modal.");
-            }
+            if (tbodyRetry) renderizarTabelaPendentes(itens);
         }, 100);
         return;
     }
@@ -301,6 +366,7 @@ function renderizarTabelaPendentes(itens) {
         `;
     }).join('');
 }
+
 window.imprimirFilaEtiquetas = async function(idsEspecificos = []) {
   const itensParaImprimir = idsEspecificos.length > 0 
     ? filaEtiquetas.filter(item => idsEspecificos.includes(item.id))
@@ -311,11 +377,8 @@ window.imprimirFilaEtiquetas = async function(idsEspecificos = []) {
     return;
   }
 
-  const empresaNome = localStorage.getItem('nome_empresa') || "NOME DA EMPRESA LTDA";
-  const empresaEndereco = (localStorage.getItem('endereco_empresa') || "ENDEREÇO COMPLETO") + " - " + (localStorage.getItem('cidade_empresa') || "CIDADE/UF");
-  const empresaCnpj = localStorage.getItem('cnpj_empresa') || "00.000.000/0000-00";
-  const empresaFone = localStorage.getItem('telefone_empresa') || "(00) 0000-0000";
-  const urlLogo = localStorage.getItem("empresa_logo") || "";
+  // Busca os dados reais atualizados da empresa do Supabase
+  const emp = await buscarDadosEmpresaSupabase();
 
   const meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
   let htmlEtiquetas = "";
@@ -323,70 +386,71 @@ window.imprimirFilaEtiquetas = async function(idsEspecificos = []) {
   itensParaImprimir.forEach((dados, idx) => {
     const dataRef = dados.prox_recarga || new Date().toISOString().split('T')[0];
     const dRecarga = new Date(dataRef + "T12:00:00");
-    const dataEtiqueta = `${meses[dRecarga.getMonth()]} - ${dRecarga.getFullYear()}`;
+    const dataEtiqueta = `${meses[dRecarga.getMonth()]} ${dRecarga.getFullYear()}`;
     const codigoBarrasReal = dados.codigo_barras || dados.numero_cilindro || "---";
     const numeroSelo = dados.selo_inmetro || "---";
 
-  htmlEtiquetas += `
-      <div class="etiqueta-pagina" style="width: 100mm; height: 50mm; padding: 5px; color: black; background: white; display: flex; justify-content: space-between; align-items: stretch; position: relative; overflow: hidden; box-sizing: border-box; page-break-after: always; break-after: page;">
-          <div style="display: flex; flex-direction: column; justify-content: space-between; flex: 1; padding-right: 8px; position: relative; z-index: 10;">
+    htmlEtiquetas += `
+      <div class="etiqueta-pagina" style="width: 100mm; height: 50mm; padding: 3px; color: black; background: white; display: flex; justify-content: space-between; align-items: stretch; position: relative; overflow: hidden; box-sizing: border-box; page-break-after: always; break-after: page; font-family: Arial, sans-serif;">
+          
+          <!-- COLUNA ESQUERDA -->
+          <div style="display: flex; flex-direction: column; justify-content: space-between; flex: 1; padding-right: 4px; box-sizing: border-box;">
               
               <!-- Cabeçalho -->
-              <div style="border-bottom: 1px solid black; padding-bottom: 3px; margin-bottom: 3px; text-align: center;">
-                  <div style="font-size: 9px; font-weight: 900; text-transform: uppercase;">${empresaNome}</div>
-                  <span style="font-size: 7px; font-weight: bold;">${empresaEndereco}</span><br>
-                  <span style="font-size: 7px;">CNPJ: ${empresaCnpj} - ${empresaFone}</span>
+              <div style="display: flex; align-items: center; border-bottom: 1.5px solid black; padding-bottom: 2px; margin-bottom: 2px;">
+                  <div style="width: 22mm; height: 10mm; display: flex; align-items: center; justify-content: center; margin-right: 4px; flex-shrink: 0;">
+                      ${emp.logo ? `<img src="${emp.logo}" style="max-width: 22mm; max-height: 10mm; object-fit: contain;">` : ''}
+                  </div>
+                  <div style="text-align: left; flex: 1; overflow: hidden;">
+                      <div style="font-size: 8.5px; font-weight: 900; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${emp.nome}</div>
+                      <div style="font-size: 6px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${emp.endereco}</div>
+                      <div style="font-size: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">CNPJ: ${emp.cnpj} | Tel: ${emp.fone}</div>
+                  </div>
               </div>
 
               <!-- Aviso Inmetro -->
-              <div style="font-size: 5.5px; text-align: center; font-weight: bold; text-transform: uppercase; line-height: 1; margin-bottom: 3px;">
+              <div style="font-size: 4.8px; text-align: center; font-weight: bold; text-transform: uppercase; line-height: 1.1; margin-bottom: 2px;">
                   PARA CONCESSÃO DE GARANTIA ESTE EXTINTOR DEVE SER VERIFICADO MENSALMENTE, GARANTIA DE 1 ANO, CONTRA A DESPRESSURIZAÇÃO. A VIOLAÇÃO DO LACRE INTERROMPE A GARANTIA.
               </div>
 
               <!-- Tabela de Prazos -->
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid black; margin-bottom: 3px; background: rgba(255,255,255,0.8);">
-                  <div style="border-right: 1px solid black; text-align: center; padding: 2px;">
-                      <div style="font-size: 5.5px; font-weight: 900; text-transform: uppercase;">Próx. Manut.</div>
-                      <div style="font-size: 9.5px; font-weight: bold;">${dataEtiqueta}</div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); border: 1.5px solid black; margin-bottom: 2px;">
+                  <div style="border-right: 1.5px solid black; text-align: center; padding: 1px;">
+                      <div style="font-size: 5px; font-weight: 900; text-transform: uppercase;">Próx. Manut. 2º Nível</div>
+                      <div style="font-size: 8.5px; font-weight: bold;">${dataEtiqueta}</div>
                   </div>
-                  <div style="border-right: 1px solid black; text-align: center; padding: 2px;">
-                      <div style="font-size: 5.5px; font-weight: 900; text-transform: uppercase;">Próx. Reteste</div>
-                      <div style="font-size: 9.5px; font-weight: bold;">${dados.prox_reteste || "---"}</div>
+                  <div style="border-right: 1.5px solid black; text-align: center; padding: 1px;">
+                      <div style="font-size: 5px; font-weight: 900; text-transform: uppercase;">Próx. Manut. 3º Nível</div>
+                      <div style="font-size: 8.5px; font-weight: bold;">${dados.prox_reteste || "---"}</div>
                   </div>
-                  <div style="text-align: center; padding: 2px; background: black; color: white;">
-                      <div style="font-size: 5.5px; font-weight: 900; text-transform: uppercase;">Manut. Realizada</div>
-                      <div style="font-size: 9.5px; font-weight: bold; font-style: italic;">NÍVEL ${dados.nivel || 2}</div>
+                  <div style="text-align: center; padding: 1px; background: black; color: white;">
+                      <div style="font-size: 5px; font-weight: 900; text-transform: uppercase; color: white;">Manut. Realizada</div>
+                      <div style="font-size: 8.5px; font-weight: bold; font-style: italic;">NÍVEL ${dados.nivel || 2}</div>
                   </div>
               </div>
 
-              <!-- 🎯 LOGO EXATAMENTE NO ESPAÇO DO RETÂNGULO VERMELHO -->
-              <div style="width: 100%; height: 11mm; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
-                  ${urlLogo ? `<img src="${urlLogo}" style="max-width: 35mm; max-height: 10mm; object-fit: contain;">` : ''}
-              </div>
-
-              <!-- Rodapé: Tipo/Cilindro à esquerda e Código de Barras à direita -->
-              <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+              <!-- Rodapé -->
+              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #ccc; padding-top: 2px;">
                   <div style="font-size: 6.5px; font-weight: bold; font-style: italic; line-height: 1.2;">
                       Tipo: ${dados.tipo_carga || "---"} | Cap: ${dados.capacidade || "---"}<br>
-                      Nº Cilindro: <span style="font-weight: 900;">${dados.numero_cilindro}</span>
-                  </div>
-
-                  <div style="display: flex; flex-direction: column; align-items: center;">
-                      <svg id="barcode_fila_${idx}"></svg>
-                      <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px;">${codigoBarrasReal}</span>
+                      Nº Cilindro: <span style="font-weight: 900;">${dados.numero_cilindro || "---"}</span>
                   </div>
               </div>
           </div>
 
-          <!-- Coluna do Selo (Direita) -->
-          <div style="width: 32px; border-left: 2px dashed black; display: flex; align-items: center; justify-content: center; background: #f8fafc; position: relative; z-index: 10;">
-              <span style="font-weight: 900; font-size: 12px; letter-spacing: 2px; writing-mode: vertical-rl; transform: rotate(180deg);">
+          <!-- COLUNA DIREITA: Código de Barras Vertical + Selo -->
+          <div style="width: 28px; border-left: 2px dashed black; display: flex; align-items: center; justify-content: space-between; background: #fff; position: relative; padding: 2px 0; box-sizing: border-box;">
+              
+              <div style="display: flex; align-items: center; justify-content: center; height: 100%; width: 14px;">
+                  <svg id="barcode_fila_${idx}" style="transform: rotate(90deg); max-height: 42mm;"></svg>
+              </div>
+
+              <span style="font-weight: 900; font-size: 10px; letter-spacing: 1px; writing-mode: vertical-rl; transform: rotate(180deg); text-align: center;">
                   ${numeroSelo}
               </span>
           </div>
       </div>
-  `;
-   
+    `;
   });
 
   const janela = window.open("", "", "width=800,height=600");
@@ -434,8 +498,6 @@ window.imprimirFilaEtiquetas = async function(idsEspecificos = []) {
 // 3. GESTÃO DE LOTES
 // ==========================================
 
-
-
 window.abrirModalLotes = function() {
     const modal = document.getElementById('modalLotesEtiquetas');
     if (modal) {
@@ -468,13 +530,9 @@ window.gerarLoteEImprimir = async function() {
     const extintoresParaLote = (window.extintoresPendentesCache || []).filter(item => idsSelecionados.includes(String(item.id)));
 
     try {
-        // Se a sua tabela exige empresa_id ou usuario, pegamos do localStorage ou sessão se houver, 
-        // ou inserimos o objeto base. Adicione os campos exigidos pela sua RLS se necessário:
         const payloadLote = { 
             quantidade_extintores: extintoresParaLote.length, 
             status: 'gerado'
-            // Exemplo caso precise de empresa/unidade (verifique se a sua tabela usa):
-            // empresa_id: window.empresaIdAtual || null 
         };
 
         const { data: loteData, error: loteError } = await window._supabase
@@ -495,7 +553,6 @@ window.gerarLoteEImprimir = async function() {
 
         alert(`Lote gerado com sucesso! ${extintoresParaLote.length} itens adicionados à fila.`);
 
-        // Reset automático após gerar
         const inputQuantidadeLote = document.getElementById('quantidade_lote_input') || document.getElementById('inputQtdLote');
         if (inputQuantidadeLote) {
             inputQuantidadeLote.value = ''; 
@@ -512,7 +569,7 @@ window.gerarLoteEImprimir = async function() {
 
 
 // ==========================================
-// 4. EXPORTAÇÕES GLOBAIS (GARANTE ACESSO NO HTML)
+// 4. EXPORTAÇÕES GLOBAIS
 // ==========================================
 window.prepararModalEtiqueta = prepararModalEtiqueta;
 window.fecharModalEtiqueta = fecharModalEtiqueta;

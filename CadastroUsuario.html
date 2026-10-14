@@ -408,6 +408,7 @@
       }
 
       // Carregar Tabela Dinâmica de Permissões de Telas
+// Carregar Tabela Dinâmica de Permissões de Telas
       async function carregarTabelaPermissoes() {
         const tbody = document.getElementById("tabelaPermissoesTelas");
         tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400 italic">A carregar permissões...</td></tr>';
@@ -424,7 +425,6 @@
 
           tbody.innerHTML = "";
           usuariosCache.forEach(user => {
-            // Tenta ler as permissões salvas (ex: JSON string ou array)
             let telasSalvas = [];
             try {
               telasSalvas = user.permissoes_telas ? JSON.parse(user.permissoes_telas) : [];
@@ -437,6 +437,7 @@
               const marcado = telasSalvas.includes(mod.arquivo) ? 'checked' : '';
               checkboxesHtml += `
                 <label class="flex items-center gap-2 text-xs text-slate-300 bg-slate-900/50 px-3 py-2 rounded-xl border border-white/5 cursor-pointer hover:border-amber-500/30">
+                  <!-- CORRIGIDO: Adicionado o data-userid para identificar corretamente o dono do checkbox -->
                   <input type="checkbox" value="${mod.arquivo}" data-userid="${user.id}" class="chk-tela rounded bg-slate-800 border-slate-700 text-amber-500 focus:ring-amber-500" ${marcado}>
                   ${mod.nome}
                 </label>
@@ -463,6 +464,27 @@
         }
       }
 
+      // Salvar as Permissões de Telas marcadas para o usuário específico
+      async function salvarPermissoesTelas(userId) {
+        // Agora o seletor vai encontrar perfeitamente os checkboxes graças ao data-userid
+        const checkboxes = document.querySelectorAll(`.chk-tela[data-userid="${userId}"]:checked`);
+        const telasPermitidas = Array.from(checkboxes).map(cb => cb.value);
+
+        try {
+          const { error } = await sb.from("usu_arios").update({
+            permissoes_telas: JSON.stringify(telasPermitidas)
+          }).eq("id", userId);
+
+          if (error) throw error;
+          
+          // Recarrega a tabela para atualizar o cache local e exibe o toast verde no canto superior direito
+          carregarTabelaPermissoes();
+          mostrarToast("✅ Permissões de telas atualizadas com sucesso!");
+        } catch (err) {
+          console.error(err);
+          mostrarToast("❌ Erro ao salvar permissões: " + (err.message || "Erro desconhecido"), "erro");
+        }
+      }
 
 // Salvar as Permissões de Telas marcadas para o usuário específico
       async function salvarPermissoesTelas(userId) {

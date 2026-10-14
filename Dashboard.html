@@ -179,91 +179,8 @@
     </div>
   </div>
 </div>
+
 <!-- <script>
-    // Supabase Init
-    const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co"; 
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    async function checkSession() {
-        const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
-        
-        if (!userJson) {
-            window.location.href = 'index.html';
-            return;
-        }
-
-        const user = JSON.parse(userJson);
-        const nivel = user.nivel_permissao;
-
-        // Preencher UI
-        document.getElementById('userName').innerText = user.nome_completo;
-        document.getElementById('userNivel').innerText = nivel;
-        
-        // Buscar nome da Unidade
-        const { data: emp } = await sb.from('empresas').select('nome_fantasia').eq('id', user.empresa_id).single();
-        if (emp) document.getElementById('unidadeNome').innerText = emp.nome_fantasia;
-
-        // 🛑 Buscar permissões de telas e status atualizados do banco de dados
-        const { data: usuarioAtual } = await sb.from('usu_arios').select('permissoes_telas, status').eq('id', user.id).single();
-
-        // 1. Validação de bloqueio geral
-        if (usuarioAtual && usuarioAtual.status === 'bloqueado') {
-            alert("O seu acesso foi bloqueado pelo gestor.");
-            localStorage.clear();
-            window.location.href = 'index.html';
-            return;
-        }
-
-        // 2. Filtragem de telas (Gestor tem acesso livre a tudo)
-        if (nivel !== 'Gestor') {
-            let telasPermitidas = [];
-            try {
-                telasPermitidas = usuarioAtual?.permissoes_telas ? JSON.parse(usuarioAtual.permissoes_telas) : [];
-            } catch (e) {
-                telasPermitidas = [];
-            }
-
-            // Seleciona todos os botões do grid de módulos
-            const botoesMenu = document.querySelectorAll('#menuGrid button');
-
-           botoesMenu.forEach(botao => {
-                const onclickAttr = botao.getAttribute('onclick') || '';
-                
-                // Extrai o nome do arquivo da ação
-                const match = onclickAttr.match(/'([^']+)'/);
-                const arquivoDestino = match ? match[1] : '';
-
-                if (arquivoDestino) {
-                    // O módulo 'Equipe' (CadastroUsuario.html) permanece exclusivo de Gerente/Gestor
-                    if (arquivoDestino === 'CadastroUsuario.html') {
-                        if (nivel !== 'Gerente' && nivel !== 'Gestor') {
-                            botao.style.display = 'none';
-                            return;
-                        }
-                    }
-
-                    // Verifica se a tela está liberada na lista de permissões gravadas no banco
-                    const temPermissao = telasPermitidas.includes(arquivoDestino);
-                    if (!temPermissao) {
-                        botao.style.display = 'none';
-                    } else {
-                        botao.style.display = 'flex'; // Garante que exibe caso tenha permissão
-                    }
-                }
-            });
-        }
-    }
-
-    function logout() {
-        localStorage.clear();
-        window.location.href = 'index.html';
-    }
-
-    window.onload = checkSession;
-</script> -->
-
-<script>
     // Supabase Init
     const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co"; 
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
@@ -519,8 +436,264 @@ window.abrirModalTrocaUsuario = abrirModalTrocaUsuario;
 window.fecharModalTrocaUsuario = fecharModalTrocaUsuario;
 window.confirmarTrocaUsuario = confirmarTrocaUsuario;
 window.onload = checkSession;
-</script>
+</script> -->
 
+<script>
+    // Supabase Init
+    const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co"; 
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function checkSession() {
+        const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+        
+        if (!userJson) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const user = JSON.parse(userJson);
+        const nivel = user.nivel_permissao || '';
+
+        // Preencher UI
+        document.getElementById('userName').innerText = user.nome_completo;
+        document.getElementById('userNivel').innerText = nivel;
+        
+        // Buscar nome da Unidade
+        const { data: emp } = await sb.from('empresas').select('nome_fantasia').eq('id', user.empresa_id).single();
+        if (emp) document.getElementById('unidadeNome').innerText = emp.nome_fantasia;
+
+
+        // 🛑 Buscar permissões de telas e status atualizados do banco de dados
+        const { data: usuarioAtual } = await sb.from('usu_arios').select('permissoes_telas, status, nivel_permissao').eq('id', user.id).single();
+
+        // 1. Validação de bloqueio geral
+        if (usuarioAtual && usuarioAtual.status === 'bloqueado') {
+            alert("O seu acesso foi bloqueado pelo gestor.");
+            localStorage.clear();
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Se for Gestor ou Gerente, libera acesso total a todas as telas (incluindo Equipe)
+        const nivelNormalizado = (usuarioAtual?.nivel_permissao || nivel).toLowerCase();
+        const isGestorOuGerente = nivelNormalizado.includes('gestor') || nivelNormalizado.includes('gerente') || nivelNormalizado.includes('admin');
+
+        if (isGestorOuGerente) {
+            // Gestores veem todos os botões/cards
+            const botoesMenu = document.querySelectorAll('#menuGrid button');
+            botoesMenu.forEach(botao => botao.style.display = 'flex');
+        } else {
+            // Operadores comuns seguem estritamente as permissões de telas gravadas
+            let telasPermitidas = [];
+            try {
+                telasPermitidas = usuarioAtual?.permissoes_telas ? JSON.parse(usuarioAtual.permissoes_telas) : [];
+            } catch (e) {
+                telasPermitidas = [];
+            }
+
+            const botoesMenu = document.querySelectorAll('#menuGrid button');
+            botoesMenu.forEach(botao => {
+                const onclickAttr = botao.getAttribute('onclick') || '';
+                const match = onclickAttr.match(/'([^']+)'/);
+                const arquivoDestino = match ? match[1] : '';
+
+                if (arquivoDestino) {
+                    const temPermissao = telasPermitidas.includes(arquivoDestino);
+                    if (!temPermissao) {
+                        botao.style.display = 'none';
+                    } else {
+                        botao.style.display = 'flex';
+                    }
+                }
+            });
+        }
+
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+
+    // ==========================================
+    // MÓDULO DE TROCA DE OPERADOR NO DASHBOARD
+    // ==========================================
+    function obterSupabase() {
+        return sb || null; 
+    }
+
+    async function abrirModalTrocaUsuario() {
+        const modal = document.getElementById("modalTrocaUsuario");
+        if (modal) {
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+        
+        const msgErro = document.getElementById("msgErroTroca");
+        if (msgErro) msgErro.classList.add("hidden");
+        
+        const senhaInput = document.getElementById("troca_senha");
+        if (senhaInput) senhaInput.value = "";
+
+        const _supabaseClient = obterSupabase();
+        const selectEl = document.getElementById("troca_codigo");
+        if (!selectEl) return;
+
+        selectEl.innerHTML = '<option value="">A carregar operadores...</option>';
+
+        if (!_supabaseClient) {
+            selectEl.innerHTML = '<option value="">Erro de conexão com o Supabase</option>';
+            return;
+        }
+
+        let empresaIdLocal = null;
+        let usuarioLogadoId = null;
+        try {
+            const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+            if (userJson) {
+                const parsedUser = JSON.parse(userJson);
+                empresaIdLocal = parsedUser.empresa_id;
+                usuarioLogadoId = parsedUser.id; // Pega o ID do usuário atual para ocultá-lo da lista
+            }
+        } catch (e) {
+            console.error("Erro ao ler sessão:", e);
+        }
+
+        if (!empresaIdLocal) {
+            selectEl.innerHTML = '<option value="">Empresa não identificada</option>';
+            return;
+        }
+
+        // Busca operadores ativos da empresa, excluindo o usuário atualmente logado e os bloqueados
+        let query = _supabaseClient
+            .from("usu_arios")
+            .select("id, codigo_id, nome_completo, nivel_permissao, status")
+            .eq("empresa_id", empresaIdLocal)
+            .neq("status", "bloqueado");
+
+        if (usuarioLogadoId) {
+            query = query.neq("id", usuarioLogadoId); // Oculta o usuário atual
+        }
+
+        const { data: usuarios, error } = await query;
+
+        if (error) {
+            console.error("Erro ao buscar operadores:", error);
+            selectEl.innerHTML = '<option value="">Erro ao carregar operadores</option>';
+            return;
+        }
+
+        selectEl.innerHTML = '<option value="">Selecione o operador...</option>';
+        
+        if (usuarios && usuarios.length > 0) {
+            usuarios.forEach(u => {
+                const option = document.createElement("option");
+                option.value = u.codigo_id; 
+                // Texto formatado de forma limpa
+                option.textContent = `${u.nome_completo} (${u.nivel_permissao || 'Operador'} - ID: ${u.codigo_id})`;
+                selectEl.appendChild(option);
+            });
+        } else {
+            selectEl.innerHTML = '<option value="">Nenhum outro operador ativo disponível</option>';
+        }
+    }
+
+    function fecharModalTrocaUsuario() {
+        const modal = document.getElementById("modalTrocaUsuario");
+        if (modal) {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+        const codigoEl = document.getElementById("troca_codigo");
+        const senhaEl = document.getElementById("troca_senha");
+        if (codigoEl) codigoEl.value = "";
+        if (senhaEl) senhaEl.value = "";
+    }
+
+    async function confirmarTrocaUsuario() {
+        const _supabaseClient = obterSupabase();
+        if (!_supabaseClient) {
+            alert("Sistema não conectado. Aguarde um momento e tente novamente.");
+            return;
+        }
+
+        const codigo = document.getElementById("troca_codigo").value;
+        const senha = document.getElementById("troca_senha").value;
+        const btn = document.getElementById("btnConfirmarTroca");
+        const msg = document.getElementById("msgErroTroca");
+
+        if (!codigo || !senha) return;
+
+        let empresaIdLocal = null;
+        try {
+            const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+            if (userJson) {
+                const parsedUser = JSON.parse(userJson);
+                empresaIdLocal = parsedUser.empresa_id;
+            }
+        } catch (e) {
+            console.error("Erro ao ler dados da sessão:", e);
+        }
+
+        if (!empresaIdLocal) {
+            alert("Sessão expirada. Faça login novamente.");
+            window.location.replace('index.html');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "VERIFICANDO...";
+        if (msg) msg.classList.add("hidden");
+
+        try {
+            const { data, error } = await _supabaseClient
+                .from("usu_arios")
+                .select("*") 
+                .eq("empresa_id", empresaIdLocal) 
+                .eq("codigo_id", codigo)
+                .eq("senha", senha)
+                .single();
+
+            if (error || !data) {
+                throw new Error("Credenciais inválidas");
+            }
+
+            if (data.status === 'bloqueado') {
+                if (msg) {
+                    msg.innerText = "⚠️ Acesso Bloqueado: Este usuário está bloqueado pelo administrador.";
+                    msg.classList.remove("hidden");
+                }
+                btn.disabled = false;
+                btn.innerText = "CONFIRMAR";
+                return; 
+            }
+
+            // Atualiza o localStorage com o novo usuário
+            localStorage.setItem("yase_user", JSON.stringify(data));
+            localStorage.setItem("yase_colab", JSON.stringify(data));
+            localStorage.setItem("nome_operador", data.nome_completo);
+
+            fecharModalTrocaUsuario();
+            location.reload(); 
+
+        } catch (err) {
+            console.error(err);
+            if (msg) {
+                msg.innerText = "ID ou Senha incorretos!";
+                msg.classList.remove("hidden");
+            }
+            btn.disabled = false;
+            btn.innerText = "CONFIRMAR";
+        }
+    }
+
+    // Vincula ao escopo global
+    window.abrirModalTrocaUsuario = abrirModalTrocaUsuario;
+    window.fecharModalTrocaUsuario = fecharModalTrocaUsuario;
+    window.confirmarTrocaUsuario = confirmarTrocaUsuario;
+    window.onload = checkSession;
+</script>
 
 </body>
  <!-- <script src="/auth.js"></script> colocar em todas as paginas (deixar ele na pasta public)  --> 

@@ -1,173 +1,379 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YaSe PRO - Dashboard</title>
+    <title>YaSe PRO - Pedidos de Carga (Responsivo)</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para ícones profissionais -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-       /* Troque o background #000 por este */
-    body { 
-        font-family: "Plus Jakarta Sans", sans-serif; 
-        background-color: #020617; /* Slate 950 */
-        color: white; 
-        min-height: 100vh; 
-    }
-    
-    .glass-card { 
-        background: rgba(15, 23, 42, 0.8); /* Slate 900 com transparência */
-        backdrop-filter: blur(12px); 
-        border: 1px solid rgba(51, 65, 85, 0.5); 
-    }
-
-    .btn-menu:hover {
-        background: rgba(30, 41, 59, 0.8); /* Slate 800 */
-        border-color: #fbbf24;
-        transform: translateY(-5px);
-    }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="p-6 md:p-12">
-   
-    <div class="bg-glow"></div>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-center items-center p-4 sm:p-6">
 
-    <!-- Header Section -->
-    <header class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-        <div>
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 bg-[#fbbf24] rounded-2xl flex items-center justify-center shadow-xl shadow-[#fbbf24]/20">
-                    <i class="fas fa-bolt text-black text-xl"></i>
-                </div>
-                <h1 class="text-3xl font-black tracking-tighter">YaSe <span class="accent-text">PRO</span></h1>
+    <!-- ================= STREAMING_CHUNK:Renderizando Tela de Login Dinâmica ================= -->
+    <div id="login-screen" class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 transition-all duration-300">
+        <div class="text-center mb-6 sm:mb-8">
+            <div class="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-red-600/10 text-red-500 mb-3 sm:mb-4 text-2xl font-bold border border-red-500/20 shadow-inner">
+                <i class="fa-solid fa-fire-extinguisher"></i>
             </div>
-            <p class="text-neutral-500 font-medium">Bem-vindo ao centro de comando, <span id="userName" class="text-white font-bold italic">...</span></p>
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">YaSe</h1>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Portal Exclusivo de Cargas e Extintores</p>
         </div>
 
-        <div class="flex items-center gap-4 glass-card p-4 rounded-3xl">
-            <div class="text-right border-r border-white/10 pr-4">
-                <p id="unidadeNome" class="text-xs font-black uppercase tracking-widest text-[#fbbf24]">Carregando...</p>
-                <p id="userNivel" class="text-[10px] text-neutral-500 font-bold uppercase tracking-tighter italic">Nível de Acesso</p>
-            </div>
-            <button onclick="logout()" class="w-10 h-10 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors">
-                <i class="fas fa-power-off"></i>
-            </button>
+        <!-- Alerta de Erro -->
+        <div id="error-msg" class="hidden mb-4 rounded-xl bg-red-500/10 border border-red-500/30 p-3 text-xs sm:text-sm text-red-400 flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation flex-shrink-0"></i>
+            <span id="error-text"></span>
         </div>
-    </header>
 
-    <!-- Menu de Blocos (Grid Dinâmico) -->
-    <main class="max-w-7xl mx-auto">
-        <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 mb-8 border-b border-white/5 pb-4">
-            Módulos Disponíveis para sua Unidade
-        </h2>
-        
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="menuGrid">
-            
-            <!-- BLOCOS OPERACIONAIS (Sempre visíveis) -->
-            <button onclick="location.href='Remessa.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4">
-                <i class="fas fa-ticket-alt text-3xl accent-text"></i>
-                <div class="text-left">
-                    <p class="font-black text-lg leading-none mb-1">Remessas</p>
-                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Gestão de Selos</p>
+     
+
+        <form id="form-login" class="space-y-4 sm:space-y-5">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">CNPJ da Empresa Cliente</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                        <i class="fa-solid fa-building text-sm"></i>
+                    </span>
+                    <input 
+                        type="text" 
+                        id="input-cnpj" 
+                        placeholder="00.000.000/0001-00"
+                        class="w-full rounded-xl bg-slate-950 border border-slate-800 py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition text-sm shadow-sm"
+                        required
+                    />
                 </div>
-            </button>
+                <p class="text-[11px] text-slate-500 mt-1">Ao digitar o CNPJ, os vendedores vinculados aparecem automaticamente.</p>
+            </div>
 
-            <button onclick="location.href='Vinculacao.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4">
-                <i class="fas fa-link text-3xl accent-text"></i>
-                <div class="text-left">
-                    <p class="font-black text-lg leading-none mb-1">Vinculação</p>
-                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Atribuir Clientes</p>
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Selecione seu Nome (Vendedor)</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
+                        <i class="fa-solid fa-user-tie text-sm"></i>
+                    </span>
+                    <select 
+                        id="select-vendedor" 
+                        disabled
+                        class="w-full rounded-xl bg-slate-950 border border-slate-800 py-3 pl-10 pr-10 text-white placeholder-slate-600 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition text-sm disabled:opacity-40 disabled:cursor-not-allowed appearance-none shadow-sm"
+                        required
+                    >
+                        <option value="">Informe o CNPJ acima primeiro...</option>
+                    </select>
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 pointer-events-none">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </span>
                 </div>
-            </button>
+            </div>
 
-   <button onclick="location.href='configuracoes.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
-    <i class="fas fa-building-circle-gear text-3xl accent-text"></i>
-    
-    <div class="text-left">
-        <p class="font-black text-lg leading-none mb-1">Minha Empresa</p>
-        <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Identidade e Dados</p>
+            <button 
+                type="submit" 
+                class="w-full rounded-xl bg-red-600 py-3.5 px-4 font-semibold text-white shadow-lg shadow-red-600/25 hover:bg-red-500 active:scale-[0.99] transition duration-200 text-sm flex items-center justify-center gap-2 mt-2"
+            >
+                <span>Acessar Pedidos de Carga</span>
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+        </form>
     </div>
-</button>
 
-            <!-- BLOCOS DE GESTÃO (Apenas Gestores/Gerentes) -->
-            <button onclick="location.href='GestaoOS.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
-                <i class="fas fa-file-invoice text-3xl accent-text"></i>
-                <div class="text-left">
-                    <p class="font-black text-lg leading-none mb-1">Gestão OS</p>
-                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Ordens de Serviço</p>
+    <!-- ================= STREAMING_CHUNK:Renderizando Tela de Pedidos (Dashboard) ================= -->
+    <div id="dashboard-screen" class="hidden w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-5 sm:p-8 transition-all duration-300 my-4">
+        <!-- Topo / Header Responsivo -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-slate-800 pb-5 gap-4">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-[11px] font-bold uppercase tracking-wider border border-emerald-500/20">Sessão Ativa</span>
+                    <h2 class="text-lg sm:text-2xl font-bold text-white tracking-tight">Pedidos de Carga</h2>
                 </div>
+                <p class="text-xs sm:text-sm text-slate-400" id="info-sessao">Vendedor: -- | CNPJ: --</p>
+            </div>
+            <button 
+                id="btn-sair" 
+                class="w-full sm:w-auto rounded-xl bg-slate-800 px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition flex items-center justify-center gap-2 border border-slate-700 shadow-sm"
+            >
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Sair / Trocar CNPJ</span>
             </button>
-
-            <button onclick="location.href='ControleDeCargas.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
-                <i class="fas fa-truck-loading text-3xl accent-text"></i>
-                <div class="text-left">
-                    <p class="font-black text-lg leading-none mb-1">Cargas</p>
-                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Logística e Saída</p>
-                </div>
-            </button>
-
-            <button onclick="location.href='AnexoOeP.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
-                <i class="fas fa-copy text-3xl accent-text"></i>
-                <div class="text-left">
-                    <p class="font-black text-lg leading-none mb-1">Anexo O e P</p>
-                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Relatórios Técnicos</p>
-                </div>
-            </button>
-
-            
-
-            <button onclick="location.href='CadastroUsuario.html'" class="btn-menu glass-card p-8 rounded-[2.5rem] flex flex-col items-start gap-4 access-gestor">
-                <i class="fas fa-user-shield text-3xl accent-text"></i>
-                <div class="text-left">
-                    <p class="font-black text-lg leading-none mb-1">Equipe</p>
-                    <p class="text-[10px] opacity-60 uppercase font-bold tracking-widest">Acessos e Níveis</p>
-                </div>
-            </button>
-
         </div>
-    </main>
 
-    <script>
-        // Supabase Init (As chaves devem estar aqui conforme corrigido)
-       const SUPABASE_URL = "https://gzojpxgpgjapsegerscb.supabase.co"; 
-      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        <!-- Cards de Métricas (Grid adaptável mobile/desktop) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-6">
+            <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 shadow-sm">
+                <p class="text-xs text-slate-400 font-medium">Empresa Cliente</p>
+                <p class="text-base sm:text-lg font-bold text-white mt-1 truncate" id="card-empresa-nome">Carregando...</p>
+                <p class="text-xs text-slate-500 mt-0.5" id="card-empresa-cnpj">CNPJ: 00.000.000/0001-00</p>
+            </div>
+            <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 shadow-sm">
+                <p class="text-xs text-slate-400 font-medium">Extintores Registrados</p>
+                <p class="text-base sm:text-lg font-bold text-emerald-400 mt-1">24 Unidades</p>
+                <p class="text-xs text-slate-500 mt-0.5">Lote ativo: #8892-SP</p>
+            </div>
+            <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 shadow-sm">
+                <p class="text-xs text-slate-400 font-medium">Status do Lote</p>
+                <p class="text-base sm:text-lg font-bold text-amber-400 mt-1">Em Andamento</p>
+                <p class="text-xs text-slate-500 mt-0.5">Última carga hoje</p>
+            </div>
+        </div>
 
-        async function checkSession() {
-            const userJson = localStorage.getItem('yase_user') || localStorage.getItem('yase_colab');
+        <!-- Tabela de Pedidos com Scroll Horizontal Otimizado para Celular -->
+        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                <h3 class="font-semibold text-white text-sm sm:text-base flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list text-red-500"></i>
+                    <span>Ordens de Recarga e Manutenção</span>
+                </h3>
+                <button onclick="alertCustom('Funcionalidade de Novo Pedido de Carga aberta com sucesso!')" class="w-full sm:w-auto bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 active:scale-95">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Novo Pedido de Carga</span>
+                </button>
+            </div>
             
-            // if (!userJson) {
-            //     window.location.href = 'index.html';
-            //     return;
-            // }
+            <div class="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm min-w-[500px]">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
+                            <th class="py-3 px-3 font-semibold">Ordem</th>
+                            <th class="py-3 px-3 font-semibold">Tipo / Capacidade</th>
+                            <th class="py-3 px-3 font-semibold">Qtd</th>
+                            <th class="py-3 px-3 font-semibold">Status</th>
+                            <th class="py-3 px-3 font-semibold text-right">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                        <tr>
+                            <td class="py-3.5 px-3 font-medium text-white">#PC-1042</td>
+                            <td class="py-3.5 px-3">Pó Químico (PQS) 6kg</td>
+                            <td class="py-3.5 px-3">12 un</td>
+                            <td class="py-3.5 px-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">Na oficina</span></td>
+                            <td class="py-3.5 px-3 text-right"><button class="text-red-400 hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-slate-900 transition">Ver</button></td>
+                        </tr>
+                        <tr>
+                            <td class="py-3.5 px-3 font-medium text-white">#PC-1043</td>
+                            <td class="py-3.5 px-3">Água Pressurizada (AP) 10L</td>
+                            <td class="py-3.5 px-3">8 un</td>
+                            <td class="py-3.5 px-3"><span class="px-2.5 py-1 rounded-full text-[11px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">Em testes</span></td>
+                            <td class="py-3.5 px-3 text-right"><button class="text-red-400 hover:text-red-300 font-medium px-2 py-1 rounded hover:bg-slate-900 transition">Ver</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-            const user = JSON.parse(userJson);
-            const nivel = user.nivel_permissao; // Gestor, Gerente ou Operador
+    <!-- ================= STREAMING_CHUNK:Configurando Lógica JS e Máscaras Mobile ================= -->
+<script>
 
-            // Preencher UI
-            document.getElementById('userName').innerText = user.nome_completo;
-            document.getElementById('userNivel').innerText = nivel;
-            
-            // Buscar nome da Unidade
-            const { data: emp } = await sb.from('empresas').select('nome_fantasia').eq('id', user.empresa_id).single();
-            if (emp) document.getElementById('unidadeNome').innerText = emp.nome_fantasia;
 
-            // Lógica de Bloqueio por Nível
-            if (nivel !== 'Gestor' && nivel !== 'Gerente') {
-                const blocosGestao = document.querySelectorAll('.access-gestor');
-                blocosGestao.forEach(bloco => bloco.classList.add('hidden-access'));
+// Referências dos elementos do DOM
+const loginScreen = document.getElementById('login-screen');
+const dashboardScreen = document.getElementById('dashboard-screen');
+const inputCnpj = document.getElementById('input-cnpj');
+const selectVendedor = document.getElementById('select-vendedor');
+const formLogin = document.getElementById('form-login');
+const errorMsg = document.getElementById('error-msg');
+const errorText = document.getElementById('error-text');
+const infoSessao = document.getElementById('info-sessao');
+const cardEmpresaNome = document.getElementById('card-empresa-nome');
+const cardEmpresaCnpj = document.getElementById('card-empresa-cnpj');
+const btnSair = document.getElementById('btn-sair');
+
+let empresaAtualCache = null;
+
+// Máscara e validação automática para mobile e desktop
+inputCnpj.addEventListener('input', (e) => {
+    let valor = e.target.value.replace(/\D/g, '');
+    if (valor.length <= 14) {
+        valor = valor.replace(/^(\d{2})(\d)/, '$1.$2');
+        valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+        valor = valor.replace(/\.(\d{3})(\d)/, '.$1/$2');
+        valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+        e.target.value = valor;
+    }
+    
+    const cnpjLimpo = valor.replace(/\D/g, '');
+    if (cnpjLimpo.length === 14) {
+        verificarCnpj(cnpjLimpo);
+    } else {
+        resetarSelectVendedores();
+    }
+});
+
+// Consulta real no banco Supabase (tabelas: empresas e usuarios)
+
+async function verificarCnpj(cnpjLimpo) {
+    exibirErro('');
+    selectVendedor.innerHTML = '<option value="">Buscando colaboradores...</option>';
+    selectVendedor.disabled = true;
+
+    try {
+        const cnpjFormatado = inputCnpj.value.trim();
+        console.log("🔍 [YaSe PRO Debug] CNPJ digitado formatado:", cnpjFormatado);
+        console.log("🔍 [YaSe PRO Debug] CNPJ limpo (apenas números):", cnpjLimpo);
+
+        // 1. Tenta buscar o CNPJ na tabela 'empresas' (buscando tanto formatado quanto limpo)
+        let { data: empresaData, error: empresaError } = await supabase
+            .from('empresas')
+            .select('id, nome_fantasia, cnpj')
+            .or(`cnpj.eq.${cnpjFormatado},cnpj.eq.${cnpjLimpo}`)
+            .maybeSingle();
+
+        if (empresaError) {
+            console.error("❌ Erro retornado pela tabela 'empresas':", empresaError.message);
+            throw new Error("Erro ao consultar a tabela empresas: " + empresaError.message);
+        }
+
+        // Se não achou na primeira tentativa, tenta buscar ignorando formatação ou buscando parcial
+        if (!empresaData) {
+            console.warn("⚠️ CNPJ exato não encontrado. Tentando busca ampla...");
+            const { data: todasEmpresas, error: errTodas } = await supabase
+                .from('empresas')
+                .select('id, nome_fantasia, cnpj');
+
+            if (!errTodas && todasEmpresas) {
+                // Compara removendo tudo que não é dígito no JavaScript para garantir 100% de match
+                empresaData = todasEmpresas.find(e => {
+                    const eLimpo = (e.cnpj || '').replace(/\D/g, '');
+                    return eLimpo === cnpjLimpo;
+                });
             }
         }
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
+        if (!empresaData) {
+            console.warn("❌ Empresa não encontrada para o CNPJ:", cnpjLimpo);
+            exibirErro('CNPJ não cadastrado ou inativo na base do YaSe PRO.');
+            resetarSelectVendedores();
+            return;
         }
 
-        window.onload = checkSession;
+        empresaAtualCache = empresaData;
+        console.log("✅ Empresa encontrada com sucesso:", empresaAtualCache);
+
+        // 2. Busca os usuários vinculados a esta empresa
+        console.log("🔍 Buscando usuários para o empresa_id:", empresaAtualCache.id);
+        
+        const { data: usuariosData, error: usuariosError } = await supabase
+            .from('usuarios')
+            .select('id, nome_completo, nivel_permissao, status')
+            .eq('empresa_id', empresaAtualCache.id);
+
+        if (usuariosError) {
+            console.error("❌ Erro retornado pela tabela 'usuarios':", usuariosError.message);
+            throw new Error("Erro ao consultar a tabela usuarios: " + usuariosError.message);
+        }
+
+        console.log("📋 Usuários crus encontrados no banco:", usuariosData);
+
+        if (!usuariosData || usuariosData.length === 0) {
+            exibirErro('Nenhum colaborador cadastrado para esta empresa.');
+            resetarSelectVendedores();
+            return;
+        }
+
+        // Filtra considerando variações de status (ativo, Ativo, ATIVO, ou nulo)
+        const usuariosAtivos = usuariosData.filter(v => {
+            const st = (v.status || '').toLowerCase().trim();
+            return st === 'ativo' || st === ''; // Se o status estiver vazio ou ativo, libera para teste
+        });
+
+        if (usuariosAtivos.length === 0) {
+            exibirErro('Existem colaboradores, mas nenhum está com status "ativo".');
+            resetarSelectVendedores();
+            return;
+        }
+
+        // 3. Popula o select com os nomes encontrados
+        let options = '<option value="">Selecione seu nome na lista...</option>';
+        usuariosAtivos.forEach(v => {
+            options += `<option value="${v.id}" data-nome="${v.nome_completo}">${v.nome_completo} (${v.nivel_permissao || 'Colaborador'})</option>`;
+        });
+        
+        selectVendedor.innerHTML = options;
+        selectVendedor.disabled = false;
+        console.log("✨ Select de vendedores populado com sucesso!");
+
+    } catch (err) {
+        console.error('🚨 Erro crítico capturado na verificação:', err);
+        exibirErro('Erro interno ao buscar dados. Veja o F12 (Console).');
+        resetarSelectVendedores();
+    }
+}
+
+
+function resetarSelectVendedores() {
+    selectVendedor.innerHTML = '<option value="">Informe o CNPJ acima primeiro...</option>';
+    selectVendedor.disabled = true;
+    empresaAtualCache = null;
+}
+
+function exibirErro(msg) {
+    if (!msg) {
+        errorMsg.classList.add('hidden');
+        errorText.textContent = '';
+    } else {
+        errorText.textContent = msg;
+        errorMsg.classList.remove('hidden');
+    }
+}
+
+// Submissão do Login
+formLogin.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const cnpjValor = inputCnpj.value;
+    const vendedorId = selectVendedor.value;
+    const optionSelecionada = selectVendedor.options[selectVendedor.selectedIndex];
+    const vendedorNome = optionSelecionada ? optionSelecionada.getAttribute('data-nome') : '';
+
+    if (!cnpjValor || !vendedorId || !empresaAtualCache) {
+        exibirErro('Por favor, informe o CNPJ válido e selecione o seu nome.');
+        return;
+    }
+
+    const dadosSessao = { 
+        cnpj: cnpjValor, 
+        empresaNome: empresaAtualCache.nome_fantasia || 'Empresa', 
+        vendedorNome,
+        vendedorId
+    };
+    
+    localStorage.setItem('yase_sessao_ativa', JSON.stringify(dadosSessao));
+    mostrarDashboard(dadosSessao);
+});
+
+function mostrarDashboard(dados) {
+    loginScreen.classList.add('hidden');
+    dashboardScreen.classList.remove('hidden');
+    infoSessao.textContent = `Vendedor: ${dados.vendedorNome} | CNPJ: ${dados.cnpj}`;
+    cardEmpresaNome.textContent = dados.empresaNome;
+    cardEmpresaCnpj.textContent = `CNPJ: ${dados.cnpj}`;
+}
+
+btnSair.addEventListener('click', () => {
+    localStorage.removeItem('yase_sessao_ativa');
+    dashboardScreen.classList.add('hidden');
+    loginScreen.classList.remove('hidden');
+    inputCnpj.value = '';
+    resetarSelectVendedores();
+});
+
+// Verificar sessão salva ao carregar a página
+window.addEventListener('DOMContentLoaded', () => {
+    const sessaoSalva = localStorage.getItem('yase_sessao_ativa');
+    if (sessaoSalva) {
+        try {
+            const dados = JSON.parse(sessaoSalva);
+            mostrarDashboard(dados);
+        } catch (err) {
+            localStorage.removeItem('yase_sessao_ativa');
+        }
+    }
+});
     </script>
 </body>
- <!-- <script src="/auth.js"></script> colocar em todas as paginas (deixar ele na pasta public)  --> 
 </html>

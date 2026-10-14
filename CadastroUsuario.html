@@ -169,6 +169,7 @@
             <select id="campo_nivel" class="login-input w-full h-12 px-4 rounded-xl text-sm appearance-none">
               <option value="Operador">Operador de Pátio</option>
               <option value="Gerente">Gerente de Unidade</option>
+              <option value="Vendedor Externo">Vendedor Externo</option>
             </select>
           </div>
           <div id="statusMsg" class="hidden text-center text-[11px] font-bold py-3 rounded-xl border border-white/5"></div>
@@ -214,6 +215,23 @@
             <p class="text-slate-400 text-xs mt-1">Marque quais módulos cada colaborador pode aceder no sistema.</p>
           </div>
         </div>
+
+        <div class="mb-4 flex gap-3 items-center">
+    <label class="text-sm text-gray-400">Filtrar por cargo:</label>
+   <div class="flex justify-between items-center mb-6">
+    <div>
+        
+    </div>
+    <!-- NOVO: Filtro de Cargos -->
+    <div>
+        <select id="filtroPermissoes" onchange="renderizarTabelaPermissoes()" class="bg-slate-900 border border-white/10 text-slate-300 text-xs rounded-xl px-4 py-2.5 outline-none focus:border-amber-500">
+            <option value="todos">Todos os Usuários</option>
+            <option value="vendedor">Apenas Vendedores (Vendedor / Vendedor Externo)</option>
+            <option value="interno">Equipe Interna (Gerente / Operador)</option>
+        </select>
+    </div>
+</div>
+</div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
@@ -278,9 +296,11 @@
           </div>
           <div>
             <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Permissão</label>
+            <!-- No seu modal de edição (modalEdicao), verifique se o select está assim: -->
             <select id="edit_nivel" class="login-input w-full h-12 px-4 rounded-xl text-sm appearance-none">
               <option value="Operador">Operador de Pátio</option>
               <option value="Gerente">Gerente de Unidade</option>
+              <option value="Vendedor Externo">Vendedor Externo</option>
             </select>
           </div>
           <div class="flex gap-4 pt-2">
@@ -409,6 +429,8 @@
 
       // Carregar Tabela Dinâmica de Permissões de Telas
 // Carregar Tabela Dinâmica de Permissões de Telas
+
+      // Carrega os dados do Supabase e guarda no cache
       async function carregarTabelaPermissoes() {
         const tbody = document.getElementById("tabelaPermissoesTelas");
         tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400 italic">A carregar permissões...</td></tr>';
@@ -418,51 +440,68 @@
           if (error) throw error;
           usuariosCache = data || [];
 
-          if (usuariosCache.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400">Nenhum funcionário encontrado.</td></tr>';
-            return;
-          }
-
-          tbody.innerHTML = "";
-          usuariosCache.forEach(user => {
-            let telasSalvas = [];
-            try {
-              telasSalvas = user.permissoes_telas ? JSON.parse(user.permissoes_telas) : [];
-            } catch(e) {
-              telasSalvas = [];
-            }
-
-            let checkboxesHtml = '<div class="flex flex-wrap gap-3">';
-            modulosDisponiveis.forEach(mod => {
-              const marcado = telasSalvas.includes(mod.arquivo) ? 'checked' : '';
-              checkboxesHtml += `
-                <label class="flex items-center gap-2 text-xs text-slate-300 bg-slate-900/50 px-3 py-2 rounded-xl border border-white/5 cursor-pointer hover:border-amber-500/30">
-                  <!-- CORRIGIDO: Adicionado o data-userid para identificar corretamente o dono do checkbox -->
-                  <input type="checkbox" value="${mod.arquivo}" data-userid="${user.id}" class="chk-tela rounded bg-slate-800 border-slate-700 text-amber-500 focus:ring-amber-500" ${marcado}>
-                  ${mod.nome}
-                </label>
-              `;
-            });
-            checkboxesHtml += '</div>';
-
-            tbody.innerHTML += `
-              <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                <td class="py-4 px-4 font-bold text-white">${user.nome_completo || '-'}</td>
-                <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400">${user.nivel_permissao || 'Operador'}</span></td>
-                <td class="py-4 px-4">${checkboxesHtml}</td>
-                <td class="py-4 px-4 text-center">
-                  <button onclick="salvarPermissoesTelas('${user.id}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl font-bold text-xs transition-all shadow-lg">
-                    Salvar
-                  </button>
-                </td>
-              </tr>
-            `;
-          });
+          renderizarTabelaPermissoes();
         } catch (err) {
           console.error(err);
           tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-red-400">Erro ao carregar permissões.</td></tr>';
         }
       }
+
+      // Renderiza a tabela aplicando o filtro selecionado
+      function renderizarTabelaPermissoes() {
+        const tbody = document.getElementById("tabelaPermissoesTelas");
+        const filtro = document.getElementById("filtroPermissoes")?.value || "todos";
+
+        // Filtra o cache com base na escolha
+        const usuariosFiltrados = usuariosCache.filter(user => {
+          const nivel = (user.nivel_permissao || '').toLowerCase();
+          const ehVendedor = nivel.includes('vendedor');
+
+          if (filtro === 'vendedor') return ehVendedor;
+          if (filtro === 'interno') return !ehVendedor;
+          return true; // 'todos'
+        });
+
+        if (usuariosFiltrados.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400">Nenhum funcionário encontrado para este filtro.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = "";
+        usuariosFiltrados.forEach(user => {
+          let telasSalvas = [];
+          try {
+            telasSalvas = user.permissoes_telas ? JSON.parse(user.permissoes_telas) : [];
+          } catch(e) {
+            telasSalvas = [];
+          }
+
+          let checkboxesHtml = '<div class="flex flex-wrap gap-3">';
+          modulosDisponiveis.forEach(mod => {
+            const marcado = telasSalvas.includes(mod.arquivo) ? 'checked' : '';
+            checkboxesHtml += `
+              <label class="flex items-center gap-2 text-xs text-slate-300 bg-slate-900/50 px-3 py-2 rounded-xl border border-white/5 cursor-pointer hover:border-amber-500/30">
+                <input type="checkbox" value="${mod.arquivo}" data-userid="${user.id}" class="chk-tela rounded bg-slate-800 border-slate-700 text-amber-500 focus:ring-amber-500" ${marcado}>
+                ${mod.nome}
+              </label>
+            `;
+          });
+          checkboxesHtml += '</div>';
+
+          tbody.innerHTML += `
+            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+              <td class="py-4 px-4 font-bold text-white">${user.nome_completo || '-'}</td>
+              <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 whitespace-nowrap">${user.nivel_permissao || 'Operador'}</span></td>              <td class="py-4 px-4">${checkboxesHtml}</td>
+              <td class="py-4 px-4 text-center">
+                <button onclick="salvarPermissoesTelas('${user.id}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl font-bold text-xs transition-all shadow-lg">
+                  Salvar
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
 
       // Salvar as Permissões de Telas marcadas para o usuário específico
       async function salvarPermissoesTelas(userId) {
@@ -639,11 +678,11 @@
             nivel_permissao: document.getElementById("edit_nivel").value
           }).eq("id", id);
           if (error) throw error;
-          alert("✅ Atualizado com sucesso!");
+         mostrarToast("✅ Usuário atualizado com sucesso!");
           fecharModal();
           carregarUsuarios();
         } catch (err) {
-          alert("Erro ao atualizar.");
+          mostrarToast("❌ Erro ao atualizar usuário.", "erro");
         }
       });
 
@@ -702,6 +741,9 @@
           btn.innerText = "CADASTRAR USUÁRIO";
         }
       });
+
+
+      
     </script>
   </body>
 </html>

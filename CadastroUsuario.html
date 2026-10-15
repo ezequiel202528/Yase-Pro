@@ -182,10 +182,29 @@
       <!-- SEÇÃO 2: TABELA DE LISTAGEM DE USUÁRIOS -->
       <div id="secaoListagem" class="glass-card w-full max-w-6xl p-8 rounded-[32px] relative z-10 hidden">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-black text-white tracking-tight">Equipe Cadastrada & Permissões</h2>
-          <button onclick="mudarAba('cadastro')" class="px-4 py-2 bg-amber-500 text-slate-900 rounded-xl font-bold text-xs hover:bg-amber-400 transition-all">
+          
+
+          <!-- Cabeçalho Organizado -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div>
+        <h2 class="text-xl font-bold text-white">Equipe Cadastrada & Permissões</h2>
+        <p class="text-xs text-slate-400">Gestão completa de utilizadores e cargos do sistema.</p>
+    </div>
+    
+    <!-- Filtro e Botão alinhados à direita -->
+    <div class="flex flex-wrap items-center gap-3">
+        <select id="filtroUsuariosGeral" onchange="renderizarTabelaUsuarios()" class="bg-slate-900 border border-white/10 text-slate-300 text-xs rounded-xl px-4 py-2.5 outline-none focus:border-amber-500">
+            <option value="todos">Todos os Usuários</option>
+            <option value="vendedor">Apenas Vendedores (Vendedor / Vendedor Externo)</option>
+            <option value="interno">Equipe Interna (Gerente / Operador)</option>
+        </select>
+        
+        <button onclick="mudarAba('cadastro')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-lg whitespace-nowrap">
             + Novo Usuário
-          </button>
+        </button>
+    </div>
+</div>
+
         </div>
 
         <div class="overflow-x-auto">
@@ -383,6 +402,10 @@
       }
 
       // Carregar Usuários na Aba de Listagem Geral
+
+      // Carregar Tabela Dinâmica de Permissões de Telas
+// Carregar Tabela Dinâmica de Permissões de Telas
+// Carrega os dados do Supabase e guarda no cache
       async function carregarUsuarios() {
         const tbody = document.getElementById("tabelaUsuarios");
         tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400 italic">A carregar equipe...</td></tr>';
@@ -392,44 +415,57 @@
           if (error) throw error;
           usuariosCache = data || [];
 
-          if (usuariosCache.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Nenhum usuário encontrado.</td></tr>';
-            return;
-          }
-
-          tbody.innerHTML = "";
-          usuariosCache.forEach(user => {
-            const isAtivo = user.status !== 'bloqueado';
-            tbody.innerHTML += `
-              <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                <td class="py-4 px-4 font-bold text-white">${user.nome_completo || '-'}</td>
-                <td class="py-4 px-4 text-slate-400">${user.codigo_id || '-'}</td>
-                <td class="py-4 px-4 font-mono text-xs text-amber-300">
-                  <span id="senha_${user.id}" class="hidden">${user.senha || ''}</span>
-                  <span id="oculta_${user.id}" class="text-slate-500">••••••••</span>
-                  <button onclick="alternarSenha('${user.id}')" class="ml-2 text-slate-400 hover:text-white"><i id="icone_${user.id}" class="fa-solid fa-eye"></i></button>
-                </td>
-                <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">${user.nivel_permissao || 'Operador'}</span></td>
-                <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${isAtivo ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${isAtivo ? 'Ativo' : 'Bloqueado'}</span></td>
-                <td class="py-4 px-4 text-center space-x-1">
-                  <button onclick="alternarBloqueio('${user.id}', '${user.status || 'ativo'}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isAtivo ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'}">
-                    <i class="fa-solid ${isAtivo ? 'fa-ban' : 'fa-check'}"></i> ${isAtivo ? 'Bloquear' : 'Liberar'}
-                  </button>
-                  <button onclick="abrirEdicao('${user.id}')" class="text-slate-400 hover:text-amber-400 transition-colors p-2"><i class="fa-solid fa-pen-to-square"></i></button>
-                  <button onclick="excluirUsuario('${user.id}')" class="text-slate-400 hover:text-red-400 transition-colors p-2"><i class="fa-solid fa-trash-can"></i></button>
-                </td>
-              </tr>
-            `;
-          });
+          renderizarTabelaUsuarios();
         } catch (err) {
           console.error(err);
           tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-red-400">Erro ao carregar dados.</td></tr>';
         }
       }
 
-      // Carregar Tabela Dinâmica de Permissões de Telas
-// Carregar Tabela Dinâmica de Permissões de Telas
+      // Renderiza a tabela de usuários aplicando o filtro e o estilo sem quebrar o texto do cargo
+      function renderizarTabelaUsuarios() {
+        const tbody = document.getElementById("tabelaUsuarios");
+        const filtro = document.getElementById("filtroUsuariosGeral")?.value || "todos";
 
+        const usuariosFiltrados = usuariosCache.filter(user => {
+          const nivel = (user.nivel_permissao || '').toLowerCase();
+          const ehVendedor = nivel.includes('vendedor');
+
+          if (filtro === 'vendedor') return ehVendedor;
+          if (filtro === 'interno') return !ehVendedor;
+          return true;
+        });
+
+        if (usuariosFiltrados.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Nenhum utilizador encontrado para este filtro.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = "";
+        usuariosFiltrados.forEach(user => {
+          const isAtivo = user.status !== 'bloqueado';
+          tbody.innerHTML += `
+            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+              <td class="py-4 px-4 font-bold text-white">${user.nome_completo || '-'}</td>
+              <td class="py-4 px-4 text-slate-400">${user.codigo_id || '-'}</td>
+              <td class="py-4 px-4 font-mono text-xs text-amber-300">
+                <span id="senha_${user.id}" class="hidden">${user.senha || ''}</span>
+                <span id="oculta_${user.id}" class="text-slate-500">••••••••</span>
+                <button onclick="alternarSenha('${user.id}')" class="ml-2 text-slate-400 hover:text-white"><i id="icone_${user.id}" class="fa-solid fa-eye"></i></button>
+              </td>
+              <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 whitespace-nowrap">${user.nivel_permissao || 'Operador'}</span></td>
+              <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${isAtivo ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${isAtivo ? 'Ativo' : 'Bloqueado'}</span></td>
+              <td class="py-4 px-4 text-center space-x-1">
+                <button onclick="alternarBloqueio('${user.id}', '${user.status || 'ativo'}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isAtivo ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'}">
+                  <i class="fa-solid ${isAtivo ? 'fa-ban' : 'fa-check'}"></i> ${isAtivo ? 'Bloquear' : 'Liberar'}
+                </button>
+                <button onclick="abrirEdicao('${user.id}')" class="text-slate-400 hover:text-amber-400 transition-colors p-2"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="excluirUsuario('${user.id}')" class="text-slate-400 hover:text-red-400 transition-colors p-2"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        });
+      }
       // Carrega os dados do Supabase e guarda no cache
       async function carregarTabelaPermissoes() {
         const tbody = document.getElementById("tabelaPermissoesTelas");

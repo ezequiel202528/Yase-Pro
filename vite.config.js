@@ -1,3 +1,5 @@
+// 
+
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -15,8 +17,9 @@ export default defineConfig({
         controleDeCargas: "./ControleDeCargas.html",
         vinculacao: "./Vinculacao.html",
         estoque: "./estoquePecas.html",
-
-        // Adicione as outras páginas aqui seguindo o mesmo padrão
+        // Adicionadas as novas telas para o Vite compilar no Vercel:
+        vendedores: "./Vendedores.html",
+        loginVendedor: "./LoginVendedor.html",
       },
     },
   },

@@ -330,7 +330,7 @@
       </div>
     </div>
 
-    <script>
+    <!-- <script>
       const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
       const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
 
@@ -340,14 +340,16 @@
       const txtStatus = document.getElementById("instrucao-conexao");
 
       // Lista de módulos disponíveis no sistema para liberar/bloquear
-      const modulosDisponiveis = [
-        { arquivo: 'Remessa.html', nome: 'Remessas' },
-        { arquivo: 'Vinculacao.html', nome: 'Vinculação' },
-        { arquivo: 'GestaoOS.html', nome: 'Gestão OS' },
-        { arquivo: 'ControleDeCargas.html', nome: 'Cargas' },
-        { arquivo: 'AnexoOeP.html', nome: 'Anexo O e P' },
-        { arquivo: 'configuracoes.html', nome:'Minha empresa'}
-      ];
+        const modulosDisponiveis = [
+            { arquivo: 'Remessa.html', nome: 'Remessas' },
+            { arquivo: 'Vinculacao.html', nome: 'Vinculação' },
+            { arquivo: 'GestaoOS.html', nome: 'Gestão OS' },
+            { arquivo: 'ControleDeCargas.html', nome: 'Cargas' },
+            { arquivo: 'AnexoOeP.html', nome: 'Anexo O e P' },
+            { arquivo: 'configuracoes.html', nome: 'Minha empresa' },
+            { arquivo: 'Dashboard.html', nome: 'Painel Vendedor' },
+            { arquivo: 'Vendedores.html', nome: 'Vendedores' }
+          ];
 
       function init() {
         try {
@@ -401,10 +403,7 @@
         }
       }
 
-      // Carregar Usuários na Aba de Listagem Geral
-
-      // Carregar Tabela Dinâmica de Permissões de Telas
-// Carregar Tabela Dinâmica de Permissões de Telas
+ 
 // Carrega os dados do Supabase e guarda no cache
       async function carregarUsuarios() {
         const tbody = document.getElementById("tabelaUsuarios");
@@ -466,6 +465,7 @@
           `;
         });
       }
+      
       // Carrega os dados do Supabase e guarda no cache
       async function carregarTabelaPermissoes() {
         const tbody = document.getElementById("tabelaPermissoesTelas");
@@ -781,5 +781,514 @@
 
       
     </script>
-  </body>
+   -->
+
+<script>
+// Credenciais e Variáveis Globais
+      const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
+      const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+
+      let sb = null;
+      let empresaId = null;
+      let usuariosCache = [];
+      const txtStatus = document.getElementById("instrucao-conexao");
+
+      // DECLARAÇÃO GLOBAL DOS MÓDULOS (Essencial para evitar o ReferenceError)
+      const modulosDisponiveis = [
+        { arquivo: 'Remessa.html', nome: 'Remessas' },
+        { arquivo: 'Vinculacao.html', nome: 'Vinculação' },
+        { arquivo: 'GestaoOS.html', nome: 'Gestão OS' },
+        { arquivo: 'ControleDeCargas.html', nome: 'Cargas' },
+        { arquivo: 'AnexoOeP.html', nome: 'Anexo O e P' },
+        { arquivo: 'configuracoes.html', nome: 'Minha empresa' },
+        { arquivo: 'Dashboard.html', nome: 'Painel Vendedor' },
+        { arquivo: 'Vendedores.html', nome: 'Vendedores' }
+      ];
+function renderizarCardsDashboard(usuarioLogado) {
+  const containerGrid = document.getElementById("gridModulos"); // ID do container dos cards no seu Dashboard
+  if (!containerGrid) return;
+
+  const nivelLower = (usuarioLogado.nivel_permissao || '').toLowerCase();
+  const ehGerente = nivelLower.includes('gerente');
+
+  let telasPermitidas = [];
+  try {
+    telasPermitidas = usuarioLogado.permissoes_telas ? JSON.parse(usuarioLogado.permissoes_telas) : [];
+  } catch(e) {
+    telasPermitidas = [];
+  }
+
+  containerGrid.innerHTML = "";
+
+  todosOsModulos.forEach(mod => {
+    // Se for Gerente OU se a tela estiver nas permissões salvas, exibe o card
+    if (ehGerente || telasPermitidas.includes(mod.arquivo)) {
+      containerGrid.innerHTML += `
+        <a href="${mod.arquivo}" class="glass-card p-6 rounded-[24px] hover:border-amber-500/50 transition-all group flex flex-col justify-between">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-lg mb-4 group-hover:scale-110 transition-transform">
+            <i class="fa-solid ${mod.icone}"></i>
+          </div>
+          <div>
+            <h3 class="text-white font-bold text-base mb-1">${mod.nome}</h3>
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">${mod.desc}</p>
+          </div>
+        </a>
+      `;
+    }
+  });
+}
+      function init() {
+        try {
+          const userJson = localStorage.getItem("yase_user") || localStorage.getItem("yase_colab");
+          const usuarioLogado = userJson ? JSON.parse(userJson) : null;
+          empresaId = usuarioLogado ? usuarioLogado.empresa_id : null;
+
+          if (!empresaId) throw new Error("Empresa não identificada.");
+
+          sb = supabase.createClient(URL_SB, KEY_SB);
+          if (txtStatus) {
+            txtStatus.innerText = "✅ Sistema Pronto para Cadastro";
+            txtStatus.className = "text-emerald-400 text-sm";
+          }
+        } catch (e) {
+          console.error(e);
+          if (txtStatus) {
+            txtStatus.innerText = "❌ Erro ao ligar ao Banco de Dados.";
+            txtStatus.className = "text-red-400 text-sm";
+          }
+        }
+      }
+
+      init();
+
+      // Alternar Abas no Submenu
+      function mudarAba(aba) {
+        const secCadastro = document.getElementById("secaoCadastro");
+        const secListagem = document.getElementById("secaoListagem");
+        const secPermissoes = document.getElementById("secaoPermissoes");
+        
+        const btnCadastro = document.getElementById("btnMenuCadastro");
+        const btnListagem = document.getElementById("btnMenuListagem");
+        const btnPermissoes = document.getElementById("btnMenuPermissoes");
+
+        // Esconde todas se existirem
+        if (secCadastro) secCadastro.classList.add("hidden");
+        if (secListagem) secListagem.classList.add("hidden");
+        if (secPermissoes) secPermissoes.classList.add("hidden");
+        if (btnCadastro) btnCadastro.classList.remove("active");
+        if (btnListagem) btnListagem.classList.remove("active");
+        if (btnPermissoes) btnPermissoes.classList.remove("active");
+
+        if (aba === "cadastro") {
+          if (secCadastro) secCadastro.classList.remove("hidden");
+          if (btnCadastro) btnCadastro.classList.add("active");
+        } else if (aba === "lista") {
+          if (secListagem) secListagem.classList.remove("hidden");
+          if (btnListagem) btnListagem.classList.add("active");
+          carregarUsuarios();
+        } else if (aba === "permissoes") {
+          if (secPermissoes) secPermissoes.classList.remove("hidden");
+          if (btnPermissoes) btnPermissoes.classList.add("active");
+          carregarTabelaPermissoes();
+        }
+      }
+
+      // Carrega os dados do Supabase e guarda no cache para listagem
+      async function carregarUsuarios() {
+        const tbody = document.getElementById("tabelaUsuarios");
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400 italic">A carregar equipe...</td></tr>';
+
+        try {
+          const { data, error } = await sb.from("usu_arios").select("*").eq("empresa_id", empresaId);
+          if (error) throw error;
+          usuariosCache = data || [];
+
+          renderizarTabelaUsuarios();
+        } catch (err) {
+          console.error(err);
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-red-400">Erro ao carregar dados.</td></tr>';
+        }
+      }
+
+      // Renderiza a tabela de usuários aplicando o filtro
+      function renderizarTabelaUsuarios() {
+        const tbody = document.getElementById("tabelaUsuarios");
+        if (!tbody) return;
+        const filtro = document.getElementById("filtroUsuariosGeral")?.value || "todos";
+
+        const usuariosFiltrados = usuariosCache.filter(user => {
+          const nivel = (user.nivel_permissao || '').toLowerCase();
+          const ehVendedor = nivel.includes('vendedor');
+
+          if (filtro === 'vendedor') return ehVendedor;
+          if (filtro === 'interno') return !ehVendedor;
+          return true;
+        });
+
+        if (usuariosFiltrados.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Nenhum utilizador encontrado para este filtro.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = "";
+        usuariosFiltrados.forEach(user => {
+          const isAtivo = user.status !== 'bloqueado';
+          tbody.innerHTML += `
+            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+              <td class="py-4 px-4 font-bold text-white">${user.nome_completo || '-'}</td>
+              <td class="py-4 px-4 text-slate-400">${user.codigo_id || '-'}</td>
+              <td class="py-4 px-4 font-mono text-xs text-amber-300">
+                <span id="senha_${user.id}" class="hidden">${user.senha || ''}</span>
+                <span id="oculta_${user.id}" class="text-slate-500">••••••••</span>
+                <button onclick="alternarSenha('${user.id}')" class="ml-2 text-slate-400 hover:text-white"><i id="icone_${user.id}" class="fa-solid fa-eye"></i></button>
+              </td>
+              <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 whitespace-nowrap">${user.nivel_permissao || 'Operador'}</span></td>
+              <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${isAtivo ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">${isAtivo ? 'Ativo' : 'Bloqueado'}</span></td>
+              <td class="py-4 px-4 text-center space-x-1">
+                <button onclick="alternarBloqueio('${user.id}', '${user.status || 'ativo'}')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isAtivo ? 'bg-red-500/10 hover:bg-red-500/20 text-red-400' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'}">
+                  <i class="fa-solid ${isAtivo ? 'fa-ban' : 'fa-check'}"></i> ${isAtivo ? 'Bloquear' : 'Liberar'}
+                </button>
+                <button onclick="abrirEdicao('${user.id}')" class="text-slate-400 hover:text-amber-400 transition-colors p-2"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="excluirUsuario('${user.id}')" class="text-slate-400 hover:text-red-400 transition-colors p-2"><i class="fa-solid fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Carrega os dados para a tabela de permissões de telas
+      async function carregarTabelaPermissoes() {
+        const tbody = document.getElementById("tabelaPermissoesTelas");
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400 italic">A carregar permissões...</td></tr>';
+
+        try {
+          const { data, error } = await sb.from("usu_arios").select("*").eq("empresa_id", empresaId);
+          if (error) throw error;
+          usuariosCache = data || [];
+
+          renderizarTabelaPermissoes();
+        } catch (err) {
+          console.error(err);
+          tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-red-400">Erro ao carregar permissões.</td></tr>';
+        }
+      }
+
+      // Renderiza a tabela de permissões aplicando o filtro e a regra automática para Gerentes
+      function renderizarTabelaPermissoes() {
+        const tbody = document.getElementById("tabelaPermissoesTelas");
+        if (!tbody) return;
+        const filtro = document.getElementById("filtroPermissoes")?.value || "todos";
+
+        const usuariosFiltrados = usuariosCache.filter(user => {
+          const nivel = (user.nivel_permissao || '').toLowerCase();
+          const ehVendedor = nivel.includes('vendedor');
+
+          if (filtro === 'vendedor') return ehVendedor;
+          if (filtro === 'interno') return !ehVendedor;
+          return true;
+        });
+
+        if (usuariosFiltrados.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400">Nenhum funcionário encontrado para este filtro.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = "";
+        usuariosFiltrados.forEach(user => {
+          const nivelLower = (user.nivel_permissao || '').toLowerCase();
+          const ehGerente = nivelLower.includes('gerente');
+
+          let telasSalvas = [];
+          try {
+            telasSalvas = user.permissoes_telas ? JSON.parse(user.permissoes_telas) : [];
+          } catch(e) {
+            telasSalvas = [];
+          }
+
+          let checkboxesHtml = '<div class="flex flex-wrap gap-3">';
+          modulosDisponiveis.forEach(mod => {
+            // Se for Gerente, marca tudo automaticamente. Caso contrário, segue o que está salvo.
+            const marcado = ehGerente || telasSalvas.includes(mod.arquivo) ? 'checked' : '';
+            const desabilitado = ehGerente ? 'disabled' : '';
+
+            checkboxesHtml += `
+              <label class="flex items-center gap-2 text-xs text-slate-300 bg-slate-900/50 px-3 py-2 rounded-xl border border-white/5 cursor-pointer hover:border-amber-500/30">
+                <input type="checkbox" value="${mod.arquivo}" data-userid="${user.id}" class="chk-tela-${user.id} rounded bg-slate-800 border-slate-700 text-amber-500 focus:ring-amber-500" ${marcado} ${desabilitado}>
+                ${mod.nome}
+              </label>
+            `;
+          });
+          checkboxesHtml += '</div>';
+
+          tbody.innerHTML += `
+            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+              <td class="py-4 px-4 font-bold text-white">
+                ${user.nome_completo || '-'} 
+                ${ehGerente ? '<span class="ml-2 text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-bold">Acesso Total</span>' : ''}
+              </td>
+              <td class="py-4 px-4"><span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 whitespace-nowrap">${user.nivel_permissao || 'Operador'}</span></td>
+              <td class="py-4 px-4">${checkboxesHtml}</td>
+              <td class="py-4 px-4 text-center">
+                <button onclick="salvarPermissoesTelas('${user.id}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl font-bold text-xs transition-all shadow-lg whitespace-nowrap">
+                  Salvar
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Salvar as Permissões de Telas (Gerente ganha acesso a todos automaticamente)
+      async function salvarPermissoesTelas(userId) {
+        const user = usuariosCache.find(u => u.id === userId);
+        const nivelLower = (user?.nivel_permissao || '').toLowerCase();
+        const ehGerente = nivelLower.includes('gerente');
+
+        let telasPermitidas = [];
+
+        if (ehGerente) {
+          telasPermitidas = modulosDisponiveis.map(m => m.arquivo);
+        } else {
+          const checkboxes = document.querySelectorAll(`input.chk-tela-${userId}:checked`);
+          telasPermitidas = Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        try {
+          const { error } = await sb.from("usu_arios").update({
+            permissoes_telas: JSON.stringify(telasPermitidas)
+          }).eq("id", userId);
+
+          if (error) throw error;
+          
+          await carregarTabelaPermissoes();
+          mostrarToast(ehGerente ? "✅ Gerente atualizado com Acesso Total a todos os menus!" : "✅ Permissões de telas atualizadas com sucesso!");
+        } catch (err) {
+          console.error(err);
+          mostrarToast("❌ Erro ao salvar permissões: " + (err.message || "Erro desconhecido"), "erro");
+        }
+      }
+
+      // Funções auxiliares (Visualização de Senha)
+      function alternarSenha(id) {
+        const spanSenha = document.getElementById(`senha_${id}`);
+        const spanOculta = document.getElementById(`oculta_${id}`);
+        const icone = document.getElementById(`icone_${id}`);
+        if (!spanSenha || !spanOculta || !icone) return;
+
+        if (spanSenha.classList.contains("hidden")) {
+          spanSenha.classList.remove("hidden");
+          spanOculta.classList.add("hidden");
+          icone.className = "fa-solid fa-eye-slash";
+        } else {
+          spanSenha.classList.add("hidden");
+          spanOculta.classList.remove("hidden");
+          icone.className = "fa-solid fa-eye";
+        }
+      }
+
+      let dadosBloqueioTemporario = { id: null, novoStatus: null };
+
+      function alternarBloqueio(id, statusAtual) {
+        const novoStatus = statusAtual === 'bloqueado' ? 'ativo' : 'bloqueado';
+        dadosBloqueioTemporario = { id, novoStatus };
+
+        const modal = document.getElementById("modalConfirmarBloqueio");
+        const iconeDiv = document.getElementById("iconeModalBloqueio");
+        const titulo = document.getElementById("tituloModalBloqueio");
+        const texto = document.getElementById("textoModalBloqueio");
+        const btnConfirmar = document.getElementById("btnExecutarBloqueio");
+
+        if (!modal) return;
+
+        if (novoStatus === 'bloqueado') {
+          if (titulo) titulo.innerText = "BLOQUEAR UTILIZADOR";
+          if (texto) texto.innerHTML = "O utilizador selecionado perderá o acesso imediato ao sistema até que seja liberado novamente.";
+          if (iconeDiv) iconeDiv.className = "w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 border text-xl bg-red-500/10 border-red-500/20 text-red-400";
+          if (btnConfirmar) {
+            btnConfirmar.className = "w-1/2 h-12 rounded-xl font-bold text-xs transition-all shadow-lg bg-red-500 hover:bg-red-400 text-white";
+            btnConfirmar.innerText = "SIM, BLOQUEAR";
+          }
+        } else {
+          if (titulo) titulo.innerText = "LIBERAR UTILIZADOR";
+          if (texto) texto.innerHTML = "O utilizador selecionado voltará a ter permissão de acesso ao sistema com as suas credenciais.";
+          if (iconeDiv) iconeDiv.className = "w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 border text-xl bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+          if (btnConfirmar) {
+            btnConfirmar.className = "w-1/2 h-12 rounded-xl font-bold text-xs transition-all shadow-lg bg-emerald-500 hover:bg-emerald-400 text-slate-900";
+            btnConfirmar.innerText = "SIM, LIBERAR";
+          }
+        }
+
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function fecharModalBloqueio() {
+        const modal = document.getElementById("modalConfirmarBloqueio");
+        if (modal) {
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+        }
+        dadosBloqueioTemporario = { id: null, novoStatus: null };
+      }
+
+      async function executarAlternarBloqueio() {
+        const { id, novoStatus } = dadosBloqueioTemporario;
+        if (!id || !novoStatus) return;
+
+        fecharModalBloqueio();
+
+        try {
+          const { error } = await sb.from("usu_arios").update({ status: novoStatus }).eq("id", id);
+          if (error) throw error;
+
+          carregarUsuarios();
+          const acaoTexto = novoStatus === 'bloqueado' ? 'bloqueado' : 'liberado';
+          mostrarToast(`✅ Utilizador ${acaoTexto} com sucesso!`);
+        } catch (err) {
+          console.error(err);
+          mostrarToast("❌ Erro ao alterar status do utilizador.", "erro");
+        }
+      }
+
+      // Sistema de Toast Flutuante (Canto Superior Direito)
+      function mostrarToast(mensagem, tipo = "sucesso") {
+        const container = document.getElementById("toastContainer");
+        if (!container) return;
+
+        const toast = document.createElement("div");
+        const corFundo = tipo === "sucesso" 
+          ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" 
+          : "bg-red-950/90 text-red-400 border-red-500/30";
+
+        toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-300 translate-x-10 opacity-0 ${corFundo}`;
+        toast.innerHTML = `<span class="text-xs font-black tracking-wide">${mensagem}</span>`;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.remove("translate-x-10", "opacity-0");
+        }, 10);
+
+        setTimeout(() => {
+          toast.classList.add("translate-x-10", "opacity-0");
+          setTimeout(() => toast.remove(), 300);
+        }, 3500);
+      }
+
+      function abrirEdicao(id) {
+        const user = usuariosCache.find(u => u.id == id);
+        if (!user) return;
+        document.getElementById("edit_id").value = user.id;
+        document.getElementById("edit_nome").value = user.nome_completo || "";
+        document.getElementById("edit_codigo").value = user.codigo_id || "";
+        document.getElementById("edit_senha").value = user.senha || "";
+        document.getElementById("edit_nivel").value = user.nivel_permissao || "Operador";
+        document.getElementById("modalEdicao").classList.remove("hidden");
+      }
+
+      function fecharModal() { 
+        const modal = document.getElementById("modalEdicao");
+        if (modal) modal.classList.add("hidden"); 
+      }
+
+      const formEdicaoEl = document.getElementById("formEdicao");
+      if (formEdicaoEl) {
+        formEdicaoEl.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const id = document.getElementById("edit_id").value;
+          try {
+            const { error } = await sb.from("usu_arios").update({
+              nome_completo: document.getElementById("edit_nome").value,
+              codigo_id: document.getElementById("edit_codigo").value,
+              senha: document.getElementById("edit_senha").value,
+              nivel_permissao: document.getElementById("edit_nivel").value
+            }).eq("id", id);
+            if (error) throw error;
+            mostrarToast("✅ Usuário atualizado com sucesso!");
+            fecharModal();
+            carregarUsuarios();
+          } catch (err) {
+            mostrarToast("❌ Erro ao atualizar usuário.", "erro");
+          }
+        });
+      }
+
+      async function excluirUsuario(id) {
+        if (!confirm("Tem certeza que deseja excluir permanentemente este usuário?")) return;
+        try {
+          const { error } = await sb.from("usu_arios").delete().eq("id", id);
+          if (error) throw error;
+          mostrarToast("✅ Usuário excluído com sucesso!");
+          carregarUsuarios();
+        } catch (err) {
+          mostrarToast("❌ Erro ao excluir.", "erro");
+        }
+      }
+
+      const cadastroFormEl = document.getElementById("cadastroForm");
+      if (cadastroFormEl) {
+        cadastroFormEl.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("btnCadastrar");
+          const msg = document.getElementById("statusMsg");
+
+          const senha = document.getElementById("campo_senha").value;
+          const conf = document.getElementById("campo_confirmar").value;
+
+          if (senha !== conf) {
+            if (msg) {
+              msg.innerText = "As senhas não coincidem!";
+              msg.className = "text-red-400 bg-red-500/10 py-3 rounded-xl block";
+              msg.classList.remove("hidden");
+            }
+            return;
+          }
+
+          if (btn) {
+            btn.disabled = true;
+            btn.innerText = "A GUARDAR...";
+          }
+
+          try {
+            // Se o nível escolhido for Gerente ao cadastrar, já criamos com permissão total em array
+            const nivelEscolhido = document.getElementById("campo_nivel").value;
+            const ehGerenteInicial = nivelEscolhido.toLowerCase().includes('gerente');
+            const telasIniciais = ehGerenteInicial ? modulosDisponiveis.map(m => m.arquivo) : [];
+
+            const { error } = await sb.from("usu_arios").insert([{
+              empresa_id: empresaId,
+              nome_completo: document.getElementById("campo_nome").value,
+              codigo_id: document.getElementById("campo_codigo").value,
+              senha: senha,
+              nivel_permissao: nivelEscolhido,
+              status: "ativo",
+              permissoes_telas: JSON.stringify(telasIniciais)
+            }]);
+
+            if (error) throw error;
+
+            if (msg) {
+              msg.innerText = "✅ Usuário criado com sucesso!";
+              msg.className = "text-emerald-400 bg-emerald-500/10 py-3 rounded-xl block";
+              msg.classList.remove("hidden");
+            }
+            cadastroFormEl.reset();
+          } catch (err) {
+            if (msg) {
+              msg.innerText = "Erro: " + (err.message || "Falha ao salvar");
+              msg.className = "text-red-400 bg-red-500/10 py-3 rounded-xl block";
+              msg.classList.remove("hidden");
+            }
+          } finally {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerText = "CADASTRAR USUÁRIO";
+            }
+          }
+        });
+      }
+</script>
+</body>
 </html>

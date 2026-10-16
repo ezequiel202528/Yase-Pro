@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YaSe PRO - Gestão de Vendedores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body { 
+            font-family: "Plus Jakarta Sans", sans-serif; 
+            background-color: #020617; 
+            color: white; 
+            min-height: 100vh; 
+        }
+        .glass-card { 
+            background: rgba(15, 23, 42, 0.8); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(51, 65, 85, 0.5); 
+        }
+        .login-input {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white !important;
+            transition: all 0.3s;
+        }
+        .login-input:focus {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1);
+            outline: none;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <!-- CONTAINER DE TOASTS (Canto Superior Direito) -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header Section -->
+    <header class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <a href="Dashboard.html" class="w-10 h-10 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-slate-300 transition-colors border border-white/10" title="Voltar ao Dashboard">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-2xl font-black tracking-tight text-white">Controle de <span class="text-amber-400">Vendedores & WhatsApp</span></h1>
+            </div>
+            <p class="text-slate-400 text-xs ml-13">Gerencie os contatos da equipe, edite, exclua e realize disparos comerciais instantâneos.</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto">
+        <div class="glass-card p-8 rounded-[32px] shadow-2xl">
+            
+            <!-- Barra de Pesquisa em Tempo Real -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                <div class="relative w-full sm:w-96">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-500 text-sm"></i>
+                    <input type="text" id="inputBusca" placeholder="Pesquisar vendedor pelo nome..." 
+                        class="login-input w-full pl-11 pr-4 py-2.5 rounded-xl text-sm">
+                </div>
+                <div class="text-xs text-slate-400 italic">
+                    * Exibe automaticamente apenas os colaboradores cadastrados com cargo de Vendedor.
+                </div>
+            </div>
+
+            <!-- Listagem de Vendedores -->
+            <div class="overflow-x-auto border border-white/10 rounded-2xl bg-slate-950/40">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 text-[10px] text-slate-400 uppercase tracking-widest bg-slate-900/50">
+                            <th class="py-4 px-6">Colaborador / Vendedor</th>
+                            <th class="py-4 px-6">Cargo / Nível</th>
+                            <th class="py-4 px-6">Número do WhatsApp</th>
+                            <th class="py-4 px-6 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaVendedores" class="text-sm text-slate-200 divide-y divide-white/5">
+                        <!-- Carregado via JavaScript do Supabase -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL DE EDIÇÃO DO VENDEDOR -->
+    <div id="modalEdicao" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="glass-card w-full max-w-md p-8 rounded-[32px] border border-white/10">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-black text-white">Editar Vendedor</h3>
+                <button onclick="fecharModalEdicao()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="formEdicaoVendedor" class="space-y-4">
+                <input type="hidden" id="edit_id" />
+                <div>
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">Nome Completo</label>
+                    <input type="text" id="edit_nome" required class="login-input w-full h-12 px-4 rounded-xl text-sm" />
+                </div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 mb-1 block">WhatsApp</label>
+                    <input type="text" id="edit_whatsapp" placeholder="Ex: 45999887766" class="login-input w-full h-12 px-4 rounded-xl text-sm" />
+                </div>
+                <div class="flex gap-4 pt-2">
+                    <button type="button" onclick="fecharModalEdicao()" class="w-1/2 h-12 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs transition-all">Cancelar</button>
+                    <button type="submit" class="w-1/2 h-12 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-xl font-bold text-xs transition-all shadow-lg">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
+        const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+        
+        let sb = null;
+        let empresaId = null;
+        let todosVendedores = [];
+
+        const tabelaVendedores = document.getElementById('tabelaVendedores');
+        const inputBusca = document.getElementById('inputBusca');
+        const toastContainer = document.getElementById('toastContainer');
+
+        async function init() {
+            try {
+                const userJson = localStorage.getItem("yase_user") || localStorage.getItem("yase_colab");
+                if (!userJson) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                const user = JSON.parse(userJson);
+                empresaId = user.empresa_id;
+                
+                sb = supabase.createClient(URL_SB, KEY_SB);
+                await carregarVendedoresDoBanco();
+            } catch (e) {
+                console.error("Erro na inicialização:", e);
+            }
+        }
+
+        // Sistema de Toast Moderno (Canto Superior Direito)
+        function mostrarToast(mensagem, tipo = "sucesso") {
+            if (!toastContainer) return;
+            const toast = document.createElement('div');
+            const corFundo = tipo === "sucesso" 
+                ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" 
+                : "bg-red-950/90 text-red-400 border-red-500/30";
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-300 translate-x-10 opacity-0 ${corFundo}`;
+            toast.innerHTML = `<span class="text-xs font-black tracking-wide">${mensagem}</span>`;
+
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.classList.remove("translate-x-10", "opacity-0"), 10);
+            setTimeout(() => {
+                toast.classList.add("translate-x-10", "opacity-0");
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Buscar dados direto do Supabase filtrando quem for Vendedor
+        async function carregarVendedoresDoBanco() {
+            tabelaVendedores.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-slate-500 text-sm italic">A carregar vendedores cadastrados...</td></tr>';
+
+            try {
+                const { data, error } = await sb
+                    .from("usu_arios")
+                    .select("*")
+                    .eq("empresa_id", empresaId)
+                    .neq("status", "bloqueado");
+
+                if (error) throw error;
+
+                todosVendedores = (data || []).filter(u => {
+                    const cargo = (u.nivel_permissao || '').toLowerCase();
+                    return cargo.includes('vendedor');
+                }).map(u => ({
+                    id: u.id,
+                    nome: u.nome_completo,
+                    iniciais: u.nome_completo ? u.nome_completo.charAt(0).toUpperCase() : 'V',
+                    cargo: u.nivel_permissao || 'Vendedor',
+                    whatsapp: u.telefone || '' // <--- Aqui mapeia a coluna real do seu banco
+                }));
+
+                renderizarLista();
+            } catch (err) {
+                console.error(err);
+                tabelaVendedores.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-red-400 text-sm">Erro ao carregar vendedores do banco de dados.</td></tr>';
+            }
+        }
+
+        // Renderizar listagem com base na busca
+        function renderizarLista(termoBusca = '') {
+            tabelaVendedores.innerHTML = '';
+
+            const filtrados = todosVendedores.filter(v => 
+                (v.nome || '').toLowerCase().includes(termoBusca.toLowerCase())
+            );
+
+            if (filtrados.length === 0) {
+                tabelaVendedores.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-8 text-slate-500 text-sm">
+                            Nenhum vendedor cadastrado encontrado.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filtrados.forEach(vendedor => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-white/5 transition-colors";
+
+                tr.innerHTML = `
+                    <td class="py-4 px-6 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
+                            ${vendedor.iniciais}
+                        </div>
+                        <span class="font-bold text-white">${vendedor.nome}</span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            ${vendedor.cargo}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6">
+                        <input 
+                            type="text" 
+                            placeholder="Ex: 45999887766"
+                            value="${vendedor.whatsapp}"
+                            data-id="${vendedor.id}"
+                            class="login-input w-full max-w-[200px] px-3 py-2 rounded-xl text-xs font-mono"
+                        >
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-1.5 whitespace-nowrap">
+                        <button onclick="salvarContato('${vendedor.id}')" title="Salvar WhatsApp" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl text-xs font-bold transition-all">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                        </button>
+                        <button onclick="abrirEdicao('${vendedor.id}')" title="Editar Vendedor" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold transition-all">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="excluirVendedor('${vendedor.id}', '${vendedor.nome}')" title="Excluir Vendedor" class="px-2.5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition-all">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        <button onclick="dispararWhatsApp('${vendedor.id}')" title="Disparar no WhatsApp" class="px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                        </button>
+                    </td>
+                `;
+                tabelaVendedores.appendChild(tr);
+            });
+        }
+
+        // Salvar WhatsApp direto no Supabase
+        window.salvarContato = async function(id) {
+            const input = document.querySelector(`input[data-id="${id}"]`);
+            const vendedor = todosVendedores.find(u => u.id === id);
+            
+            if (vendedor && input) {
+                const numeroLimpo = input.value.replace(/\D/g, '');
+                vendedor.whatsapp = numeroLimpo;
+
+                try {
+                   const { error } = await sb
+                    .from("usu_arios")
+                    .update({ telefone: numeroLimpo }) // <--- Coluna real
+                    .eq("id", id);
+
+                    if (error) throw error;
+                    mostrarToast(`✅ WhatsApp de ${vendedor.nome} salvo com sucesso!`);
+                } catch (err) {
+                    console.error(err);
+                    mostrarToast("❌ Erro ao salvar no banco de dados.", "erro");
+                }
+            }
+        };
+
+        // Abrir Modal de Edição
+        window.abrirEdicao = function(id) {
+            const vendedor = todosVendedores.find(u => u.id === id);
+            if (!vendedor) return;
+
+            document.getElementById("edit_id").value = vendedor.id;
+            document.getElementById("edit_nome").value = vendedor.nome;
+            document.getElementById("edit_whatsapp").value = vendedor.whatsapp;
+            document.getElementById("modalEdicao").classList.remove("hidden");
+        };
+
+        window.fecharModalEdicao = function() {
+            document.getElementById("modalEdicao").classList.add("hidden");
+        };
+
+        // Salvar Alterações do Modal de Edição no Supabase
+        document.getElementById("formEdicaoVendedor").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const id = document.getElementById("edit_id").value;
+            const novoNome = document.getElementById("edit_nome").value.trim();
+            const novoZap = document.getElementById("edit_whatsapp").value.replace(/\D/g, '');
+
+            try {
+                const { error } = await sb
+                    .from("usu_arios")
+                    .update({ 
+                        nome_completo: novoNome,
+                        telefone: novoZap // <--- Coluna real
+                    })
+                    .eq("id", id);
+
+                if (error) throw error;
+
+                mostrarToast("✅ Vendedor atualizado com sucesso!");
+                fecharModalEdicao();
+                carregarVendedoresDoBanco();
+            } catch (err) {
+                console.error(err);
+                mostrarToast("❌ Erro ao atualizar vendedor.", "erro");
+            }
+        });
+        // Excluir Vendedor do Sistema
+        window.excluirVendedor = async function(id, nome) {
+            if (!confirm(`Tem certeza que deseja remover o vendedor "${nome}" do sistema?`)) return;
+
+            try {
+                const { error } = await sb
+                    .from("usu_arios")
+                    .delete()
+                    .eq("id", id);
+
+                if (error) throw error;
+
+                mostrarToast(`✅ Vendedor ${nome} removido com sucesso!`);
+                carregarVendedoresDoBanco();
+            } catch (err) {
+                console.error(err);
+                mostrarToast("❌ Erro ao excluir vendedor.", "erro");
+            }
+        };
+
+       
+// Disparar WhatsApp com o link do Portal do Vendedor Externo
+        window.dispararWhatsApp = function(id) {
+            const vendedor = todosVendedores.find(u => u.id === id);
+            
+            // Pega o número atual digitado no input da linha (caso tenha alterado sem salvar antes)
+            const inputLinha = document.querySelector(`input[data-id="${id}"]`);
+            const numeroZap = inputLinha ? inputLinha.value.replace(/\D/g, '') : (vendedor ? vendedor.whatsapp : '');
+
+            if (vendedor && numeroZap) {
+                mostrarToast(`A iniciar chat com ${vendedor.nome}...`);
+
+                // Monta o link do portal de login do vendedor com base no domínio atual
+                const linkPortal = window.location.origin + "/LoginVendedor.html";
+
+                // Mensagem comercial personalizada com o link direto
+                const textoMensagem = `Olá *${vendedor.nome}*, aqui está o link de acesso ao seu Portal do Vendedor Externo no YaSe PRO:\n\n🔗 ${linkPortal}\n\nAceda com as suas credenciais para gerenciar os seus pedidos.`;
+
+                const mensagemCodificada = encodeURIComponent(textoMensagem);
+                
+                // Abre o chat do WhatsApp com o número e a mensagem preenchida
+                window.open(`https://wa.me/55${numeroZap}?text=${mensagemCodificada}`, '_blank');
+            } else {
+                mostrarToast(`⚠️ Insira e salve um número de WhatsApp válido para este vendedor!`, "erro");
+            }
+        };
+        // Evento de pesquisa em tempo real
+        if (inputBusca) {
+            inputBusca.addEventListener('input', (e) => {
+                renderizarLista(e.target.value);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

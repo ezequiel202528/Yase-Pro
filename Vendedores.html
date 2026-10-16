@@ -342,30 +342,55 @@
 
        
 // Disparar WhatsApp com o link do Portal do Vendedor Externo
-        window.dispararWhatsApp = function(id) {
-            const vendedor = todosVendedores.find(u => u.id === id);
+        // window.dispararWhatsApp = function(id) {
+        //     const vendedor = todosVendedores.find(u => u.id === id);
             
-            // Pega o número atual digitado no input da linha (caso tenha alterado sem salvar antes)
-            const inputLinha = document.querySelector(`input[data-id="${id}"]`);
-            const numeroZap = inputLinha ? inputLinha.value.replace(/\D/g, '') : (vendedor ? vendedor.whatsapp : '');
+        //     // Pega o número atual digitado no input da linha (caso tenha alterado sem salvar antes)
+        //     const inputLinha = document.querySelector(`input[data-id="${id}"]`);
+        //     const numeroZap = inputLinha ? inputLinha.value.replace(/\D/g, '') : (vendedor ? vendedor.whatsapp : '');
 
-            if (vendedor && numeroZap) {
-                mostrarToast(`A iniciar chat com ${vendedor.nome}...`);
+        //     if (vendedor && numeroZap) {
+        //         mostrarToast(`A iniciar chat com ${vendedor.nome}...`);
 
-                // Monta o link do portal de login do vendedor com base no domínio atual
-                const linkPortal = window.location.origin + "/LoginVendedor.html";
+        //         // Monta o link do portal de login do vendedor com base no domínio atual
+        //         const linkPortal = window.location.origin + "/LoginVendedor.html";
 
-                // Mensagem comercial personalizada com o link direto
-                const textoMensagem = `Olá *${vendedor.nome}*, aqui está o link de acesso ao seu Portal do Vendedor Externo no YaSe PRO:\n\n🔗 ${linkPortal}\n\nAceda com as suas credenciais para gerenciar os seus pedidos.`;
+        //         // Mensagem comercial personalizada com o link direto
+        //         const textoMensagem = `Olá *${vendedor.nome}*, aqui está o link de acesso ao seu Portal do Vendedor Externo no YaSe PRO:\n\n🔗 ${linkPortal}\n\nAceda com as suas credenciais para gerenciar os seus pedidos.`;
 
-                const mensagemCodificada = encodeURIComponent(textoMensagem);
+        //         const mensagemCodificada = encodeURIComponent(textoMensagem);
                 
-                // Abre o chat do WhatsApp com o número e a mensagem preenchida
-                window.open(`https://wa.me/55${numeroZap}?text=${mensagemCodificada}`, '_blank');
-            } else {
-                mostrarToast(`⚠️ Insira e salve um número de WhatsApp válido para este vendedor!`, "erro");
-            }
-        };
+        //         // Abre o chat do WhatsApp com o número e a mensagem preenchida
+        //         window.open(`https://wa.me/55${numeroZap}?text=${mensagemCodificada}`, '_blank');
+        //     } else {
+        //         mostrarToast(`⚠️ Insira e salve um número de WhatsApp válido para este vendedor!`, "erro");
+        //     }
+        // };
+        
+   window.dispararWhatsApp = function(id) {
+    const vendedor = todosVendedores.find(u => u.id === id);
+    const inputLinha = document.querySelector(`input[data-id="${id}"]`);
+    const numeroZap = inputLinha ? inputLinha.value.replace(/\D/g, '') : (vendedor ? vendedor.whatsapp : '');
+
+    if (vendedor && numeroZap) {
+        mostrarToast(`A iniciar chat com ${vendedor.nome}...`);
+
+        // Pega o CNPJ salvo na sessão da empresa logada e limpa os caracteres especiais
+        const cnpjEmpresaLogada = (localStorage.getItem('user_cnpj') || '').replace(/\D/g, '');
+        
+        // Monta o link passando o CNPJ por parâmetro na URL
+        const linkPortal = `${window.location.origin}/LoginVendedor.html?cnpj=${cnpjEmpresaLogada}`;
+
+        const textoMensagem = `Olá *${vendedor.nome}*, aqui está o link de acesso ao seu Portal do Vendedor Externo no YaSe PRO:\n\n🔗 ${linkPortal}\n\nAceda com as suas credenciais para gerenciar os seus pedidos.`;
+
+        window.open(`https://wa.me/55${numeroZap}?text=${encodeURIComponent(textoMensagem)}`, '_blank');
+    } else {
+        mostrarToast(`⚠️ Insira e salve um número de WhatsApp válido para este vendedor!`, "erro");
+    }
+};     
+        
+        
+        
         // Evento de pesquisa em tempo real
         if (inputBusca) {
             inputBusca.addEventListener('input', (e) => {

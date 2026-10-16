@@ -91,7 +91,7 @@
 
   <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
+  <!-- <script>
     const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
     const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
     const sb = supabase.createClient(URL_SB, KEY_SB);
@@ -225,6 +225,159 @@
         setTimeout(() => toast.remove(), 300);
       }, 3500);
     }
+  </script> -->
+
+<script>
+    const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
+    const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+    const sb = supabase.createClient(URL_SB, KEY_SB);
+
+    let empresaCacheId = null;
+    let vendedoresLista = [];
+
+    // Função centralizada para buscar empresa e preencher os vendedores
+    async function carregarVendedoresPorCnpj(cnpjBruto) {
+      const cnpjLimpo = cnpjBruto.replace(/\D/g, '');
+      if (!cnpjLimpo) return;
+
+      try {
+        // 1. Busca a empresa pelo CNPJ limpo na tabela 'empresas'
+        const { data: empresaData, error: empresaErr } = await sb
+          .from("empresas")
+          .select("id")
+          .eq("cnpj", cnpjLimpo)
+          .single();
+
+        if (empresaErr || !empresaData) {
+          throw new Error("Empresa não encontrada com este CNPJ.");
+        }
+
+        empresaCacheId = empresaData.id;
+
+        // 2. Busca todos os usuários daquela empresa que possuem cargo de Vendedor
+        const { data: usuariosData, error: usuariosErr } = await sb
+          .from("usu_arios")
+          .select("*")
+          .eq("empresa_id", empresaCacheId)
+          .or('nivel_permissao.ilike.%vendedor%');
+
+        if (usuariosErr) throw usuariosErr;
+
+        vendedoresLista = usuariosData || [];
+        const select = document.getElementById("selectVendedor");
+        select.innerHTML = '<option value="">Selecione o seu nome...</option>';
+
+        if (vendedoresLista.length === 0) {
+          select.disabled = true;
+          mostrarToast("⚠️ Nenhum vendedor registado para este CNPJ.", "erro");
+          return;
+        }
+
+        vendedoresLista.forEach(v => {
+          select.innerHTML += `<option value="${v.id}">${v.nome_completo} (${v.nivel_permissao})</option>`;
+        });
+
+        select.disabled = false;
+        mostrarToast("✅ Empresa identificada com sucesso!");
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById("selectVendedor").innerHTML = '<option value="">CNPJ inválido ou sem vendedores...</option>';
+        document.getElementById("selectVendedor").disabled = true;
+        mostrarToast("❌ " + (err.message || "Erro ao localizar empresa."), "erro");
+      }
+    }
+
+    // Listener para quando o usuário digitar ou alterar o CNPJ manualmente
+    document.getElementById("cnpjEmpresa").addEventListener("blur", async (e) => {
+      const cnpjDigitado = e.target.value.trim();
+      if (cnpjDigitado) {
+        mostrarToast("A procurar empresa...", "sucesso");
+        await carregarVendedoresPorCnpj(cnpjDigitado);
+      }
+    });
+
+    // Assim que a página abre, verifica se veio um CNPJ na URL (via WhatsApp)
+    window.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const cnpjParam = params.get("cnpj");
+
+      if (cnpjParam) {
+        const inputCnpj = document.getElementById("cnpjEmpresa");
+        inputCnpj.value = cnpjParam;
+        await carregarVendedoresPorCnpj(cnpjParam);
+      }
+    });
+
+    // Ação do Botão de Entrar
+    document.getElementById("formLoginVendedor").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const vendedorId = document.getElementById("selectVendedor").value;
+      const senhaDigitada = document.getElementById("senhaVendedor").value;
+
+      if (!vendedorId) {
+        mostrarToast("❌ Selecione um vendedor.", "erro");
+        return;
+      }
+
+      const vendedorSelecionado = vendedoresLista.find(v => v.id == vendedorId);
+
+      if (!vendedorSelecionado) {
+        mostrarToast("❌ Vendedor não encontrado.", "erro");
+        return;
+      }
+
+      if (vendedorSelecionado.senha !== senhaDigitada) {
+        mostrarToast("❌ Palavra-passe incorreta.", "erro");
+        return;
+      }
+
+      localStorage.setItem("yase_vendedor_logado", JSON.stringify(vendedorSelecionado));
+      localStorage.setItem("yase_empresa_id", empresaCacheId);
+
+      mostrarToast("✅ Login efetuado com sucesso! A redirecionar...");
+
+      setTimeout(() => {
+        window.location.href = "PainelVendedor.html"; 
+      }, 1000);
+    });
+
+    // Função para mostrar/esconder senha
+    function toggleSenha() {
+      const input = document.getElementById("senhaVendedor");
+      const icone = document.getElementById("iconeOlho");
+      if (input.type === "password") {
+        input.type = "text";
+        icone.className = "fa-solid fa-eye-slash";
+      } else {
+        input.type = "password";
+        icone.className = "fa-solid fa-eye";
+      }
+    }
+
+    // Função de Toast Moderno no Canto Superior Direito
+    function mostrarToast(mensagem, tipo = "sucesso") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+
+      const toast = document.createElement("div");
+      const corFundo = tipo === "sucesso" 
+        ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" 
+        : "bg-red-950/90 text-red-400 border-red-500/30";
+
+      toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-300 translate-x-10 opacity-0 ${corFundo}`;
+      toast.innerHTML = `<span class="text-xs font-black tracking-wide">${mensagem}</span>`;
+
+      container.appendChild(toast);
+
+      setTimeout(() => toast.classList.remove("translate-x-10", "opacity-0"), 10);
+      setTimeout(() => {
+        toast.classList.add("translate-x-10", "opacity-0");
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
   </script>
+
+
 </body>
 </html>

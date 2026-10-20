@@ -87,12 +87,12 @@
           </label>
           
           <div class="space-y-2">
-            <!-- Select de Tipos (Dispara o filtro ao alterar) -->
+            <!-- Select de Tipos -->
             <select id="selectTipoExtintor" onchange="filtrarCapacidadesPorTipo()" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required>
               <option value="">A carregar tipos do sistema...</option>
             </select>
 
-            <!-- Select de Capacidades (Filtrado automaticamente) -->
+            <!-- Select de Capacidades -->
             <select id="selectCapacidadeExtintor" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required disabled>
               <option value="">Selecione o tipo primeiro...</option>
             </select>
@@ -148,7 +148,7 @@
     let empresaId = null;
     let itensTemp = [];
     let todasDemandasCache = [];
-    let cacheCapacidades = []; // Armazena as capacidades carregadas do banco
+    let cacheCapacidades = [];
 
     window.addEventListener("DOMContentLoaded", () => {
       const vJson = localStorage.getItem("yase_vendedor_logado");
@@ -169,7 +169,6 @@
       carregarDemandasParaNotificacao();
     });
 
-    // 1. Carrega os Tipos cadastrados
     async function carregarTiposDinamicos() {
       const select = document.getElementById("selectTipoExtintor");
       if (!select) return;
@@ -205,11 +204,7 @@
       }
     }
 
-    // 2. Carrega e guarda em cache todas as Capacidades do banco
     async function carregarCapacidadesDinamicas() {
-      const select = document.getElementById("selectCapacidadeExtintor");
-      if (!select) return;
-
       try {
         const { data, error } = await sb
           .from("capacidades")
@@ -225,7 +220,6 @@
       }
     }
 
-    // 3. Filtra dinamicamente as opções de capacidade baseando-se no tipo escolhido (KG vs Litros)
     function filtrarCapacidadesPorTipo() {
       const tipoSelect = document.getElementById("selectTipoExtintor").value.toUpperCase();
       const capSelect = document.getElementById("selectCapacidadeExtintor");
@@ -238,12 +232,9 @@
         return;
       }
 
-      // Descobre se o tipo exige KG ou Litros (L)
-      // PQS e CO2 -> KG | AP e EP -> Litros (L)
       const exigeKg = tipoSelect.includes("PQS") || tipoSelect.includes("CO2");
       const exigeLitros = tipoSelect.includes("AP") || tipoSelect.includes("EP");
 
-      // Filtra a lista guardada em cache
       const capacidadesFiltradas = cacheCapacidades.filter(item => {
         const nomeCap = (item.nome || "").toUpperCase();
         if (exigeKg) {
@@ -251,7 +242,7 @@
         } else if (exigeLitros) {
           return nomeCap.includes("L") || nomeCap.includes("LITRO");
         }
-        return true; // Se for outro tipo genérico, mostra tudo por segurança
+        return true;
       });
 
       if (capacidadesFiltradas.length === 0) {
@@ -267,7 +258,6 @@
       });
     }
 
-    // Adicionar item temporário unindo Tipo + Capacidade
     function adicionarItemTemporario() {
       const selectTipo = document.getElementById("selectTipoExtintor").value;
       const selectCap = document.getElementById("selectCapacidadeExtintor").value;
@@ -287,7 +277,6 @@
       itensTemp.push({ tipo: tipoFinal, qtd });
       renderizarItensTemp();
 
-      // Reseta os campos
       document.getElementById("selectTipoExtintor").value = "";
       document.getElementById("selectCapacidadeExtintor").value = "";
       document.getElementById("selectCapacidadeExtintor").disabled = true;
@@ -323,7 +312,6 @@
       });
     }
 
-    // Enviar demanda para o Supabase
     document.getElementById("formDemanda").addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -372,7 +360,6 @@
       }
     });
 
-    // Notificações
     async function carregarDemandasParaNotificacao() {
       try {
         const { data } = await sb

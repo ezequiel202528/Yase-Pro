@@ -42,8 +42,8 @@
           <span id="badgeNotificacao" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg">0</span>
         </button>
 
-        <!-- Modal / Dropdown de Notificações -->
-        <div id="modalNotificacoes" class="hidden absolute right-0 mt-2 w-80 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
+        <!-- Modal / Dropdown de Notificações Responsivo -->
+        <div id="modalNotificacoes" class="hidden absolute right-0 sm:right-0 mt-2 w-72 sm:w-80 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
           <div class="p-3 bg-slate-950/60 border-b border-white/5 flex items-center justify-between">
             <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
               <i class="fa-solid fa-bell text-amber-400"></i> Notificações de Conclusão
@@ -106,6 +106,39 @@
 
     </div>
   </main>
+
+  <!-- MODAL DE DETALHES DOS EXTINTORES DO PEDIDO -->
+  <div id="modalDetalhesPedido" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-white/10 animate-fade-in">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center bg-slate-900/50">
+        <div>
+          <h3 id="modalTituloNF" class="font-black text-sm text-amber-400 uppercase tracking-wider">Detalhes do Pedido</h3>
+          <p id="modalSubCliente" class="text-xs text-slate-300 font-bold mt-0.5"></p>
+        </div>
+        <button onclick="fecharModalDetalhes()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-2">Equipamentos / Extintores Solicitados</label>
+          <div id="modalListaItens" class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-1">
+            <!-- Os itens entram dinamicamente aqui -->
+          </div>
+        </div>
+
+        <div id="modalBoxObs" class="hidden pt-2 border-t border-white/5">
+          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Observação:</label>
+          <p id="modalTextoObs" class="text-xs text-slate-300 italic bg-white/5 p-2.5 rounded-xl border border-white/5"></p>
+        </div>
+
+        <button onclick="fecharModalDetalhes()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition-all">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Menu Inferior de Navegação estilo App -->
   <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-white/10 p-3 flex justify-around items-center z-40 max-w-md mx-auto rounded-t-2xl shadow-2xl">
@@ -195,23 +228,64 @@
           statusTexto = "Concluído";
         }
 
-        const resumoItens = d.itens ? d.itens.map(i => `${i.qtd}x ${i.tipo}`).join(", ") : "Sem itens";
         const dataFormatada = d.data_criacao ? new Date(d.data_criacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '';
+        const idUnico = d.id;
 
+        // Card limpo mostrando apenas a NF, o cliente e o status. Ao clicar, abre o modal.
         container.innerHTML += `
-          <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-2">
+          <div onclick='abrirModalDetalhes(${JSON.stringify(d).replace(/'/g, "&#39;")})' class="p-4 bg-slate-950/40 hover:bg-slate-900/60 border border-white/5 hover:border-amber-500/30 rounded-2xl space-y-2 cursor-pointer transition-all active:scale-[0.98]">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-white">NF: ${d.nota_fiscal} - ${d.cliente}</span>
+              <span class="text-sm font-black text-white">NF: ${d.nota_fiscal}</span>
               <span class="text-[10px] px-2.5 py-1 rounded-full font-bold border ${badgeCor}">${statusTexto}</span>
             </div>
-            <p class="text-xs text-slate-400"><i class="fa-solid fa-box mr-1 text-slate-500"></i> ${resumoItens}</p>
+            
+            <div class="text-xs font-bold text-amber-200/90 flex items-center gap-1.5">
+              <i class="fa-solid fa-building text-amber-400 text-xs"></i> ${d.cliente || 'Cliente não informado'}
+            </div>
+
             <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-white/5">
               <span><i class="fa-regular fa-calendar mr-1"></i> ${dataFormatada}</span>
-              ${d.observacao ? `<span class="italic truncate max-w-[200px]">Obs: ${d.observacao}</span>` : ''}
+              <span class="text-amber-400 font-semibold text-[10px]">Toque para ver itens <i class="fa-solid fa-chevron-right ml-0.5 text-[9px]"></i></span>
             </div>
           </div>
         `;
       });
+    }
+
+    // Funções do Modal de Detalhes dos Itens
+    function abrirModalDetalhes(pedido) {
+      document.getElementById("modalTituloNF").textContent = `NF: ${pedido.nota_fiscal || 'S/N'}`;
+      document.getElementById("modalSubCliente").textContent = pedido.cliente || 'Cliente não informado';
+
+      const listaContainer = document.getElementById("modalListaItens");
+      listaContainer.innerHTML = "";
+
+      if (pedido.itens && pedido.itens.length > 0) {
+        pedido.itens.forEach((i, idx) => {
+          listaContainer.innerHTML += `
+            <div class="flex items-center justify-between bg-slate-900 border border-white/5 px-3 py-2.5 rounded-xl text-xs">
+              <span class="text-white font-medium"><i class="fa-solid fa-fire-extinguisher text-amber-400 mr-2"></i> ${i.tipo}</span>
+              <span class="bg-amber-500/10 text-amber-400 font-black px-2.5 py-1 rounded-lg border border-amber-500/20">${i.qtd}x</span>
+            </div>
+          `;
+        });
+      } else {
+        listaContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-3">Nenhum item registrado.</p>`;
+      }
+
+      const boxObs = document.getElementById("modalBoxObs");
+      if (pedido.observacao) {
+        boxObs.classList.remove("hidden");
+        document.getElementById("modalTextoObs").textContent = pedido.observacao;
+      } else {
+        boxObs.classList.add("hidden");
+      }
+
+      document.getElementById("modalDetalhesPedido").classList.remove("hidden");
+    }
+
+    function fecharModalDetalhes() {
+      document.getElementById("modalDetalhesPedido").classList.add("hidden");
     }
 
     // Funções do Sino de Notificações

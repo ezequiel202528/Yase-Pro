@@ -15,7 +15,6 @@
     .input-yase:focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
     .custom-scroll::-webkit-scrollbar { width: 4px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-    /* Estilo do Canvas de Assinatura */
     #canvasAssinatura {
       touch-action: none;
       background-color: #0f172a;
@@ -42,7 +41,6 @@
     </div>
 
     <div class="flex items-center gap-3">
-      <!-- Botão do Sino -->
       <div class="relative">
         <button onclick="toggleModalNotificacoes()" class="relative w-10 h-10 bg-slate-800/80 hover:bg-slate-700 border border-white/10 rounded-xl flex items-center justify-center text-slate-300 hover:text-white transition-all">
           <i class="fa-solid fa-bell text-sm"></i>
@@ -90,18 +88,18 @@
           </div>
         </div>
 
-        <!-- Seção de Adicionar Itens com Regra Inteligente de KG / Litros -->
+        <!-- Seção de Adicionar Itens sem required nos selects internos -->
         <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-3">
           <label class="text-[11px] font-bold text-slate-300 uppercase flex items-center gap-2">
             <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Adicionar Extintores / Equipamentos
           </label>
           
           <div class="space-y-2">
-            <select id="selectTipoExtintor" onchange="filtrarCapacidadesPorTipo()" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required>
+            <select id="selectTipoExtintor" onchange="filtrarCapacidadesPorTipo()" class="input-yase w-full h-11 px-3 rounded-xl text-xs">
               <option value="">A carregar tipos do sistema...</option>
             </select>
 
-            <select id="selectCapacidadeExtintor" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required disabled>
+            <select id="selectCapacidadeExtintor" class="input-yase w-full h-11 px-3 rounded-xl text-xs" disabled>
               <option value="">Selecione o tipo primeiro...</option>
             </select>
 
@@ -123,7 +121,7 @@
           <textarea id="inputObs" rows="2" placeholder="Ex: Cliente pediu urgência na recarga..." class="input-yase w-full p-3 rounded-xl text-sm resize-none"></textarea>
         </div>
 
-        <!-- SEÇÃO DE ASSINATURA DIGITAL DO VENDEDOR -->
+        <!-- Assinatura Digital -->
         <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-2">
           <div class="flex items-center justify-between">
             <label class="text-[11px] font-bold text-slate-300 uppercase flex items-center gap-2">
@@ -132,7 +130,6 @@
             <button type="button" onclick="limparAssinatura()" class="text-[10px] text-amber-400 hover:underline">Limpar</button>
           </div>
           <p class="text-[10px] text-slate-400">Assine no espaço abaixo usando o dedo ou o mouse:</p>
-          
           <canvas id="canvasAssinatura"></canvas>
         </div>
 
@@ -143,7 +140,6 @@
     </div>
   </main>
 
-  <!-- Menu Inferior estilo App -->
   <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-white/10 p-3 flex justify-around items-center z-40 max-w-md mx-auto rounded-t-2xl shadow-2xl">
     <a href="PainelVendedor.html" class="flex flex-col items-center text-amber-400 font-bold text-[10px] transition-all">
       <i class="fa-solid fa-plus-circle text-lg mb-0.5"></i>
@@ -170,7 +166,6 @@
     let todasDemandasCache = [];
     let cacheCapacidades = [];
 
-    // Configuração do Canvas de Assinatura
     let canvas, ctx, desenhando = false;
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -197,7 +192,6 @@
       canvas = document.getElementById("canvasAssinatura");
       ctx = canvas.getContext("2d");
 
-      // Ajustar resolução interna para ficar nítido
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
 
@@ -206,46 +200,32 @@
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
-      // Eventos de Mouse
       canvas.addEventListener("mousedown", iniciarDesenho);
       canvas.addEventListener("mousemove", desenhar);
       canvas.addEventListener("mouseup", pararDesenho);
       canvas.addEventListener("mouseleave", pararDesenho);
 
-      // Eventos de Toque (Celular / Tablet)
       canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
         const touch = e.touches[0];
-        const mouseEvent = new MouseEvent("mousedown", {
-          clientX: touch.clientX,
-          clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
+        canvas.dispatchEvent(new MouseEvent("mousedown", { clientX: touch.clientX, clientY: touch.clientY }));
       });
 
       canvas.addEventListener("touchmove", (e) => {
         e.preventDefault();
         const touch = e.touches[0];
-        const mouseEvent = new MouseEvent("mousemove", {
-          clientX: touch.clientX,
-          clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
+        canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: touch.clientX, clientY: touch.clientY }));
       });
 
       canvas.addEventListener("touchend", (e) => {
         e.preventDefault();
-        const mouseEvent = new MouseEvent("mouseup", {});
-        canvas.dispatchEvent(mouseEvent);
+        canvas.dispatchEvent(new MouseEvent("mouseup", {}));
       });
     }
 
     function obterPosicao(e) {
       const rect = canvas.getBoundingClientRect();
-      return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
 
     function iniciarDesenho(e) {
@@ -262,13 +242,8 @@
       ctx.stroke();
     }
 
-    function pararDesenho() {
-      desenhando = false;
-    }
-
-    function limparAssinatura() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
+    function pararDesenho() { desenhando = false; }
+    function limparAssinatura() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
     function isCanvasEmBranco() {
       const blank = document.createElement('canvas');
@@ -280,20 +255,15 @@
     async function carregarTiposDinamicos() {
       const select = document.getElementById("selectTipoExtintor");
       if (!select) return;
-
       try {
         select.innerHTML = '<option value="">A carregar tipos...</option>';
         const { data, error } = await sb.from("tipos_carga").select("*").order("nome", { ascending: true });
         if (error) throw error;
-
-        const lista = data || [];
         select.innerHTML = '<option value="">Selecione o tipo do extintor...</option>';
-        lista.forEach(item => {
+        (data || []).forEach(item => {
           if (item.nome) select.innerHTML += `<option value="${item.nome}">${item.nome}</option>`;
         });
-      } catch (err) {
-        console.error("Erro ao carregar tipos:", err);
-      }
+      } catch (err) { console.error(err); }
     }
 
     async function carregarCapacidadesDinamicas() {
@@ -301,9 +271,7 @@
         const { data, error } = await sb.from("capacidades").select("*").order("nome", { ascending: true });
         if (error) throw error;
         cacheCapacidades = data || [];
-      } catch (err) {
-        cacheCapacidades = [];
-      }
+      } catch (err) { cacheCapacidades = []; }
     }
 
     function filtrarCapacidadesPorTipo() {
@@ -402,7 +370,7 @@
           cliente: cliente,
           itens: itensTemp,
           observacao: obs,
-          assinatura: assinaturaBase64, // Salva a assinatura em formato Base64 no banco
+          assinatura: assinaturaBase64,
           status: "pendente",
           data_criacao: new Date().toISOString()
         }]);
@@ -480,6 +448,7 @@
       localStorage.removeItem("yase_empresa_id");
       window.location.href = "LoginVendedor.html";
     }
+
 
     function mostrarToast(mensagem, tipo = "sucesso") {
       const container = document.getElementById("toastContainer");

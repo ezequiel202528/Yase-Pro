@@ -85,7 +85,7 @@
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      #modalCarga { background-color: rgba(11, 15, 25, 0.8); backdrop-filter: blur(12px); }
+      #modalCarga, #modalAssinatura { background-color: rgba(11, 15, 25, 0.8); backdrop-filter: blur(12px); }
       .custom-scroll::-webkit-scrollbar { width: 4px; }
       .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
@@ -172,6 +172,26 @@
       </div>
     </div>
 
+    <!-- MODAL DE VISUALIZAÇÃO DA ASSINATURA -->
+    <div id="modalAssinatura" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+      <div class="glass-card w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-fade-in border border-white/10 p-6 space-y-4 text-center">
+        <div class="flex justify-between items-center border-b border-white/10 pb-3">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-amber-400 flex items-center gap-2">
+            <i class="fa-solid fa-signature"></i> Assinatura do Vendedor
+          </h3>
+          <button onclick="fecharModalAssinatura()" class="text-slate-400 hover:text-white p-1">
+            <i class="fa-solid fa-xmark text-base"></i>
+          </button>
+        </div>
+        <div class="bg-slate-950 p-4 rounded-2xl border border-white/10 flex items-center justify-center">
+          <img id="imgAssinaturaModal" src="" alt="Assinatura" class="max-h-40 object-contain invert" />
+        </div>
+        <button onclick="fecharModalAssinatura()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider">
+          Fechar
+        </button>
+      </div>
+    </div>
+
     <!-- MODAL DE NOVA CARGA -->
     <div id="modalCarga" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
       <div class="glass-card w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-fade-in border border-white/10">
@@ -243,7 +263,6 @@
       const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
       const sb = supabase.createClient(URL_SB, KEY_SB);
 
-      // Obtém o ID da empresa de forma segura e flexível
       let empresaIdLogada = localStorage.getItem("yase_empresa_id") || 
                             (JSON.parse(localStorage.getItem("yase_vendedor_logado") || "{}").empresa_id) || 
                             "b6000456-4290-410a-b31c-0c1fc9919f2a";
@@ -264,9 +283,9 @@
           coluna.scrollBy({ left: direcao * larguraCard, behavior: 'smooth' });
         }
       }
-async function carregarDemandasDoSupabase() {
+
+      async function carregarDemandasDoSupabase() {
         try {
-          // Traz todas as demandas da tabela sem restrição de ID de empresa para teste
           const { data, error } = await sb
             .from("cargas_demandas")
             .select("*")
@@ -275,8 +294,6 @@ async function carregarDemandasDoSupabase() {
           if (error) throw error;
           
           todasDemandas = data || [];
-          console.log("Todas as cargas no banco (sem filtro):", todasDemandas);
-          
           renderizarKanban(todasDemandas);
         } catch (err) {
           console.error("Erro ao carregar cargas do Supabase:", err);
@@ -320,6 +337,13 @@ async function carregarDemandasDoSupabase() {
 
           const dataFormatada = d.data_criacao ? new Date(d.data_criacao).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' }) : "Data recente";
 
+          // Botão de assinatura condicional (só aparece se a demanda tiver assinatura salva)
+          const botaoAssinaturaHtml = d.assinatura ? `
+            <button onclick='abrirModalAssinatura("${d.assinatura}")' class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 text-xs font-bold py-2 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2">
+              <i class="fa-solid fa-signature"></i> Ver Assinatura do Vendedor
+            </button>
+          ` : '';
+
           const cardHtml = `
             <div class="card-container">
               <div class="card-content bg-slate-900/90 border border-white/10 rounded-2xl p-5 shadow-2xl space-y-4 animate-fade-in hover:border-amber-500/40 transition-all">
@@ -354,6 +378,9 @@ async function carregarDemandasDoSupabase() {
                   </div>
                 ` : ''}
 
+                <!-- Botão de Assinatura -->
+                ${botaoAssinaturaHtml}
+
                 <!-- Botões de Ação -->
                 <div class="space-y-2 pt-1">
                   ${status !== 'concluido' && status !== 'concluído' ? `
@@ -382,6 +409,15 @@ async function carregarDemandasDoSupabase() {
         document.getElementById("countAtraso").textContent = qtdAtraso;
         document.getElementById("countPendente").textContent = qtdPendente;
         document.getElementById("countConcluido").textContent = qtdConcluido;
+      }
+
+      function abrirModalAssinatura(base64Url) {
+        document.getElementById("imgAssinaturaModal").src = base64Url;
+        document.getElementById("modalAssinatura").classList.remove("hidden");
+      }
+
+      function fecharModalAssinatura() {
+        document.getElementById("modalAssinatura").classList.add("hidden");
       }
 
       function irParaProducao(idCarga, nf) {

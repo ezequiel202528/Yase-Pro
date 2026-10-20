@@ -145,7 +145,7 @@
       <i class="fa-solid fa-plus-circle text-lg mb-0.5"></i>
       Nova Demanda
     </a>
-    <a href="HistoricoDemandas.html" class="flex flex-col items-center text-slate-400 hover:text-slate-200 font-medium text-[10px] transition-all">
+    <a href="historicoDemandas.html" class="flex flex-col items-center text-slate-400 hover:text-slate-200 font-medium text-[10px] transition-all">
       <i class="fa-solid fa-clock-rotate-left text-lg mb-0.5"></i>
       Minhas Demandas
     </a>
@@ -188,22 +188,26 @@
       carregarDemandasParaNotificacao();
     });
 
-    function inicializarCanvas() {
-      canvas = document.getElementById("canvasAssinatura");
-      ctx = canvas.getContext("2d");
+      function inicializarCanvas() {
+        canvas = document.getElementById("canvasAssinatura");
+        ctx = canvas.getContext("2d");
 
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
 
-      ctx.strokeStyle = "#f8fafc";
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+        // Preenche o fundo inicial com branco para evitar transparência
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      canvas.addEventListener("mousedown", iniciarDesenho);
-      canvas.addEventListener("mousemove", desenhar);
-      canvas.addEventListener("mouseup", pararDesenho);
-      canvas.addEventListener("mouseleave", pararDesenho);
+        ctx.strokeStyle = "#000000"; // Tinta preta
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        canvas.addEventListener("mousedown", iniciarDesenho);
+        canvas.addEventListener("mousemove", desenhar);
+        canvas.addEventListener("mouseup", pararDesenho);
+        canvas.addEventListener("mouseleave", pararDesenho);
 
       canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
@@ -243,7 +247,11 @@
     }
 
     function pararDesenho() { desenhando = false; }
-    function limparAssinatura() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    
+    function limparAssinatura() {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
     function isCanvasEmBranco() {
       const blank = document.createElement('canvas');

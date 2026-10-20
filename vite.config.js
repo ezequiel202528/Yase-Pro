@@ -17,9 +17,9 @@ export default defineConfig({
         controleDeCargas: "./ControleDeCargas.html",
         vinculacao: "./Vinculacao.html",
         estoque: "./estoquePecas.html",
-        // Adicionadas as novas telas para o Vite compilar no Vercel:
         vendedores: "./Vendedores.html",
         loginVendedor: "./LoginVendedor.html",
+        painelVendedor: "./PainelVendedor.html", 
       },
     },
   },

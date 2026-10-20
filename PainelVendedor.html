@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YaSe PRO - Nova Demanda</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #0b0f19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .input-yase { background-color: #111827; border: 1px solid rgba(255, 255, 255, 0.1); color: white; outline: none; transition: all 0.2s; }
+    .input-yase:focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-24">
+
+  <!-- Header Superior com Sino -->
+  <header class="glass-card border-b border-white/10 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-center text-amber-400 font-black">
+        <i class="fa-solid fa-fire-extinguisher"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-wide text-white">YaSe <span class="text-amber-500">PRO</span></h1>
+        <p id="nomeVendedorHeader" class="text-[11px] text-slate-400">A carregar perfil...</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Botão do Sino -->
+      <div class="relative">
+        <button onclick="toggleModalNotificacoes()" class="relative w-10 h-10 bg-slate-800/80 hover:bg-slate-700 border border-white/10 rounded-xl flex items-center justify-center text-slate-300 hover:text-white transition-all">
+          <i class="fa-solid fa-bell text-sm"></i>
+          <span id="badgeNotificacao" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg">0</span>
+        </button>
+
+        <div id="modalNotificacoes" class="hidden absolute right-0 mt-2 w-80 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
+          <div class="p-3 bg-slate-950/60 border-b border-white/5 flex items-center justify-between">
+            <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-bell text-amber-400"></i> Notificações
+            </span>
+            <button onclick="marcarTodasComoLidas()" class="text-[10px] text-amber-400 hover:underline">Marcar lidas</button>
+          </div>
+          <div id="listaNotificacoes" class="max-h-64 overflow-y-auto custom-scroll p-2 space-y-2">
+            <p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="fazerLogout()" class="text-xs text-red-400 hover:text-red-300 font-semibold bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-xl transition-all">
+        <i class="fa-solid fa-right-from-bracket mr-1"></i> Sair
+      </button>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <div class="glass-card rounded-3xl p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-sm font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle"></i> Criar Nova Demanda / Carga
+        </h2>
+        <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-full font-bold border border-amber-500/20">Modo Vendedor</span>
+      </div>
+
+      <form id="formDemanda" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Nº Nota Fiscal (NF) / Pedido</label>
+            <input type="text" id="inputNF" placeholder="Ex: 1045" required class="input-yase w-full h-12 px-4 rounded-xl text-sm">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Cliente / Local de Destino</label>
+            <input type="text" id="inputCliente" placeholder="Nome do Cliente" required class="input-yase w-full h-12 px-4 rounded-xl text-sm">
+          </div>
+        </div>
+
+        <!-- Seção de Adicionar Itens com Regra Inteligente de KG / Litros -->
+        <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-3">
+          <label class="text-[11px] font-bold text-slate-300 uppercase flex items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Adicionar Extintores / Equipamentos
+          </label>
+          
+          <div class="space-y-2">
+            <!-- Select de Tipos (Dispara o filtro ao alterar) -->
+            <select id="selectTipoExtintor" onchange="filtrarCapacidadesPorTipo()" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required>
+              <option value="">A carregar tipos do sistema...</option>
+            </select>
+
+            <!-- Select de Capacidades (Filtrado automaticamente) -->
+            <select id="selectCapacidadeExtintor" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required disabled>
+              <option value="">Selecione o tipo primeiro...</option>
+            </select>
+
+            <div class="flex gap-2 pt-1">
+              <input type="number" id="inputQtd" placeholder="Qtd" min="1" value="1" class="input-yase w-24 h-11 px-3 rounded-xl text-xs text-center font-bold">
+              <button type="button" onclick="adicionarItemTemporario()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 h-11 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus"></i> Adicionar à Carga
+              </button>
+            </div>
+          </div>
+
+          <!-- Lista temporária de itens adicionados -->
+          <div id="containerItens" class="hidden space-y-2 pt-2 border-t border-white/5">
+            <div id="listaItensTemp" class="space-y-1.5 max-h-36 overflow-y-auto custom-scroll pr-1"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Observações para a Oficina</label>
+          <textarea id="inputObs" rows="2" placeholder="Ex: Cliente pediu urgência na recarga..." class="input-yase w-full p-3 rounded-xl text-sm resize-none"></textarea>
+        </div>
+
+        <button type="submit" id="btnEnviarDemanda" class="w-full h-12 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98]">
+          Enviar Demanda para a Oficina
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Menu Inferior estilo App -->
+  <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-white/10 p-3 flex justify-around items-center z-40 max-w-md mx-auto rounded-t-2xl shadow-2xl">
+    <a href="PainelVendedor.html" class="flex flex-col items-center text-amber-400 font-bold text-[10px] transition-all">
+      <i class="fa-solid fa-plus-circle text-lg mb-0.5"></i>
+      Nova Demanda
+    </a>
+    <a href="HistoricoDemandas.html" class="flex flex-col items-center text-slate-400 hover:text-slate-200 font-medium text-[10px] transition-all">
+      <i class="fa-solid fa-clock-rotate-left text-lg mb-0.5"></i>
+      Minhas Demandas
+    </a>
+  </nav>
+
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
+    const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+    const sb = supabase.createClient(URL_SB, KEY_SB);
+
+    let vendedorLogado = null;
+    let empresaId = null;
+    let itensTemp = [];
+    let todasDemandasCache = [];
+    let cacheCapacidades = []; // Armazena as capacidades carregadas do banco
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const vJson = localStorage.getItem("yase_vendedor_logado");
+      const eId = localStorage.getItem("yase_empresa_id");
+
+      if (!vJson || !eId) {
+        mostrarToast("Sessão expirada. Faça login novamente.", "erro");
+        setTimeout(() => window.location.href = "LoginVendedor.html", 1500);
+        return;
+      }
+
+      vendedorLogado = JSON.parse(vJson);
+      empresaId = eId;
+      document.getElementById("nomeVendedorHeader").textContent = `${vendedorLogado.nome_completo} (${vendedorLogado.nivel_permissao || 'Vendedor'})`;
+
+      carregarTiposDinamicos();
+      carregarCapacidadesDinamicas();
+      carregarDemandasParaNotificacao();
+    });
+
+    // 1. Carrega os Tipos cadastrados
+    async function carregarTiposDinamicos() {
+      const select = document.getElementById("selectTipoExtintor");
+      if (!select) return;
+
+      try {
+        select.innerHTML = '<option value="">A carregar tipos...</option>';
+
+        const { data, error } = await sb
+          .from("tipos_carga")
+          .select("*")
+          .order("nome", { ascending: true });
+
+        if (error) throw error;
+
+        const lista = data || [];
+        select.innerHTML = '<option value="">Selecione o tipo do extintor...</option>';
+
+        if (lista.length === 0) {
+          select.innerHTML = '<option value="">Nenhum tipo cadastrado</option>';
+          return;
+        }
+
+        lista.forEach(item => {
+          const nomeItem = item.nome || '';
+          if (nomeItem) {
+            select.innerHTML += `<option value="${nomeItem}">${nomeItem}</option>`;
+          }
+        });
+
+      } catch (err) {
+        console.error("Erro ao carregar tipos:", err);
+        select.innerHTML = '<option value="">Erro ao carregar tipos</option>';
+      }
+    }
+
+    // 2. Carrega e guarda em cache todas as Capacidades do banco
+    async function carregarCapacidadesDinamicas() {
+      const select = document.getElementById("selectCapacidadeExtintor");
+      if (!select) return;
+
+      try {
+        const { data, error } = await sb
+          .from("capacidades")
+          .select("*")
+          .order("nome", { ascending: true });
+
+        if (error) throw error;
+
+        cacheCapacidades = data || [];
+      } catch (err) {
+        console.error("Erro ao carregar capacidades:", err);
+        cacheCapacidades = [];
+      }
+    }
+
+    // 3. Filtra dinamicamente as opções de capacidade baseando-se no tipo escolhido (KG vs Litros)
+    function filtrarCapacidadesPorTipo() {
+      const tipoSelect = document.getElementById("selectTipoExtintor").value.toUpperCase();
+      const capSelect = document.getElementById("selectCapacidadeExtintor");
+
+      capSelect.innerHTML = '<option value="">Selecione a capacidade...</option>';
+
+      if (!tipoSelect) {
+        capSelect.disabled = true;
+        capSelect.innerHTML = '<option value="">Selecione o tipo primeiro...</option>';
+        return;
+      }
+
+      // Descobre se o tipo exige KG ou Litros (L)
+      // PQS e CO2 -> KG | AP e EP -> Litros (L)
+      const exigeKg = tipoSelect.includes("PQS") || tipoSelect.includes("CO2");
+      const exigeLitros = tipoSelect.includes("AP") || tipoSelect.includes("EP");
+
+      // Filtra a lista guardada em cache
+      const capacidadesFiltradas = cacheCapacidades.filter(item => {
+        const nomeCap = (item.nome || "").toUpperCase();
+        if (exigeKg) {
+          return nomeCap.includes("KG");
+        } else if (exigeLitros) {
+          return nomeCap.includes("L") || nomeCap.includes("LITRO");
+        }
+        return true; // Se for outro tipo genérico, mostra tudo por segurança
+      });
+
+      if (capacidadesFiltradas.length === 0) {
+        capSelect.innerHTML = '<option value="">Nenhuma capacidade compatível encontrada</option>';
+        capSelect.disabled = true;
+        return;
+      }
+
+      capSelect.disabled = false;
+      capacidadesFiltradas.forEach(item => {
+        const nomeItem = item.nome || '';
+        capSelect.innerHTML += `<option value="${nomeItem}">${nomeItem}</option>`;
+      });
+    }
+
+    // Adicionar item temporário unindo Tipo + Capacidade
+    function adicionarItemTemporario() {
+      const selectTipo = document.getElementById("selectTipoExtintor").value;
+      const selectCap = document.getElementById("selectCapacidadeExtintor").value;
+      const qtd = parseInt(document.getElementById("inputQtd").value);
+
+      if (!selectTipo || !selectCap) {
+        mostrarToast("Selecione o tipo e a capacidade do extintor.", "erro");
+        return;
+      }
+      if (!qtd || qtd < 1) {
+        mostrarToast("Informe uma quantidade válida.", "erro");
+        return;
+      }
+
+      const tipoFinal = `${selectTipo} ${selectCap}`;
+
+      itensTemp.push({ tipo: tipoFinal, qtd });
+      renderizarItensTemp();
+
+      // Reseta os campos
+      document.getElementById("selectTipoExtintor").value = "";
+      document.getElementById("selectCapacidadeExtintor").value = "";
+      document.getElementById("selectCapacidadeExtintor").disabled = true;
+      document.getElementById("selectCapacidadeExtintor").innerHTML = '<option value="">Selecione o tipo primeiro...</option>';
+      document.getElementById("inputQtd").value = "1";
+    }
+
+    function removerItemTemp(index) {
+      itensTemp.splice(index, 1);
+      renderizarItensTemp();
+    }
+
+    function renderizarItensTemp() {
+      const container = document.getElementById("containerItens");
+      const lista = document.getElementById("listaItensTemp");
+      lista.innerHTML = "";
+
+      if (itensTemp.length === 0) {
+        container.classList.add("hidden");
+        return;
+      }
+
+      container.classList.remove("hidden");
+      itensTemp.forEach((item, index) => {
+        lista.innerHTML += `
+          <div class="flex items-center justify-between bg-slate-900 border border-white/5 px-3 py-2 rounded-xl text-xs">
+            <span class="text-white font-medium">${item.qtd}x ${item.tipo}</span>
+            <button type="button" onclick="removerItemTemp(${index})" class="text-red-400 hover:text-red-300 p-1">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    // Enviar demanda para o Supabase
+    document.getElementById("formDemanda").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (itensTemp.length === 0) {
+        mostrarToast("Adicione pelo menos um item à carga.", "erro");
+        return;
+      }
+
+      const nf = document.getElementById("inputNF").value.trim();
+      const cliente = document.getElementById("inputCliente").value.trim();
+      const obs = document.getElementById("inputObs").value.trim();
+
+      const btn = document.getElementById("btnEnviarDemanda");
+      btn.disabled = true;
+      btn.textContent = "A enviar demanda...";
+
+      try {
+        const { error } = await sb.from("cargas_demandas").insert([{
+          empresa_id: empresaId,
+          vendedor_id: vendedorLogado.id,
+          vendedor_nome: vendedorLogado.nome_completo,
+          nota_fiscal: nf,
+          cliente: cliente,
+          itens: itensTemp,
+          observacao: obs,
+          status: "pendente",
+          data_criacao: new Date().toISOString()
+        }]);
+
+        if (error) throw error;
+
+        mostrarToast("✅ Demanda criada e enviada com sucesso!");
+        
+        document.getElementById("formDemanda").reset();
+        itensTemp = [];
+        renderizarItensTemp();
+        document.getElementById("selectCapacidadeExtintor").disabled = true;
+        document.getElementById("selectCapacidadeExtintor").innerHTML = '<option value="">Selecione o tipo primeiro...</option>';
+
+      } catch (err) {
+        console.error(err);
+        mostrarToast("❌ Erro ao enviar demanda: " + (err.message || "Tente novamente"), "erro");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Enviar Demanda para a Oficina";
+      }
+    });
+
+    // Notificações
+    async function carregarDemandasParaNotificacao() {
+      try {
+        const { data } = await sb
+          .from("cargas_demandas")
+          .select("*")
+          .eq("empresa_id", empresaId)
+          .eq("vendedor_id", vendedorLogado.id);
+
+        todasDemandasCache = data || [];
+        processarNotificacoes(todasDemandasCache);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function processarNotificacoes(demandas) {
+      const badge = document.getElementById("badgeNotificacao");
+      const listaNotif = document.getElementById("listaNotificacoes");
+      const concluidas = demandas.filter(d => d.status === 'concluido');
+      const lidasSalvas = JSON.parse(localStorage.getItem(`yase_notif_lidas_${vendedorLogado.id}`) || "[]");
+      const naoLidas = concluidas.filter(d => !lidasSalvas.includes(d.id));
+
+      if (naoLidas.length > 0) {
+        badge.textContent = naoLidas.length;
+        badge.classList.remove("hidden");
+        
+        listaNotif.innerHTML = "";
+        naoLidas.forEach(d => {
+          listaNotif.innerHTML += `
+            <div class="p-2.5 bg-emerald-950/30 border border-emerald-500/20 rounded-xl space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">NF: ${d.nota_fiscal} - ${d.cliente}</span>
+                <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">Concluído</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Lote finalizado na oficina.</p>
+            </div>
+          `;
+        });
+      } else {
+        badge.classList.add("hidden");
+        listaNotif.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>`;
+      }
+    }
+
+    function toggleModalNotificacoes() {
+      document.getElementById("modalNotificacoes").classList.toggle("hidden");
+    }
+
+    function marcarTodasComoLidas() {
+      const concluidas = todasDemandasCache.filter(d => d.status === 'concluido');
+      const idsConcluidas = concluidas.map(d => d.id);
+      localStorage.setItem(`yase_notif_lidas_${vendedorLogado.id}`, JSON.stringify(idsConcluidas));
+      
+      document.getElementById("badgeNotificacao").classList.add("hidden");
+      document.getElementById("listaNotificacoes").innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>`;
+    }
+
+    function fazerLogout() {
+      localStorage.removeItem("yase_vendedor_logado");
+      localStorage.removeItem("yase_empresa_id");
+      window.location.href = "LoginVendedor.html";
+    }
+
+    function mostrarToast(mensagem, tipo = "sucesso") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const toast = document.createElement("div");
+      const corFundo = tipo === "sucesso" ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" : "bg-red-950/90 text-red-400 border-red-500/30";
+      toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-300 translate-x-10 opacity-0 ${corFundo}`;
+      toast.innerHTML = `<span class="text-xs font-black tracking-wide">${mensagem}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove("translate-x-10", "opacity-0"), 10);
+      setTimeout(() => {
+        toast.classList.add("translate-x-10", "opacity-0");
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

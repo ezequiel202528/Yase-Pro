@@ -569,6 +569,11 @@ async function registrarItem() {
         console.log("📦 Modo lote ativo: Item registrado e guardado para o próximo lote em massa.");
     }
 
+   
+    if (typeof window.atualizarEspelhoProducao === "function") {
+        window.atualizarEspelhoProducao();
+    }
+
     await carregarItens();
     focarUltimoRegistro();
     limparCamposAposRegistro();
@@ -594,6 +599,7 @@ async function registrarItem() {
       alert("Erro ao salvar: " + (err.message || "Erro desconhecido."));
     }
   }
+
 }
 
 /**
@@ -762,7 +768,170 @@ document.addEventListener("keydown", function (e) {
 });
 
 
+window.addEventListener("DOMContentLoaded", async () => {
+    const params = new URLSearchParams(window.location.search);
+    const cargaId = params.get("cargaId");
+    const container = document.getElementById("containerPedidoAtivo");
 
+    if (!container) return;
+
+    if (!cargaId) {
+      container.innerHTML = `
+        <div class="p-3 bg-slate-900/40 border border-white/5 rounded-xl text-center text-[10px] text-slate-500">
+          Nenhum pedido vinculado.
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      const chaveAnon = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+      
+      const respCarga = await fetch("https://gzojpxgpgjapsegerscb.supabase.co/rest/v1/cargas_demandas?id=eq." + cargaId, {
+        headers: { "apikey": chaveAnon, "Authorization": "Bearer " + chaveAnon }
+      });
+      const cargas = await respCarga.json();
+      if (!cargas || cargas.length === 0) throw new Error("Carga não encontrada.");
+      const carga = cargas.shift();
+
+      window.atualizarEspelhoProducao = async function() {
+        const osAtual = window.currentOS || sessionStorage.getItem("currentOS") || "2";
+
+        const respItens = await fetch(`https://gzojpxgpgjapsegerscb.supabase.co/rest/v1/itens_os?os_number=eq.${osAtual}&select=tipo_carga,capacidade`, {
+          headers: { "apikey": chaveAnon, "Authorization": "Bearer " + chaveAnon }
+        });
+        const itensRegistrados = await respItens.json() || [];
+
+        renderizarCardsDuplosTotalmenteFlexivel(carga, itensRegistrados, container);
+      };
+
+      await window.atualizarEspelhoProducao();
+
+    } catch (err) {
+      console.error("Erro ao carregar espelho:", err);
+      container.innerHTML = `
+        <div class="p-3 bg-red-950/40 border border-red-500/20 rounded-xl text-center text-[10px] text-red-400">
+          Erro ao carregar pedido.
+        </div>
+      `;
+    }
+  });
+
+  function renderizarCardsDuplosTotalmenteFlexivel(carga, itensRegistrados, container) {
+    const dataFormatada = new Date(carga.data_criacao).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+    
+    const contagemRegistrada = {};
+    (carga.itens || []).forEach(item => {
+      contagemRegistrada[item.tipo] = 0;
+    });
+
+    // Mapeamento Totalmente Flexível: Cruza qualquer registo que tenha a capacidade numérica correspondente ou parte do texto
+    itensRegistrados.forEach(reg => {
+      const tipoReg = (reg.tipo_carga || "").toLowerCase();
+      const capReg = String(reg.capacidade || "").toLowerCase().replace(/[^0-9]/g, ""); // ex: "6"
+
+      (carga.itens || []).forEach(item => {
+        const tipoItem = item.tipo.toLowerCase();
+        const capItemMatch = tipoItem.match(/\d+/);
+        const capItemNum = capItemMatch ? capItemMatch[0] : ""; // ex: "6"
+
+        // Extrai palavras-chave essenciais (ex: "pqs", "co2", "abc", "agua")
+        const palavrasChave = tipoItem.split(/[\s\-\(\)\/]+/);
+        let matchTexto = palavrasChave.some(palavra => palavra.length > 2 && tipoReg.includes(palavra));
+
+        // Se o tipo do registo bater com alguma palavra do item da carga OU se a capacidade for idêntica
+        const matchCapacidade = (capReg && capItemNum) ? (capReg === capItemNum) : false;
+
+        // Atribui o ponto se pertencer ao mesmo grupo de capacidade/tipo
+        if (matchCapacidade || (matchTexto && capReg === capItemNum)) {
+          contagemRegistrada[item.tipo]++;
+        } else if (!matchCapacidade && carga.itens.length === 1) {
+          // Se houver apenas 1 tipo de item na carga, qualquer registo vai para ele diretamente
+          contagemRegistrada[item.tipo]++;
+        }
+      });
+    });
+
+    let tudoConcluido = true;
+    let itensEspelhoHtml = "";
+
+    const itensDemandaHtml = (carga.itens || []).map(i => {
+      let produzidoReal = contagemRegistrada[i.tipo] || 0;
+      if (produzidoReal > i.qtd) produzidoReal = i.qtd; // Trava para não ultrapassar a meta
+      
+      const falta = i.qtd - produzidoReal;
+      const concluidoItem = falta <= 0;
+
+      if (!concluidoItem) tudoConcluido = false;
+
+      if (!concluidoItem) {
+        itensEspelhoHtml += `
+          <div class="flex items-center justify-between text-[10px] py-1 px-2 bg-red-950/30 border border-red-500/20 rounded-lg mb-1">
+            <span class="text-slate-300 truncate">• ${i.tipo}</span>
+            <span class="bg-red-500/20 text-red-400 font-black px-2 py-0.5 rounded text-[9px] animate-pulse">Faltam: ${falta}x</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="flex items-center justify-between text-[10px]">
+          <span class="${concluidoItem ? 'text-emerald-400 line-through font-bold' : 'text-slate-300'} truncate">• ${i.tipo}</span>
+          <span class="${concluidoItem ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} font-bold px-1.5 py-0.5 rounded text-[9px]">
+            ${produzidoReal}/${i.qtd}x
+          </span>
+        </div>
+      `;
+    }).join("");
+
+    const bordaCardPrincipal = tudoConcluido ? "border-emerald-500/80 bg-emerald-950/20" : "border-amber-500/30 bg-slate-900/90";
+    const badgeStatusPrincipal = tudoConcluido 
+      ? `<span class="text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-black px-2 py-0.5 rounded-full">CONCLUÍDO</span>`
+      : `<span class="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 font-black px-2 py-0.5 rounded-full">${carga.vendedor_nome || 'Vendedor'}</span>`;
+
+    container.innerHTML = `
+      <!-- CARD 1: PEDIDO DA DEMANDA PRINCIPAL -->
+      <div onclick="abrirModalDetalhesCarga()" 
+           class="${bordaCardPrincipal} rounded-xl p-3 shadow-xl space-y-2 cursor-pointer transition-all mb-2">
+        
+        <div class="flex justify-between items-center">
+          ${badgeStatusPrincipal}
+          <span class="text-[9px] text-slate-400 font-mono">${dataFormatada}</span>
+        </div>
+
+        <div>
+          <div class="text-xs font-black text-white">NF: ${carga.nota_fiscal}</div>
+          <div class="text-[11px] font-bold text-amber-200/90 truncate">${carga.cliente}</div>
+        </div>
+
+        <div class="bg-slate-950/80 border border-white/5 p-2 rounded-lg space-y-1">
+          <div class="text-[9px] font-black text-slate-400 uppercase flex justify-between">
+            <span>Progresso Geral</span>
+            <span class="${tudoConcluido ? 'text-emerald-400' : 'text-amber-400'}">${tudoConcluido ? '100%' : 'Em Produção'}</span>
+          </div>
+          ${itensDemandaHtml}
+        </div>
+      </div>
+
+      <!-- CARD 2: ESPELHO (SALDO RESTANTE EM TEMPO REAL) -->
+      ${!tudoConcluido ? `
+        <div class="bg-slate-900/90 border border-red-500/30 rounded-xl p-3 shadow-xl space-y-1.5 animate-fade-in">
+          <div class="text-[9px] font-black text-red-400 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i class="fa-solid fa-triangle-exclamation"></i> Saldo Pendente (Espelho)
+          </div>
+          ${itensEspelhoHtml}
+        </div>
+      ` : `
+        <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-3 text-center text-emerald-400 text-[10px] font-bold">
+          🎉 Todos os itens desta carga foram produzidos!
+        </div>
+      `}
+    `;
+  }
+
+  function abrirModalDetalhesCarga() {
+    console.log("Abrir modal de detalhes da carga...");
+  }
+  
 window.fixData = fixData;
 window.carregarItens = carregarItens;
 window.focarUltimoRegistro = focarUltimoRegistro;

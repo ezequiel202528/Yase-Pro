@@ -3,36 +3,40 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Controle de Cargas - Extintores</title>
+    <title>YaSe PRO - Controle de Cargas</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
-
-      body {
-        font-family: "Inter", sans-serif;
-      }
-
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+      body { background-color: #0b0f19; color: #f8fafc; font-family: "Inter", sans-serif; }
+      .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+      .input-yase { background-color: #111827; border: 1px solid rgba(255, 255, 255, 0.1); color: white; outline: none; transition: all 0.2s; }
+      .input-yase:focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+      
+      /* Coluna Kanban em Carrossel Horizontal */
       .status-column {
         scrollbar-width: none;
         -ms-overflow-style: none;
-        min-height: 480px;
-        background: #f1f5f9;
-        border-radius: 1.25rem;
+        min-height: 520px;
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        border-radius: 1.5rem;
         padding: 1.25rem;
-        border: 2px dashed #cbd5e1;
         display: flex;
         flex-direction: row;
         overflow-x: auto;
         gap: 1.25rem;
         scroll-snap-type: x mandatory;
         scroll-behavior: smooth;
+        align-items: center;
       }
-      .status-column::-webkit-scrollbar {
-        display: none;
-      }
+      .status-column::-webkit-scrollbar { display: none; }
 
       .card-container {
         flex: 0 0 100%;
@@ -43,423 +47,449 @@
 
       .card-content {
         width: 100%;
-        max-width: 100%;
-        height: 100%;
+        max-width: 380px;
       }
 
-      .empty-state-card {
-        flex: 0 0 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 2.5rem;
-        background: rgba(255, 255, 255, 0.4);
-        border-radius: 1.25rem;
-        color: #94a3b8;
-      }
-
-      .animate-fade-in {
-        animation: fadeIn 0.25s ease-out;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      #modalCarga {
-        background-color: rgba(15, 23, 42, 0.7);
-        backdrop-filter: blur(8px);
-      }
-
-      .card-item-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 6px 10px;
-        background: #ffffff;
-        border-radius: 8px;
-        margin-bottom: 4px;
-        border: 1px solid #e2e8f0;
-      }
-
+      /* Setas de Navegação Horizontal */
       .nav-arrow {
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background: white;
-        color: #1e293b;
-        width: 40px;
-        height: 40px;
+        background: #1e293b;
+        color: #f8fafc;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         cursor: pointer;
         z-index: 20;
         transition: all 0.2s;
         opacity: 0;
       }
-
-      .group:hover .nav-arrow {
-        opacity: 1;
-      }
-      .arrow-left {
-        left: -15px;
-      }
-      .arrow-right {
-        right: -15px;
-      }
+      .group:hover .nav-arrow { opacity: 1; }
+      .arrow-left { left: -14px; }
+      .arrow-right { right: -14px; }
 
       @media (max-width: 1024px) {
-        .nav-arrow {
-          opacity: 1;
-          width: 32px;
-          height: 32px;
-        }
-        .arrow-left {
-          left: 5px;
-        }
-        .arrow-right {
-          right: 5px;
-        }
+        .nav-arrow { opacity: 1; width: 32px; height: 32px; }
+        .arrow-left { left: 4px; }
+        .arrow-right { right: 4px; }
       }
 
-      .custom-scroll::-webkit-scrollbar {
-        width: 4px;
+      .animate-fade-in { animation: fadeIn 0.25s ease-out; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
-      .custom-scroll::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-      }
+      #modalCarga { background-color: rgba(11, 15, 25, 0.8); backdrop-filter: blur(12px); }
+      .custom-scroll::-webkit-scrollbar { width: 4px; }
+      .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
   </head>
-  <body class="bg-slate-50 min-h-screen p-4 md:p-6 text-slate-900">
-    <!-- <script src="auth.js"></script> -->
+  <body class="min-h-screen p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
+      
       <!-- Header -->
-      <header
-        class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4"
-      >
+      <header class="glass-card mb-8 p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
         <div class="flex items-center gap-4">
-          <h1
-            class="text-3xl font-black text-slate-800 flex items-center gap-2"
-          >
-            <i data-lucide="shield-check" class="text-blue-600 w-9 h-9"></i>
-            Sistema de Cargas
-          </h1>
-          <button
-            onclick="AppUI.toggleConfigVendedores()"
-            class="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all shadow-sm uppercase tracking-wider"
-          >
-            <i data-lucide="users" class="w-4 h-4"></i>
-            Vendedores
-          </button>
+          <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center text-amber-400">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-black text-white tracking-wide">YaSe <span class="text-amber-500">PRO</span></h1>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Controle de Cargas & Demandas</p>
+          </div>
         </div>
 
         <div class="flex items-center gap-3">
           <div class="relative w-48 md:w-80">
-            <i
-              data-lucide="search"
-              class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
-            ></i>
-            <input
-              type="text"
-              id="inputBusca"
-              oninput="AppUI.renderizarCards()"
-              placeholder="Buscar Cliente, NF ou Vendedor..."
-              class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all"
-            />
+            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+            <input type="text" id="inputBusca" oninput="filtrarDemandas()" placeholder="Buscar Cliente, NF ou Vendedor..."
+                   class="input-yase w-full pl-10 pr-4 py-3 rounded-xl text-sm" />
           </div>
 
-          <button
-            onclick="AppUI.abrirModalCarga()"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl text-sm font-black shadow-lg shadow-blue-200 flex items-center gap-2 transition-all active:scale-95"
-          >
-            <i data-lucide="plus-circle" class="w-5 h-5"></i>
-            NOVA CARGA
+          <button onclick="abrirModalCarga()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-6 py-3 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all active:scale-95 uppercase tracking-wider">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Nova Carga
           </button>
         </div>
       </header>
 
-      <!-- Seção Gerenciar Vendedores -->
-      <div
-        id="secaoVendedores"
-        class="hidden mb-6 bg-slate-800 p-6 rounded-2xl text-white shadow-xl animate-fade-in"
-      >
-        <div class="flex justify-between items-center mb-4">
-          <h2
-            class="text-sm font-bold uppercase tracking-[0.2em] flex items-center gap-2 text-blue-400"
-          >
-            <i data-lucide="settings" class="w-5 h-5"></i>
-            Configuração de Vendedores
-          </h2>
-          <button
-            onclick="AppUI.toggleConfigVendedores()"
-            class="hover:bg-white/10 p-1 rounded-full transition-colors"
-          >
-            <i data-lucide="x" class="w-6 h-6"></i>
-          </button>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-3 mb-4">
-          <input
-            type="text"
-            id="inputNovoVendedor"
-            placeholder="Nome completo do vendedor"
-            class="flex-1 px-4 py-3 rounded-lg text-slate-900 text-sm focus:outline-none"
-          />
-          <button
-            onclick="CargaService.adicionarVendedor()"
-            class="bg-blue-600 text-white px-8 py-3 rounded-lg text-sm font-bold hover:bg-blue-500 transition-colors"
-          >
-            Salvar Novo
-          </button>
-        </div>
-        <div id="listaVendedoresAtivos" class="flex flex-wrap gap-2"></div>
-      </div>
-
       <!-- Kanban Board -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
         <!-- Atrasados -->
         <div class="flex flex-col gap-4">
-          <div class="flex items-center justify-center gap-2 px-2">
-            <div
-              class="w-4 h-4 rounded-full bg-red-500 shadow-sm shadow-red-200"
-            ></div>
-            <h3
-              class="font-black text-slate-600 text-xs uppercase tracking-widest"
-            >
-              Atrasados
-            </h3>
-            <span
-              id="countAtraso"
-              class="text-xs font-black text-red-600 bg-red-100 px-3 py-1 rounded-full"
-              >0</span
-            >
+          <div class="flex items-center justify-between px-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-3 h-3 rounded-full bg-red-500 shadow-lg shadow-red-500/50"></div>
+              <h3 class="font-black text-slate-300 text-xs uppercase tracking-widest">Atrasados</h3>
+            </div>
+            <span id="countAtraso" class="text-xs font-black text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-0.5 rounded-full">0</span>
           </div>
           <div class="relative group px-1">
-            <button
-              onclick="AppUI.scrollColumn('colunaAtraso', -1)"
-              class="nav-arrow arrow-left"
-            >
-              <i data-lucide="chevron-left" class="w-6 h-6"></i>
-            </button>
+            <button onclick="rolarColuna('colunaAtraso', -1)" class="nav-arrow arrow-left"><i class="fa-solid fa-chevron-left text-xs"></i></button>
             <div id="colunaAtraso" class="status-column"></div>
-            <button
-              onclick="AppUI.scrollColumn('colunaAtraso', 1)"
-              class="nav-arrow arrow-right"
-            >
-              <i data-lucide="chevron-right" class="w-6 h-6"></i>
-            </button>
+            <button onclick="rolarColuna('colunaAtraso', 1)" class="nav-arrow arrow-right"><i class="fa-solid fa-chevron-right text-xs"></i></button>
           </div>
         </div>
 
         <!-- Pendentes -->
         <div class="flex flex-col gap-4">
-          <div class="flex items-center justify-center gap-2 px-2">
-            <div
-              class="w-4 h-4 rounded-full bg-amber-500 shadow-sm shadow-amber-200"
-            ></div>
-            <h3
-              class="font-black text-slate-600 text-xs uppercase tracking-widest"
-            >
-              Pendentes
-            </h3>
-            <span
-              id="countPendente"
-              class="text-xs font-black text-amber-600 bg-amber-100 px-3 py-1 rounded-full"
-              >0</span
-            >
+          <div class="flex items-center justify-between px-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-3 h-3 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50"></div>
+              <h3 class="font-black text-slate-300 text-xs uppercase tracking-widest">Pendentes</h3>
+            </div>
+            <span id="countPendente" class="text-xs font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-0.5 rounded-full">0</span>
           </div>
           <div class="relative group px-1">
-            <button
-              onclick="AppUI.scrollColumn('colunaPendente', -1)"
-              class="nav-arrow arrow-left"
-            >
-              <i data-lucide="chevron-left" class="w-6 h-6"></i>
-            </button>
+            <button onclick="rolarColuna('colunaPendente', -1)" class="nav-arrow arrow-left"><i class="fa-solid fa-chevron-left text-xs"></i></button>
             <div id="colunaPendente" class="status-column"></div>
-            <button
-              onclick="AppUI.scrollColumn('colunaPendente', 1)"
-              class="nav-arrow arrow-right"
-            >
-              <i data-lucide="chevron-right" class="w-6 h-6"></i>
-            </button>
+            <button onclick="rolarColuna('colunaPendente', 1)" class="nav-arrow arrow-right"><i class="fa-solid fa-chevron-right text-xs"></i></button>
           </div>
         </div>
 
         <!-- Finalizados -->
         <div class="flex flex-col gap-4">
-          <div class="flex items-center justify-center gap-2 px-2">
-            <div
-              class="w-4 h-4 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200"
-            ></div>
-            <h3
-              class="font-black text-slate-600 text-xs uppercase tracking-widest"
-            >
-              Finalizados
-            </h3>
-            <span
-              id="countConcluido"
-              class="text-xs font-black text-emerald-600 bg-emerald-100 px-3 py-1 rounded-full"
-              >0</span
-            >
+          <div class="flex items-center justify-between px-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
+              <h3 class="font-black text-slate-300 text-xs uppercase tracking-widest">Finalizados</h3>
+            </div>
+            <span id="countConcluido" class="text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-0.5 rounded-full">0</span>
           </div>
           <div class="relative group px-1">
-            <button
-              onclick="AppUI.scrollColumn('colunaConcluido', -1)"
-              class="nav-arrow arrow-left"
-            >
-              <i data-lucide="chevron-left" class="w-6 h-6"></i>
-            </button>
+            <button onclick="rolarColuna('colunaConcluido', -1)" class="nav-arrow arrow-left"><i class="fa-solid fa-chevron-left text-xs"></i></button>
             <div id="colunaConcluido" class="status-column"></div>
-            <button
-              onclick="AppUI.scrollColumn('colunaConcluido', 1)"
-              class="nav-arrow arrow-right"
-            >
-              <i data-lucide="chevron-right" class="w-6 h-6"></i>
-            </button>
+            <button onclick="rolarColuna('colunaConcluido', 1)" class="nav-arrow arrow-right"><i class="fa-solid fa-chevron-right text-xs"></i></button>
           </div>
         </div>
+
       </div>
     </div>
 
     <!-- MODAL DE NOVA CARGA -->
-    <div
-      id="modalCarga"
-      class="fixed inset-0 z-50 hidden flex items-center justify-center p-4"
-    >
-      <div
-        class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-fade-in border border-slate-200"
-      >
-        <div
-          class="bg-slate-50 px-6 py-5 border-b border-slate-100 flex justify-between items-center"
-        >
-          <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-            <i data-lucide="plus-circle" class="text-blue-600 w-6 h-6"></i>
-            Configurar Nova Carga
+    <div id="modalCarga" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+      <div class="glass-card w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-fade-in border border-white/10">
+        <div class="px-6 py-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50">
+          <h2 class="font-bold text-sm uppercase tracking-wider text-amber-400 flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i> Configurar Nova Carga
           </h2>
-          <button
-            onclick="AppUI.fecharModalCarga()"
-            class="text-slate-400 hover:text-slate-600 p-1"
-          >
-            <i data-lucide="x" class="w-6 h-6"></i>
+          <button onclick="fecharModalCarga()" class="text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
-        <div class="p-6 space-y-5">
-          <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2">
-              <label
-                class="text-[11px] font-black text-slate-400 uppercase ml-1"
-                >Vendedor Responsável</label
-              >
-              <select
-                id="selectVendedor"
-                class="w-full mt-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              >
-                <option value="">Selecione...</option>
-              </select>
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Vendedor Responsável</label>
+            <select id="selectVendedorModal" class="input-yase w-full h-11 px-3 rounded-xl text-xs">
+              <option value="">Selecione o vendedor...</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Nº Nota Fiscal (NF)</label>
+              <input type="text" id="inputNF" placeholder="Ex: 1025" class="input-yase w-full h-11 px-3 rounded-xl text-xs" />
             </div>
-            <div class="col-span-1">
-              <label
-                class="text-[11px] font-black text-slate-400 uppercase ml-1"
-                >Nº Nota Fiscal (NF)</label
-              >
-              <input
-                type="text"
-                id="inputNF"
-                placeholder="Ex: 1025"
-                class="w-full mt-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              />
-            </div>
-            <div class="col-span-1">
-              <label
-                class="text-[11px] font-black text-slate-400 uppercase ml-1"
-                >Cliente / Local</label
-              >
-              <input
-                type="text"
-                id="inputLocalDestino"
-                placeholder="Nome do Cliente"
-                class="w-full mt-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-              />
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Cliente / Local</label>
+              <input type="text" id="inputLocalDestino" placeholder="Nome do Cliente" class="input-yase w-full h-11 px-3 rounded-xl text-xs" />
             </div>
           </div>
 
-          <div
-            class="p-5 bg-blue-50 border border-blue-100 rounded-2xl space-y-4"
-          >
-            <label
-              class="text-[11px] font-black text-blue-600 uppercase flex items-center gap-2"
-            >
-              <i data-lucide="box" class="w-4 h-4"></i> Adicionar Itens
+          <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-3">
+            <label class="text-[11px] font-bold text-slate-300 uppercase flex items-center gap-2">
+              <i data-lucide="box" class="text-amber-400 w-4 h-4"></i> Adicionar Itens
             </label>
-            <div class="flex flex-col gap-3">
-              <div class="flex gap-2">
-                <select
-                  id="selectTipoExtintor"
-                  class="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm font-medium outline-none shadow-sm"
-                >
-                  <option value="">Escolha o Modelo</option>
-                </select>
-                <input
-                  type="number"
-                  id="inputQtdItem"
-                  placeholder="Qtd"
-                  min="1"
-                  class="w-24 px-4 py-3 bg-white border border-slate-200 rounded-lg text-sm font-medium outline-none shadow-sm"
-                />
-              </div>
-              <button
-                onclick="CargaService.adicionarItemTemporario()"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-xs font-black transition-all uppercase tracking-widest"
-              >
-                Incluir na Lista
-              </button>
+            <div class="flex gap-2">
+              <select id="selectTipoExtintor" class="input-yase flex-1 h-10 px-3 rounded-xl text-xs">
+                <option value="">Escolha o Modelo</option>
+                <option value="PQS 4kg (ABC)">PQS 4kg (ABC)</option>
+                <option value="PQS 6kg (ABC)">PQS 6kg (ABC)</option>
+                <option value="PQS 12kg (ABC)">PQS 12kg (ABC)</option>
+                <option value="Água Pressurizada 10L">Água Pressurizada 10L</option>
+                <option value="CO2 4kg">CO2 4kg</option>
+              </select>
+              <input type="number" id="inputQtdItem" placeholder="Qtd" min="1" value="1" class="input-yase w-20 h-10 px-2 rounded-xl text-xs text-center font-bold" />
             </div>
+            <button type="button" onclick="adicionarItemTempModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
+              Incluir na Lista
+            </button>
           </div>
 
-          <div
-            id="containerResumo"
-            class="hidden pt-4 border-t border-slate-100"
-          >
-            <label
-              class="text-[11px] font-black text-slate-400 uppercase ml-1 mb-3 block"
-              >Resumo dos Itens</label
-            >
-            <ul
-              id="listaTemporaria"
-              class="space-y-2 mb-6 max-h-40 overflow-y-auto custom-scroll pr-1"
-            ></ul>
+          <div id="containerResumoModal" class="hidden pt-2 border-t border-white/5">
+            <label class="text-[11px] font-bold text-slate-400 uppercase mb-2 block">Resumo dos Itens</label>
+            <ul id="listaTemporariaModal" class="space-y-1.5 max-h-32 overflow-y-auto custom-scroll pr-1"></ul>
 
-            <button
-              onclick="CargaService.gerarCardCarga()"
-              class="w-full bg-slate-900 hover:bg-black text-white font-black py-4 rounded-xl text-sm transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200 active:scale-95"
-            >
-              <i data-lucide="send" class="w-5 h-5"></i>
-              FINALIZAR E GERAR CARGA
+            <button type="button" onclick="salvarNovaCargaOficina()" class="w-full mt-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20">
+              Finalizar e Gerar Carga
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Container de Notificação Customizado -->
-    <div
-      id="toastContainer"
-      class="fixed bottom-10 right-10 z-[100] flex flex-col gap-3"
-    ></div>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
-    <script type="module" src="ControleDeCargas/entry.js"></script>
+    <script>
+      const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
+      const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+      const sb = supabase.createClient(URL_SB, KEY_SB);
+
+      let empresaIdLogada = localStorage.getItem("yase_empresa_id") || "b6000456-4290-410a-b31c-0c1fc9919f2a";
+      let todasDemandas = [];
+      let itensModalTemp = [];
+
+      window.addEventListener("DOMContentLoaded", async () => {
+        if (window.lucide) lucide.createIcons();
+        await carregarDemandasDoSupabase();
+        await carregarVendedoresModal();
+      });
+
+      function rolarColuna(idColuna, direcao) {
+        const coluna = document.getElementById(idColuna);
+        if (coluna) {
+          const larguraCard = coluna.clientWidth;
+          coluna.scrollBy({ left: direcao * larguraCard, behavior: 'smooth' });
+        }
+      }
+
+      async function carregarDemandasDoSupabase() {
+        try {
+          const { data, error } = await sb
+            .from("cargas_demandas")
+            .select("*")
+            .eq("empresa_id", empresaIdLogada)
+            .order("data_criacao", { ascending: false });
+
+          if (error) throw error;
+          todasDemandas = data || [];
+          renderizarKanban(todasDemandas);
+        } catch (err) {
+          console.error("Erro ao carregar cargas:", err);
+          mostrarToast("Erro ao sincronizar cargas.", "erro");
+        }
+      }
+
+      function renderizarKanban(lista) {
+        const colAtraso = document.getElementById("colunaAtraso");
+        const colPendente = document.getElementById("colunaPendente");
+        const colConcluido = document.getElementById("colunaConcluido");
+
+        colAtraso.innerHTML = "";
+        colPendente.innerHTML = "";
+        colConcluido.innerHTML = "";
+
+        let qtdAtraso = 0, qtdPendente = 0, qtdConcluido = 0;
+
+        lista.forEach(d => {
+          const status = d.status || "pendente";
+          if (status === "atrasado") qtdAtraso++;
+          else if (status === "concluido") qtdConcluido++;
+          else qtdPendente++;
+
+          const itensHtml = (d.itens || []).map(i => `
+            <div class="flex items-center justify-between text-xs py-1.5 px-2.5 bg-slate-900/60 rounded-xl border border-white/5 mb-1.5 last:mb-0">
+              <span class="text-white font-medium">• ${i.tipo}</span>
+              <span class="bg-amber-500/10 text-amber-400 font-black px-2.5 py-0.5 rounded-lg text-xs border border-amber-500/20">${i.qtd}x</span>
+            </div>
+          `).join("");
+
+          const dataFormatada = new Date(d.data_criacao).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+
+          const cardHtml = `
+            <div class="card-container">
+              <div class="card-content bg-slate-900/90 border border-white/10 rounded-2xl p-5 shadow-2xl space-y-4 animate-fade-in hover:border-amber-500/40 transition-all">
+                
+                <!-- Cabeçalho do Card -->
+                <div class="flex justify-between items-start gap-2">
+                  <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 font-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-tie text-[10px]"></i> ${d.vendedor_nome || 'Vendedor'}
+                  </span>
+                  <span class="text-xs text-slate-400 font-mono font-medium bg-white/5 px-2.5 py-1 rounded-lg">${dataFormatada}</span>
+                </div>
+
+                <!-- Informações Principais (NF e Cliente) -->
+                <div class="space-y-1">
+                  <div class="text-lg font-black text-white tracking-wide">NF: ${d.nota_fiscal}</div>
+                  <div class="text-sm font-bold text-amber-200/90 flex items-center gap-1.5">
+                    <i class="fa-solid fa-building text-amber-400 text-xs"></i> ${d.cliente}
+                  </div>
+                </div>
+
+                <!-- Lista de Extintores -->
+                <div class="bg-slate-950/80 border border-white/5 p-3.5 rounded-xl space-y-1">
+                  <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Extintores da Carga
+                  </div>
+                  ${itensHtml}
+                </div>
+
+                ${d.observacao ? `
+                  <div class="text-xs text-slate-300 italic bg-white/5 p-2.5 rounded-xl border border-white/5">
+                    <span class="font-bold text-slate-400 uppercase text-[10px] block mb-0.5">Observação:</span> ${d.observacao}
+                  </div>
+                ` : ''}
+
+                <!-- Botões de Ação -->
+                <div class="space-y-2 pt-1">
+                  ${status !== 'concluido' ? `
+                    <button onclick="irParaProducao('${d.id}', '${d.nota_fiscal}')" class="w-full bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 text-xs font-black py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-950/20 active:scale-[0.98]">
+                      <i class="fa-solid fa-industry"></i> Ir para Produção
+                    </button>
+                    <button onclick="atualizarStatus('${d.id}', 'concluido')" class="w-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-black py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20 active:scale-[0.98]">
+                      <i class="fa-solid fa-check-circle"></i> Concluir Carga
+                    </button>
+                  ` : `
+                    <button onclick="atualizarStatus('${d.id}', 'pendente')" class="w-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-black py-3 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-950/20 active:scale-[0.98]">
+                      <i class="fa-solid fa-rotate-left"></i> Reabrir Carga
+                    </button>
+                  `}
+                </div>
+
+              </div>
+            </div>
+          `;
+
+          if (status === "atrasado") colAtraso.innerHTML += cardHtml;
+          else if (status === "concluido") colConcluido.innerHTML += cardHtml;
+          else colPendente.innerHTML += cardHtml;
+        });
+
+        document.getElementById("countAtraso").textContent = qtdAtraso;
+        document.getElementById("countPendente").textContent = qtdPendente;
+        document.getElementById("countConcluido").textContent = qtdConcluido;
+      }
+
+      // Função para redirecionar para a tela de rastreio passando o ID da carga
+      function irParaProducao(idCarga, nf) {
+        // Redireciona para a tela de rastreio passando o ID e a NF por parâmetro na URL
+        window.location.href = `Rastreio_Full.html?cargaId=${idCarga}&nf=${nf}`;
+      }
+
+      async function atualizarStatus(id, novoStatus) {
+        try {
+          const { error } = await sb.from("cargas_demandas").update({ status: novoStatus }).eq("id", id);
+          if (error) throw error;
+          mostrarToast("Status atualizado com sucesso!");
+          await carregarDemandasDoSupabase();
+        } catch (err) {
+          console.error(err);
+          mostrarToast("Erro ao atualizar status.", "erro");
+        }
+      }
+
+      function filtrarDemandas() {
+        const termo = document.getElementById("inputBusca").value.toLowerCase();
+        const filtradas = todasDemandas.filter(d => 
+          (d.cliente && d.cliente.toLowerCase().includes(termo)) ||
+          (d.nota_fiscal && d.nota_fiscal.toLowerCase().includes(termo)) ||
+          (d.vendedor_nome && d.vendedor_nome.toLowerCase().includes(termo))
+        );
+        renderizarKanban(filtradas);
+      }
+
+      function abrirModalCarga() { document.getElementById("modalCarga").classList.remove("hidden"); }
+      function fecharModalCarga() {
+        document.getElementById("modalCarga").classList.add("hidden");
+        itensModalTemp = [];
+        document.getElementById("containerResumoModal").classList.add("hidden");
+      }
+
+      async function carregarVendedoresModal() {
+        try {
+          const { data } = await sb.from("usu_arios").select("id, nome_completo").eq("empresa_id", empresaIdLogada);
+          const select = document.getElementById("selectVendedorModal");
+          select.innerHTML = '<option value="">Selecione o vendedor...</option>';
+          if (data) {
+            data.forEach(v => {
+              select.innerHTML += `<option value="${v.id}" data-nome="${v.nome_completo}">${v.nome_completo}</option>`;
+            });
+          }
+        } catch (err) { console.error(err); }
+      }
+
+      function adicionarItemTempModal() {
+        const tipo = document.getElementById("selectTipoExtintor").value;
+        const qtd = parseInt(document.getElementById("inputQtdItem").value);
+        if (!tipo || !qtd) return mostrarToast("Preencha o modelo e quantidade.", "erro");
+
+        itensModalTemp.push({ tipo, qtd });
+        renderizarResumoModal();
+        document.getElementById("selectTipoExtintor").value = "";
+        document.getElementById("inputQtdItem").value = "1";
+      }
+
+      function renderizarResumoModal() {
+        const container = document.getElementById("containerResumoModal");
+        const lista = document.getElementById("listaTemporariaModal");
+        lista.innerHTML = "";
+        if (itensModalTemp.length === 0) {
+          container.classList.add("hidden");
+          return;
+        }
+        container.classList.remove("hidden");
+        itensModalTemp.forEach((item, index) => {
+          lista.innerHTML += `
+            <div class="flex items-center justify-between bg-slate-900 border border-white/5 px-3 py-2 rounded-xl text-xs">
+              <span class="text-white font-medium">${item.qtd}x ${item.tipo}</span>
+              <button type="button" onclick="itensModalTemp.splice(${index},1);renderizarResumoModal();" class="text-red-400 hover:text-red-300 font-bold">Remover</button>
+            </div>
+          `;
+        });
+      }
+
+      async function salvarNovaCargaOficina() {
+        const select = document.getElementById("selectVendedorModal");
+        const opt = select.options[select.selectedIndex];
+        const vendedorId = select.value;
+        const vendedorNome = opt ? opt.getAttribute("data-nome") : "Oficina / Interno";
+        const nf = document.getElementById("inputNF").value.trim();
+        const cliente = document.getElementById("inputLocalDestino").value.trim();
+
+        if (!nf || !cliente || itensModalTemp.length === 0) {
+          return mostrarToast("Preencha a NF, o cliente e adicione itens.", "erro");
+        }
+
+        try {
+          const { error } = await sb.from("cargas_demandas").insert([{
+            empresa_id: empresaIdLogada,
+            vendedor_id: vendedorId || null,
+            vendedor_nome: vendedorNome,
+            nota_fiscal: nf,
+            cliente: cliente,
+            itens: itensModalTemp,
+            status: "pendente",
+            data_criacao: new Date().toISOString()
+          }]);
+
+          if (error) throw error;
+          mostrarToast("Carga criada com sucesso!");
+          fecharModalCarga();
+          await carregarDemandasDoSupabase();
+        } catch (err) {
+          console.error(err);
+          mostrarToast("Erro ao criar carga.", "erro");
+        }
+      }
+
+      function mostrarToast(mensagem, tipo = "sucesso") {
+        const container = document.getElementById("toastContainer");
+        if (!container) return;
+        const toast = document.createElement("div");
+        const corFundo = tipo === "sucesso" ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" : "bg-red-950/90 text-red-400 border-red-500/30";
+        toast.className = `px-5 py-3 rounded-xl shadow-2xl text-xs font-black tracking-wide border backdrop-blur-md ${corFundo} animate-fade-in`;
+        toast.textContent = mensagem;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+      }
+    </script>
   </body>
 </html>

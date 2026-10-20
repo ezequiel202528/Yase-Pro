@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YaSe PRO - Minhas Demandas</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #0b0f19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .input-yase { background-color: #111827; border: 1px solid rgba(255, 255, 255, 0.1); color: white; outline: none; transition: all 0.2s; }
+    .input-yase:focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-24">
+
+  <!-- Header Superior com Sino de Notificações -->
+  <header class="glass-card border-b border-white/10 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-center text-amber-400 font-black">
+        <i class="fa-solid fa-fire-extinguisher"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-wide text-white">YaSe <span class="text-amber-500">PRO</span></h1>
+        <p id="nomeVendedorHeader" class="text-[11px] text-slate-400">A carregar perfil...</p>
+      </div>
+    </div>
+
+    <!-- Container da Direita: Sino e Botão Sair -->
+    <div class="flex items-center gap-3">
+      
+      <!-- Botão do Sino de Notificações -->
+      <div class="relative">
+        <button onclick="toggleModalNotificacoes()" class="relative w-10 h-10 bg-slate-800/80 hover:bg-slate-700 border border-white/10 rounded-xl flex items-center justify-center text-slate-300 hover:text-white transition-all">
+          <i class="fa-solid fa-bell text-sm"></i>
+          <!-- Bolinha de alerta (Badge vermelha) -->
+          <span id="badgeNotificacao" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg">0</span>
+        </button>
+
+        <!-- Modal / Dropdown de Notificações -->
+        <div id="modalNotificacoes" class="hidden absolute right-0 mt-2 w-80 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
+          <div class="p-3 bg-slate-950/60 border-b border-white/5 flex items-center justify-between">
+            <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-bell text-amber-400"></i> Notificações de Conclusão
+            </span>
+            <button onclick="marcarTodasComoLidas()" class="text-[10px] text-amber-400 hover:underline">Marcar lidas</button>
+          </div>
+          <div id="listaNotificacoes" class="max-h-64 overflow-y-auto custom-scroll p-2 space-y-2">
+            <p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botão Sair -->
+      <button onclick="fazerLogout()" class="text-xs text-red-400 hover:text-red-300 font-semibold bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-xl transition-all">
+        <i class="fa-solid fa-right-from-bracket mr-1"></i> Sair
+      </button>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <div class="glass-card rounded-3xl p-6 shadow-2xl space-y-5">
+      
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-amber-400"></i> Minhas Demandas
+        </h2>
+        <span id="contadorDemandas" class="text-xs bg-slate-800 px-2.5 py-0.5 rounded-full text-slate-400 font-bold">0</span>
+      </div>
+
+      <!-- Barra de Filtros Intuitiva para Mobile -->
+      <div class="p-4 bg-slate-950/50 border border-white/5 rounded-2xl space-y-3">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-400 uppercase">
+          <span><i class="fa-solid fa-filter text-amber-400 mr-1"></i> Filtrar Período</span>
+          <button onclick="limparFiltros()" class="text-[10px] text-amber-400 hover:underline normal-case">Limpar filtros</button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" onclick="filtrarPeriodo('mes')" id="btnMes" class="py-2 px-3 bg-slate-900 hover:bg-slate-800 border border-white/10 rounded-xl text-xs font-semibold text-slate-300 transition-all">Este Mês</button>
+          <button type="button" onclick="filtrarPeriodo('hoje')" id="btnHoje" class="py-2 px-3 bg-slate-900 hover:bg-slate-800 border border-white/10 rounded-xl text-xs font-semibold text-slate-300 transition-all">Hoje</button>
+          <button type="button" onclick="filtrarPeriodo('todos')" id="btnTodos" class="py-2 px-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl text-xs font-bold transition-all">Todas</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <div>
+            <label class="block text-[10px] text-slate-400 uppercase mb-1">De:</label>
+            <input type="date" id="dataInicio" onchange="aplicarFiltrosCustomizados()" class="input-yase w-full h-10 px-3 rounded-xl text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-400 uppercase mb-1">Até:</label>
+            <input type="date" id="dataFim" onchange="aplicarFiltrosCustomizados()" class="input-yase w-full h-10 px-3 rounded-xl text-xs">
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Demandas -->
+      <div id="listaMinhasDemandas" class="space-y-3 custom-scroll max-h-[55vh] overflow-y-auto pr-1">
+        <p class="text-xs text-slate-500 text-center py-6">A carregar o seu histórico...</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Menu Inferior de Navegação estilo App -->
+  <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-white/10 p-3 flex justify-around items-center z-40 max-w-md mx-auto rounded-t-2xl shadow-2xl">
+    <a href="PainelVendedor.html" class="flex flex-col items-center text-slate-400 hover:text-slate-200 font-medium text-[10px] transition-all">
+      <i class="fa-solid fa-plus-circle text-lg mb-0.5"></i>
+      Nova Demanda
+    </a>
+    <a href="HistoricoDemandas.html" class="flex flex-col items-center text-amber-400 font-bold text-[10px] transition-all">
+      <i class="fa-solid fa-clock-rotate-left text-lg mb-0.5"></i>
+      Minhas Demandas
+    </a>
+  </nav>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
+    const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+    const sb = supabase.createClient(URL_SB, KEY_SB);
+
+    let vendedorLogado = null;
+    let empresaId = null;
+    let demandasCache = [];
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const vJson = localStorage.getItem("yase_vendedor_logado");
+      const eId = localStorage.getItem("yase_empresa_id");
+
+      if (!vJson || !eId) {
+        mostrarToast("Sessão expirada. Faça login novamente.", "erro");
+        setTimeout(() => window.location.href = "LoginVendedor.html", 1500);
+        return;
+      }
+
+      vendedorLogado = JSON.parse(vJson);
+      empresaId = eId;
+      document.getElementById("nomeVendedorHeader").textContent = `${vendedorLogado.nome_completo} (${vendedorLogado.nivel_permissao || 'Vendedor'})`;
+
+      carregarMinhasDemandas();
+    });
+
+    async function carregarMinhasDemandas() {
+      const container = document.getElementById("listaMinhasDemandas");
+      
+      try {
+        const { data, error } = await sb
+          .from("cargas_demandas")
+          .select("*")
+          .eq("empresa_id", empresaId)
+          .eq("vendedor_id", vendedorLogado.id)
+          .order("data_criacao", { ascending: false });
+
+        if (error) throw error;
+
+        demandasCache = data || [];
+        renderizarDemandas(demandasCache);
+        processarNotificacoes(demandasCache);
+        destacarBotaoFiltro('btnTodos');
+
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<p class="text-xs text-red-400 text-center py-4">Erro ao carregar histórico.</p>`;
+      }
+    }
+
+    function renderizarDemandas(lista) {
+      const container = document.getElementById("listaMinhasDemandas");
+      document.getElementById("contadorDemandas").textContent = lista.length;
+
+      if (!lista || lista.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Nenhuma demanda encontrada.</p>`;
+        return;
+      }
+
+      container.innerHTML = "";
+      lista.forEach(d => {
+        let badgeCor = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+        let statusTexto = "Pendente";
+        if (d.status === "em_andamento") {
+          badgeCor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+          statusTexto = "Em Andamento";
+        } else if (d.status === "concluido") {
+          badgeCor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+          statusTexto = "Concluído";
+        }
+
+        const resumoItens = d.itens ? d.itens.map(i => `${i.qtd}x ${i.tipo}`).join(", ") : "Sem itens";
+        const dataFormatada = d.data_criacao ? new Date(d.data_criacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '';
+
+        container.innerHTML += `
+          <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-white">NF: ${d.nota_fiscal} - ${d.cliente}</span>
+              <span class="text-[10px] px-2.5 py-1 rounded-full font-bold border ${badgeCor}">${statusTexto}</span>
+            </div>
+            <p class="text-xs text-slate-400"><i class="fa-solid fa-box mr-1 text-slate-500"></i> ${resumoItens}</p>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-white/5">
+              <span><i class="fa-regular fa-calendar mr-1"></i> ${dataFormatada}</span>
+              ${d.observacao ? `<span class="italic truncate max-w-[200px]">Obs: ${d.observacao}</span>` : ''}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // Funções do Sino de Notificações
+    function processarNotificacoes(demandas) {
+      const badge = document.getElementById("badgeNotificacao");
+      const listaNotif = document.getElementById("listaNotificacoes");
+      const concluidas = demandas.filter(d => d.status === 'concluido');
+      const lidasSalvas = JSON.parse(localStorage.getItem(`yase_notif_lidas_${vendedorLogado.id}`) || "[]");
+      const naoLidas = concluidas.filter(d => !lidasSalvas.includes(d.id));
+
+      if (naoLidas.length > 0) {
+        badge.textContent = naoLidas.length;
+        badge.classList.remove("hidden");
+        
+        listaNotif.innerHTML = "";
+        naoLidas.forEach(d => {
+          listaNotif.innerHTML += `
+            <div class="p-2.5 bg-emerald-950/30 border border-emerald-500/20 rounded-xl space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">NF: ${d.nota_fiscal} - ${d.cliente}</span>
+                <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">Concluído</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Lote finalizado na oficina.</p>
+            </div>
+          `;
+        });
+      } else {
+        badge.classList.add("hidden");
+        listaNotif.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>`;
+      }
+    }
+
+    function toggleModalNotificacoes() {
+      const modal = document.getElementById("modalNotificacoes");
+      modal.classList.toggle("hidden");
+    }
+
+    function marcarTodasComoLidas() {
+      const concluidas = demandasCache.filter(d => d.status === 'concluido');
+      const idsConcluidas = concluidas.map(d => d.id);
+      localStorage.setItem(`yase_notif_lidas_${vendedorLogado.id}`, JSON.stringify(idsConcluidas));
+      
+      document.getElementById("badgeNotificacao").classList.add("hidden");
+      document.getElementById("listaNotificacoes").innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>`;
+    }
+
+    window.addEventListener("click", (e) => {
+      const modal = document.getElementById("modalNotificacoes");
+      const sinoBtn = e.target.closest("button");
+      if (modal && !modal.contains(e.target) && (!sinoBtn || !sinoBtn.getAttribute('onclick')?.includes('toggleModalNotificacoes'))) {
+        modal.classList.add("hidden");
+      }
+    });
+
+    // Filtros rápidos
+    function filtrarPeriodo(tipo) {
+      const hoje = new Date();
+      let filtradas = [...demandasCache];
+
+      if (tipo === 'hoje') {
+        const dataHojeStr = hoje.toISOString().split('T')[0];
+        filtradas = demandasCache.filter(d => d.data_criacao && d.data_criacao.startsWith(dataHojeStr));
+        destacarBotaoFiltro('btnHoje');
+      } else if (tipo === 'mes') {
+        const anoAtual = hoje.getFullYear();
+        const mesAtual = String(hoje.getMonth() + 1).padStart(2, '0');
+        filtradas = demandasCache.filter(d => {
+          if (!d.data_criacao) return false;
+          return d.data_criacao.startsWith(`${anoAtual}-${mesAtual}`);
+        });
+        destacarBotaoFiltro('btnMes');
+      } else {
+        document.getElementById('dataInicio').value = '';
+        document.getElementById('dataFim').value = '';
+        destacarBotaoFiltro('btnTodos');
+      }
+
+      renderizarDemandas(filtradas);
+    }
+
+    function aplicarFiltrosCustomizados() {
+      const inicio = document.getElementById('dataInicio').value;
+      const fim = document.getElementById('dataFim').value;
+      let filtradas = [...demandasCache];
+
+      if (inicio) filtradas = filtradas.filter(d => d.data_criacao && d.data_criacao.split('T')[0] >= inicio);
+      if (fim) filtradas = filtradas.filter(d => d.data_criacao && d.data_criacao.split('T')[0] <= fim);
+
+      destacarBotaoFiltro(null);
+      renderizarDemandas(filtradas);
+    }
+
+    function limparFiltros() {
+      document.getElementById('dataInicio').value = '';
+      document.getElementById('dataFim').value = '';
+      filtrarPeriodo('todos');
+    }
+
+    function destacarBotaoFiltro(idAtivo) {
+      ['btnMes', 'btnHoje', 'btnTodos'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        if (id === idAtivo) {
+          btn.className = "py-2 px-3 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl text-xs font-bold transition-all";
+        } else {
+          btn.className = "py-2 px-3 bg-slate-900 hover:bg-slate-800 border border-white/10 rounded-xl text-xs font-semibold text-slate-300 transition-all";
+        }
+      });
+    }
+
+    function fazerLogout() {
+      localStorage.removeItem("yase_vendedor_logado");
+      localStorage.removeItem("yase_empresa_id");
+      window.location.href = "LoginVendedor.html";
+    }
+
+    function mostrarToast(mensagem, tipo = "sucesso") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const toast = document.createElement("div");
+      const corFundo = tipo === "sucesso" ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" : "bg-red-950/90 text-red-400 border-red-500/30";
+      toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-300 translate-x-10 opacity-0 ${corFundo}`;
+      toast.innerHTML = `<span class="text-xs font-black tracking-wide">${mensagem}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove("translate-x-10", "opacity-0"), 10);
+      setTimeout(() => {
+        toast.classList.add("translate-x-10", "opacity-0");
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

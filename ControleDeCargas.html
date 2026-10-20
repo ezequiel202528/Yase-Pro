@@ -331,7 +331,7 @@
         }
       }
 
-      function renderizarKanban(lista) {
+function renderizarKanban(lista) {
         const colAtraso = document.getElementById("colunaAtraso");
         const colPendente = document.getElementById("colunaPendente");
         const colConcluido = document.getElementById("colunaConcluido");
@@ -343,17 +343,35 @@
         let qtdAtraso = 0, qtdPendente = 0, qtdConcluido = 0;
 
         if (!lista || lista.length === 0) {
-          colPendente.innerHTML = `<div class="text-xs text-slate-500 text-center py-8 w-full">Nenhuma carga encontrada.</div>`;
-          colAtraso.innerHTML = `<div class="text-xs text-slate-500 text-center py-8 w-full">Nenhuma carga.</div>`;
-          colConcluido.innerHTML = `<div class="text-xs text-slate-500 text-center py-8 w-full">Nenhuma carga.</div>`;
-          document.getElementById("countAtraso").textContent = "0";
-          document.getElementById("countPendente").textContent = "0";
-          document.getElementById("countConcluido").textContent = "0";
-          return;
+            const htmlVazio = `
+                <div class="flex flex-col items-center justify-center py-12 px-4 text-center w-full">
+                    <div class="w-12 h-12 bg-slate-800/50 border border-white/5 rounded-2xl flex items-center justify-center text-slate-500 mb-3">
+                        <i class="fa-solid fa-folder-open text-lg"></i>
+                    </div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Nenhuma carga encontrada</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Os registros aparecerão aqui conforme forem criados.</p>
+                </div>
+            `;
+            colAtraso.innerHTML = htmlVazio;
+            colPendente.innerHTML = htmlVazio;
+            colConcluido.innerHTML = htmlVazio;
+            document.getElementById("countAtraso").textContent = "0";
+            document.getElementById("countPendente").textContent = "0";
+            document.getElementById("countConcluido").textContent = "0";
+            return;
         }
 
         lista.forEach(d => {
-          const status = (d.status || "pendente").toLowerCase();
+          let status = (d.status || "pendente").toLowerCase();
+
+          // REGRA DAS 24 HORAS: Se estiver pendente há mais de 24h, muda para atrasado
+          if (status === "pendente" && d.data_criacao) {
+            const diffHoras = (new Date() - new Date(d.data_criacao)) / (1000 * 60 * 60);
+            if (diffHoras > 24) {
+              status = "atrasado";
+            }
+          }
+
           if (status === "atrasado") qtdAtraso++;
           else if (status === "concluido" || status === "concluído") qtdConcluido++;
           else qtdPendente++;
@@ -367,7 +385,6 @@
 
           const dataFormatada = d.data_criacao ? new Date(d.data_criacao).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' }) : "Data recente";
 
-          // Passamos o objeto completo ou o ID para abrir a assinatura e vincular os dados do PDF
           const botaoAssinaturaHtml = d.assinatura ? `
             <button onclick='abrirModalAssinaturaPorId("${d.id}")' class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 text-xs font-bold py-2 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2">
               <i class="fa-solid fa-signature"></i> Ver Assinatura do Vendedor
@@ -436,11 +453,47 @@
           else colPendente.innerHTML += cardHtml;
         });
 
+        // Mensagens elegantes para colunas individuais vazias
+        if (colAtraso.innerHTML === "") {
+          colAtraso.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-12 px-4 text-center w-full">
+                <div class="w-10 h-10 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center text-red-400 mb-2">
+                    <i class="fa-solid fa-circle-check text-base"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tudo em dia!</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Nenhuma carga atrasada.</p>
+            </div>
+          `;
+        }
+
+        if (colPendente.innerHTML === "") {
+          colPendente.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-12 px-4 text-center w-full">
+                <div class="w-10 h-10 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center text-amber-400 mb-2">
+                    <i class="fa-solid fa-box-open text-base"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Nenhum pendente</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Todas as cargas foram processadas.</p>
+            </div>
+          `;
+        }
+
+        if (colConcluido.innerHTML === "") {
+          colConcluido.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-12 px-4 text-center w-full">
+                <div class="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-400 mb-2">
+                    <i class="fa-solid fa-clipboard-list text-base"></i>
+                </div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Nenhum finalizado</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">As conclusões aparecerão aqui.</p>
+            </div>
+          `;
+        }
+
         document.getElementById("countAtraso").textContent = qtdAtraso;
         document.getElementById("countPendente").textContent = qtdPendente;
         document.getElementById("countConcluido").textContent = qtdConcluido;
       }
-
       function abrirModalAssinaturaPorId(idCarga) {
         const d = todasDemandas.find(item => item.id === idCarga);
         if (!d) return;

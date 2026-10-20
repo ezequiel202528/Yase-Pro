@@ -1,500 +1,797 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YaSe PRO - Nova Demanda</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body { background-color: #0b0f19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-    .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .input-yase { background-color: #111827; border: 1px solid rgba(255, 255, 255, 0.1); color: white; outline: none; transition: all 0.2s; }
-    .input-yase:focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
-    .custom-scroll::-webkit-scrollbar { width: 4px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-    /* Estilo do Canvas de Assinatura */
-    #canvasAssinatura {
-      touch-action: none;
-      background-color: #0f172a;
-      border: 1px dashed rgba(255, 255, 255, 0.2);
-      border-radius: 0.75rem;
-      width: 100%;
-      height: 140px;
-      cursor: crosshair;
-    }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col pb-24">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YaSe PRO - Controle de Cargas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- jsPDF CDN para geração do PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+      body { background-color: #0b0f19; color: #f8fafc; font-family: "Inter", sans-serif; }
+      .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+      .input-yase { background-color: #111827; border: 1px solid rgba(255, 255, 255, 0.1); color: white; outline: none; transition: all 0.2s; }
+      .input-yase:focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+      
+      /* Coluna Kanban em Carrossel Horizontal */
+      .status-column {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        min-height: 520px;
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        border-radius: 1.5rem;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 1.25rem;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        align-items: center;
+      }
+      .status-column::-webkit-scrollbar { display: none; }
 
-  <!-- Header Superior com Sino -->
-  <header class="glass-card border-b border-white/10 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-center text-amber-400 font-black">
-        <i class="fa-solid fa-fire-extinguisher"></i>
-      </div>
-      <div>
-        <h1 class="text-sm font-bold tracking-wide text-white">YaSe <span class="text-amber-500">PRO</span></h1>
-        <p id="nomeVendedorHeader" class="text-[11px] text-slate-400">A carregar perfil...</p>
+      .card-container {
+        flex: 0 0 100%;
+        scroll-snap-align: center;
+        display: flex;
+        justify-content: center;
+      }
+
+      .card-content {
+        width: 100%;
+        max-width: 380px;
+      }
+
+      #canvasAssinatura {
+        touch-action: none;
+        background-color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0.75rem;
+        width: 100%;
+        height: 140px;
+        cursor: crosshair;
+      }
+
+      .nav-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #1e293b;
+        color: #f8fafc;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        cursor: pointer;
+        z-index: 20;
+        transition: all 0.2s;
+        opacity: 0;
+      }
+      .group:hover .nav-arrow { opacity: 1; }
+      .arrow-left { left: -14px; }
+      .arrow-right { right: -14px; }
+
+      @media (max-width: 1024px) {
+        .nav-arrow { opacity: 1; width: 32px; height: 32px; }
+        .arrow-left { left: 4px; }
+        .arrow-right { right: 4px; }
+      }
+
+      .animate-fade-in { animation: fadeIn 0.25s ease-out; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      #modalCarga, #modalAssinatura { background-color: rgba(11, 15, 25, 0.8); backdrop-filter: blur(12px); }
+      .custom-scroll::-webkit-scrollbar { width: 4px; }
+      .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+  </head>
+  <body class="min-h-screen p-4 md:p-6">
+    <div class="max-w-7xl mx-auto">
+      
+      <!-- Header -->
+      <header class="glass-card mb-8 p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center text-amber-400">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-black text-white tracking-wide">YaSe <span class="text-amber-500">PRO</span></h1>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Controle de Cargas & Demandas</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="relative w-48 md:w-80">
+            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+            <input type="text" id="inputBusca" oninput="filtrarDemandas()" placeholder="Buscar Cliente, NF ou Vendedor..."
+                   class="input-yase w-full pl-10 pr-4 py-3 rounded-xl text-sm" />
+          </div>
+
+          <button onclick="abrirModalCarga()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-6 py-3 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all active:scale-95 uppercase tracking-wider">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Nova Carga
+          </button>
+        </div>
+      </header>
+
+      <!-- Kanban Board -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Atrasados -->
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center justify-between px-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-3 h-3 rounded-full bg-red-500 shadow-lg shadow-red-500/50"></div>
+              <h3 class="font-black text-slate-300 text-xs uppercase tracking-widest">Atrasados</h3>
+            </div>
+            <span id="countAtraso" class="text-xs font-black text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-0.5 rounded-full">0</span>
+          </div>
+          <div class="relative group px-1">
+            <button onclick="rolarColuna('colunaAtraso', -1)" class="nav-arrow arrow-left"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+            <div id="colunaAtraso" class="status-column"></div>
+            <button onclick="rolarColuna('colunaAtraso', 1)" class="nav-arrow arrow-right"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+          </div>
+        </div>
+
+        <!-- Pendentes -->
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center justify-between px-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-3 h-3 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50"></div>
+              <h3 class="font-black text-slate-300 text-xs uppercase tracking-widest">Pendentes</h3>
+            </div>
+            <span id="countPendente" class="text-xs font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-0.5 rounded-full">0</span>
+          </div>
+          <div class="relative group px-1">
+            <button onclick="rolarColuna('colunaPendente', -1)" class="nav-arrow arrow-left"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+            <div id="colunaPendente" class="status-column"></div>
+            <button onclick="rolarColuna('colunaPendente', 1)" class="nav-arrow arrow-right"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+          </div>
+        </div>
+
+        <!-- Finalizados -->
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center justify-between px-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
+              <h3 class="font-black text-slate-300 text-xs uppercase tracking-widest">Finalizados</h3>
+            </div>
+            <span id="countConcluido" class="text-xs font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-0.5 rounded-full">0</span>
+          </div>
+          <div class="relative group px-1">
+            <button onclick="rolarColuna('colunaConcluido', -1)" class="nav-arrow arrow-left"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+            <div id="colunaConcluido" class="status-column"></div>
+            <button onclick="rolarColuna('colunaConcluido', 1)" class="nav-arrow arrow-right"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <div class="flex items-center gap-3">
-      <!-- Botão do Sino -->
-      <div class="relative">
-        <button onclick="toggleModalNotificacoes()" class="relative w-10 h-10 bg-slate-800/80 hover:bg-slate-700 border border-white/10 rounded-xl flex items-center justify-center text-slate-300 hover:text-white transition-all">
-          <i class="fa-solid fa-bell text-sm"></i>
-          <span id="badgeNotificacao" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg">0</span>
-        </button>
-
-        <div id="modalNotificacoes" class="hidden absolute right-0 sm:right-0 mt-2 w-72 sm:w-80 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
-          <div class="p-3 bg-slate-950/60 border-b border-white/5 flex items-center justify-between">
-            <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-bell text-amber-400"></i> Notificações
-            </span>
-            <button onclick="marcarTodasComoLidas()" class="text-[10px] text-amber-400 hover:underline">Marcar lidas</button>
-          </div>
-          <div id="listaNotificacoes" class="max-h-64 overflow-y-auto custom-scroll p-2 space-y-2">
-            <p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>
-          </div>
+    <!-- MODAL DE VISUALIZAÇÃO DA ASSINATURA -->
+    <div id="modalAssinatura" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+      <div class="glass-card w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-fade-in border border-white/10 p-6 space-y-4 text-center">
+        <div class="flex justify-between items-center border-b border-white/10 pb-3">
+          <h3 class="font-bold text-xs uppercase tracking-wider text-amber-400 flex items-center gap-2">
+            <i class="fa-solid fa-signature"></i> Assinatura do Vendedor
+          </h3>
+          <button onclick="fecharModalAssinatura()" class="text-slate-400 hover:text-white p-1">
+            <i class="fa-solid fa-xmark text-base"></i>
+          </button>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-white/10 flex items-center justify-center">
+          <img id="imgAssinaturaModal" src="" alt="Assinatura" class="max-h-40 object-contain w-full" />
+        </div>
+        
+        <!-- Botões do Modal: Baixar PDF e Fechar -->
+        <div class="space-y-2">
+          <button onclick="baixarPdfPedido()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20 transition-all">
+            <i class="fa-solid fa-file-pdf"></i> Baixar Pedido (PDF)
+          </button>
+          <button onclick="fecharModalAssinatura()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider">
+            Fechar
+          </button>
         </div>
       </div>
-
-      <button onclick="fazerLogout()" class="text-xs text-red-400 hover:text-red-300 font-semibold bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-xl transition-all">
-        <i class="fa-solid fa-right-from-bracket mr-1"></i> Sair
-      </button>
     </div>
-  </header>
 
-  <!-- Container Principal -->
-  <main class="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 space-y-6">
-    <div class="glass-card rounded-3xl p-6 shadow-2xl">
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="text-sm font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
-          <i class="fa-solid fa-plus-circle"></i> Criar Nova Demanda / Carga
-        </h2>
-        <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-full font-bold border border-amber-500/20">Modo Vendedor</span>
-      </div>
-
-      <form id="formDemanda" class="space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Nº Nota Fiscal (NF) / Pedido</label>
-            <input type="text" id="inputNF" placeholder="Ex: 1045" required class="input-yase w-full h-12 px-4 rounded-xl text-sm">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Cliente / Local de Destino</label>
-            <input type="text" id="inputCliente" placeholder="Nome do Cliente" required class="input-yase w-full h-12 px-4 rounded-xl text-sm">
-          </div>
+    <!-- MODAL DE NOVA CARGA -->
+    <div id="modalCarga" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+      <div class="glass-card w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-fade-in border border-white/10">
+        <div class="px-6 py-5 border-b border-white/10 flex justify-between items-center bg-slate-900/50">
+          <h2 class="font-bold text-sm uppercase tracking-wider text-amber-400 flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i> Configurar Nova Carga
+          </h2>
+          <button onclick="fecharModalCarga()" class="text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
         </div>
 
-        <!-- Seção de Adicionar Itens com Regra Inteligente de KG / Litros -->
-        <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-3">
-          <label class="text-[11px] font-bold text-slate-300 uppercase flex items-center gap-2">
-            <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Adicionar Extintores / Equipamentos
-          </label>
-          
-          <div class="space-y-2">
-            <select id="selectTipoExtintor" onchange="filtrarCapacidadesPorTipo()" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required>
-              <option value="">A carregar tipos do sistema...</option>
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Vendedor Responsável</label>
+            <select id="selectVendedorModal" class="input-yase w-full h-11 px-3 rounded-xl text-xs">
+              <option value="">Selecione o vendedor...</option>
             </select>
+          </div>
 
-            <select id="selectCapacidadeExtintor" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required disabled>
-              <option value="">Selecione o tipo primeiro...</option>
-            </select>
-
-            <div class="flex gap-2 pt-1">
-              <input type="number" id="inputQtd" placeholder="Qtd" min="1" value="1" class="input-yase w-24 h-11 px-3 rounded-xl text-xs text-center font-bold">
-              <button type="button" onclick="adicionarItemTemporario()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 h-11 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2">
-                <i class="fa-solid fa-plus"></i> Adicionar à Carga
-              </button>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Nº Nota Fiscal (NF)</label>
+              <input type="text" id="inputNFModal" placeholder="Ex: 1025" class="input-yase w-full h-11 px-3 rounded-xl text-xs" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Cliente / Local</label>
+              <input type="text" id="inputLocalDestinoModal" placeholder="Nome do Cliente" class="input-yase w-full h-11 px-3 rounded-xl text-xs" />
             </div>
           </div>
 
-          <div id="containerItens" class="hidden space-y-2 pt-2 border-t border-white/5">
-            <div id="listaItensTemp" class="space-y-1.5 max-h-36 overflow-y-auto custom-scroll pr-1"></div>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Observações para a Oficina</label>
-          <textarea id="inputObs" rows="2" placeholder="Ex: Cliente pediu urgência na recarga..." class="input-yase w-full p-3 rounded-xl text-sm resize-none"></textarea>
-        </div>
-
-        <!-- SEÇÃO DE ASSINATURA DIGITAL DO VENDEDOR -->
-        <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-2">
-          <div class="flex items-center justify-between">
+          <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-3">
             <label class="text-[11px] font-bold text-slate-300 uppercase flex items-center gap-2">
-              <i class="fa-solid fa-signature text-amber-400"></i> Assinatura Digital do Vendedor *
+              <i data-lucide="box" class="text-amber-400 w-4 h-4"></i> Adicionar Itens
             </label>
-            <button type="button" onclick="limparAssinatura()" class="text-[10px] text-amber-400 hover:underline">Limpar</button>
-          </div>
-          <p class="text-[10px] text-slate-400">Assine no espaço abaixo usando o dedo ou o mouse:</p>
-          
-          <canvas id="canvasAssinatura"></canvas>
-        </div>
-
-        <button type="submit" id="btnEnviarDemanda" class="w-full h-12 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98]">
-          Enviar Demanda para a Oficina
-        </button>
-      </form>
-    </div>
-  </main>
-
-  <!-- Menu Inferior estilo App -->
-  <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-white/10 p-3 flex justify-around items-center z-40 max-w-md mx-auto rounded-t-2xl shadow-2xl">
-    <a href="PainelVendedor.html" class="flex flex-col items-center text-amber-400 font-bold text-[10px] transition-all">
-      <i class="fa-solid fa-plus-circle text-lg mb-0.5"></i>
-      Nova Demanda
-    </a>
-    <a href="HistoricoDemandas.html" class="flex flex-col items-center text-slate-400 hover:text-slate-200 font-medium text-[10px] transition-all">
-      <i class="fa-solid fa-clock-rotate-left text-lg mb-0.5"></i>
-      Minhas Demandas
-    </a>
-  </nav>
-
-  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
-    const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
-    const sb = supabase.createClient(URL_SB, KEY_SB);
-
-    let vendedorLogado = null;
-    let empresaId = null;
-    let itensTemp = [];
-    let todasDemandasCache = [];
-    let cacheCapacidades = [];
-
-    // Configuração do Canvas de Assinatura
-    let canvas, ctx, desenhando = false;
-
-    window.addEventListener("DOMContentLoaded", () => {
-      const vJson = localStorage.getItem("yase_vendedor_logado");
-      const eId = localStorage.getItem("yase_empresa_id");
-
-      if (!vJson || !eId) {
-        mostrarToast("Sessão expirada. Faça login novamente.", "erro");
-        setTimeout(() => window.location.href = "LoginVendedor.html", 1500);
-        return;
-      }
-
-      vendedorLogado = JSON.parse(vJson);
-      empresaId = eId;
-      document.getElementById("nomeVendedorHeader").textContent = `${vendedorLogado.nome_completo} (${vendedorLogado.nivel_permissao || 'Vendedor'})`;
-
-      inicializarCanvas();
-      carregarTiposDinamicos();
-      carregarCapacidadesDinamicas();
-      carregarDemandasParaNotificacao();
-    });
-
-    function inicializarCanvas() {
-      canvas = document.getElementById("canvasAssinatura");
-      ctx = canvas.getContext("2d");
-
-      // Ajustar resolução interna para ficar nítido
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-
-      ctx.strokeStyle = "#f8fafc";
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-
-      // Eventos de Mouse
-      canvas.addEventListener("mousedown", iniciarDesenho);
-      canvas.addEventListener("mousemove", desenhar);
-      canvas.addEventListener("mouseup", pararDesenho);
-      canvas.addEventListener("mouseleave", pararDesenho);
-
-      // Eventos de Toque (Celular / Tablet)
-      canvas.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        const mouseEvent = new MouseEvent("mousedown", {
-          clientX: touch.clientX,
-          clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
-      });
-
-      canvas.addEventListener("touchmove", (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        const mouseEvent = new MouseEvent("mousemove", {
-          clientX: touch.clientX,
-          clientY: touch.clientY
-        });
-        canvas.dispatchEvent(mouseEvent);
-      });
-
-      canvas.addEventListener("touchend", (e) => {
-        e.preventDefault();
-        const mouseEvent = new MouseEvent("mouseup", {});
-        canvas.dispatchEvent(mouseEvent);
-      });
-    }
-
-    function obterPosicao(e) {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
-    }
-
-    function iniciarDesenho(e) {
-      desenhando = true;
-      const pos = obterPosicao(e);
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-    }
-
-    function desenhar(e) {
-      if (!desenhando) return;
-      const pos = obterPosicao(e);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-    }
-
-    function pararDesenho() {
-      desenhando = false;
-    }
-
-    function limparAssinatura() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function isCanvasEmBranco() {
-      const blank = document.createElement('canvas');
-      blank.width = canvas.width;
-      blank.height = canvas.height;
-      return canvas.toDataURL() === blank.toDataURL();
-    }
-
-    async function carregarTiposDinamicos() {
-      const select = document.getElementById("selectTipoExtintor");
-      if (!select) return;
-
-      try {
-        select.innerHTML = '<option value="">A carregar tipos...</option>';
-        const { data, error } = await sb.from("tipos_carga").select("*").order("nome", { ascending: true });
-        if (error) throw error;
-
-        const lista = data || [];
-        select.innerHTML = '<option value="">Selecione o tipo do extintor...</option>';
-        lista.forEach(item => {
-          if (item.nome) select.innerHTML += `<option value="${item.nome}">${item.nome}</option>`;
-        });
-      } catch (err) {
-        console.error("Erro ao carregar tipos:", err);
-      }
-    }
-
-    async function carregarCapacidadesDinamicas() {
-      try {
-        const { data, error } = await sb.from("capacidades").select("*").order("nome", { ascending: true });
-        if (error) throw error;
-        cacheCapacidades = data || [];
-      } catch (err) {
-        cacheCapacidades = [];
-      }
-    }
-
-    function filtrarCapacidadesPorTipo() {
-      const tipoSelect = document.getElementById("selectTipoExtintor").value.toUpperCase();
-      const capSelect = document.getElementById("selectCapacidadeExtintor");
-      capSelect.innerHTML = '<option value="">Selecione a capacidade...</option>';
-
-      if (!tipoSelect) {
-        capSelect.disabled = true;
-        return;
-      }
-
-      const exigeKg = tipoSelect.includes("PQS") || tipoSelect.includes("CO2");
-      const exigeLitros = tipoSelect.includes("AP") || tipoSelect.includes("EP");
-
-      const capacidadesFiltradas = cacheCapacidades.filter(item => {
-        const nomeCap = (item.nome || "").toUpperCase();
-        if (exigeKg) return nomeCap.includes("KG");
-        if (exigeLitros) return nomeCap.includes("L") || nomeCap.includes("LITRO");
-        return true;
-      });
-
-      capSelect.disabled = false;
-      capacidadesFiltradas.forEach(item => {
-        capSelect.innerHTML += `<option value="${item.nome}">${item.nome}</option>`;
-      });
-    }
-
-    function adicionarItemTemporario() {
-      const selectTipo = document.getElementById("selectTipoExtintor").value;
-      const selectCap = document.getElementById("selectCapacidadeExtintor").value;
-      const qtd = parseInt(document.getElementById("inputQtd").value);
-
-      if (!selectTipo || !selectCap) return mostrarToast("Selecione o tipo e a capacidade.", "erro");
-      if (!qtd || qtd < 1) return mostrarToast("Informe uma quantidade válida.", "erro");
-
-      itensTemp.push({ tipo: `${selectTipo} ${selectCap}`, qtd });
-      renderizarItensTemp();
-
-      document.getElementById("selectTipoExtintor").value = "";
-      document.getElementById("selectCapacidadeExtintor").value = "";
-      document.getElementById("selectCapacidadeExtintor").disabled = true;
-      document.getElementById("selectCapacidadeExtintor").innerHTML = '<option value="">Selecione o tipo primeiro...</option>';
-      document.getElementById("inputQtd").value = "1";
-    }
-
-    function removerItemTemp(index) {
-      itensTemp.splice(index, 1);
-      renderizarItensTemp();
-    }
-
-    function renderizarItensTemp() {
-      const container = document.getElementById("containerItens");
-      const lista = document.getElementById("listaItensTemp");
-      lista.innerHTML = "";
-
-      if (itensTemp.length === 0) {
-        container.classList.add("hidden");
-        return;
-      }
-
-      container.classList.remove("hidden");
-      itensTemp.forEach((item, index) => {
-        lista.innerHTML += `
-          <div class="flex items-center justify-between bg-slate-900 border border-white/5 px-3 py-2 rounded-xl text-xs">
-            <span class="text-white font-medium">${item.qtd}x ${item.tipo}</span>
-            <button type="button" onclick="removerItemTemp(${index})" class="text-red-400 hover:text-red-300 p-1">
-              <i class="fa-solid fa-trash-can text-xs"></i>
+            <div class="flex gap-2">
+              <select id="selectTipoExtintorModal" class="input-yase flex-1 h-10 px-3 rounded-xl text-xs">
+                <option value="">Escolha o Modelo</option>
+                <option value="PQS 4kg (ABC)">PQS 4kg (ABC)</option>
+                <option value="PQS 6kg (ABC)">PQS 6kg (ABC)</option>
+                <option value="PQS 12kg (ABC)">PQS 12kg (ABC)</option>
+                <option value="Água Pressurizada 10L">Água Pressurizada 10L</option>
+                <option value="CO2 4kg">CO2 4kg</option>
+              </select>
+              <input type="number" id="inputQtdItemModal" placeholder="Qtd" min="1" value="1" class="input-yase w-20 h-10 px-2 rounded-xl text-xs text-center font-bold" />
+            </div>
+            <button type="button" onclick="adicionarItemTempModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
+              Incluir na Lista
             </button>
           </div>
-        `;
+
+          <div id="containerResumoModal" class="hidden pt-2 border-t border-white/5">
+            <label class="text-[11px] font-bold text-slate-400 uppercase mb-2 block">Resumo dos Itens</label>
+            <ul id="listaTemporariaModal" class="space-y-1.5 max-h-32 overflow-y-auto custom-scroll pr-1"></ul>
+
+            <button type="button" onclick="salvarNovaCargaOficina()" class="w-full mt-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20">
+              Finalizar e Gerar Carga
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+      const URL_SB = "https://gzojpxgpgjapsegerscb.supabase.co";
+      const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
+      const sb = supabase.createClient(URL_SB, KEY_SB);
+
+      let empresaIdLogada = localStorage.getItem("yase_empresa_id") || 
+                            (JSON.parse(localStorage.getItem("yase_vendedor_logado") || "{}").empresa_id) || 
+                            "b6000456-4290-410a-b31c-0c1fc9919f2a";
+      
+      let todasDemandas = [];
+      let itensModalTemp = [];
+      let demandaAtualSelecionada = null; // Variável para armazenar a demanda ativa no modal de assinatura
+      let dadosEmpresaLogada = {}; // Para armazenar o logo e nome da empresa
+
+      window.addEventListener("DOMContentLoaded", async () => {
+        if (window.lucide) lucide.createIcons();
+        await carregarDadosEmpresa();
+        await carregarDemandasDoSupabase();
+        await carregarVendedoresModal();
       });
-    }
 
-    document.getElementById("formDemanda").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      if (itensTemp.length === 0) return mostrarToast("Adicione pelo menos um item à carga.", "erro");
-      if (isCanvasEmBranco()) return mostrarToast("Por favor, faça a assinatura digital antes de enviar.", "erro");
-
-      const nf = document.getElementById("inputNF").value.trim();
-      const cliente = document.getElementById("inputCliente").value.trim();
-      const obs = document.getElementById("inputObs").value.trim();
-      const assinaturaBase64 = canvas.toDataURL("image/png");
-
-      const btn = document.getElementById("btnEnviarDemanda");
-      btn.disabled = true;
-      btn.textContent = "A enviar demanda...";
-
-      try {
-        const { error } = await sb.from("cargas_demandas").insert([{
-          empresa_id: empresaId,
-          vendedor_id: vendedorLogado.id,
-          vendedor_nome: vendedorLogado.nome_completo,
-          nota_fiscal: nf,
-          cliente: cliente,
-          itens: itensTemp,
-          observacao: obs,
-          assinatura: assinaturaBase64, // Salva a assinatura em formato Base64 no banco
-          status: "pendente",
-          data_criacao: new Date().toISOString()
-        }]);
-
-        if (error) throw error;
-
-        mostrarToast("✅ Demanda criada e assinada com sucesso!");
-        
-        document.getElementById("formDemanda").reset();
-        limparAssinatura();
-        itensTemp = [];
-        renderizarItensTemp();
-        document.getElementById("selectCapacidadeExtintor").disabled = true;
-        document.getElementById("selectCapacidadeExtintor").innerHTML = '<option value="">Selecione o tipo primeiro...</option>';
-
-      } catch (err) {
-        console.error(err);
-        mostrarToast("❌ Erro ao enviar demanda.", "erro");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Enviar Demanda para a Oficina";
+      async function carregarDadosEmpresa() {
+        try {
+          const { data, error } = await sb.from("empresas").select("*").eq("id", empresaIdLogada).single();
+          if (data) dadosEmpresaLogada = data;
+        } catch (err) {
+          console.error("Erro ao carregar dados da empresa:", err);
+        }
       }
-    });
 
-    async function carregarDemandasParaNotificacao() {
-      try {
-        const { data } = await sb.from("cargas_demandas").select("*").eq("empresa_id", empresaId).eq("vendedor_id", vendedorLogado.id);
-        todasDemandasCache = data || [];
-        processarNotificacoes(todasDemandasCache);
-      } catch (err) { console.error(err); }
+      function rolarColuna(idColuna, direcao) {
+        const coluna = document.getElementById(idColuna);
+        if (coluna) {
+          const larguraCard = coluna.clientWidth;
+          coluna.scrollBy({ left: direcao * larguraCard, behavior: 'smooth' });
+        }
+      }
+
+      async function carregarDemandasDoSupabase() {
+        try {
+          const { data, error } = await sb
+            .from("cargas_demandas")
+            .select("*")
+            .order("data_criacao", { ascending: false });
+
+          if (error) throw error;
+          
+          todasDemandas = data || [];
+          renderizarKanban(todasDemandas);
+        } catch (err) {
+          console.error("Erro ao carregar cargas do Supabase:", err);
+          mostrarToast("Erro ao sincronizar cargas.", "erro");
+        }
+      }
+
+      function renderizarKanban(lista) {
+        const colAtraso = document.getElementById("colunaAtraso");
+        const colPendente = document.getElementById("colunaPendente");
+        const colConcluido = document.getElementById("colunaConcluido");
+
+        colAtraso.innerHTML = "";
+        colPendente.innerHTML = "";
+        colConcluido.innerHTML = "";
+
+        let qtdAtraso = 0, qtdPendente = 0, qtdConcluido = 0;
+
+        if (!lista || lista.length === 0) {
+          colPendente.innerHTML = `<div class="text-xs text-slate-500 text-center py-8 w-full">Nenhuma carga encontrada.</div>`;
+          colAtraso.innerHTML = `<div class="text-xs text-slate-500 text-center py-8 w-full">Nenhuma carga.</div>`;
+          colConcluido.innerHTML = `<div class="text-xs text-slate-500 text-center py-8 w-full">Nenhuma carga.</div>`;
+          document.getElementById("countAtraso").textContent = "0";
+          document.getElementById("countPendente").textContent = "0";
+          document.getElementById("countConcluido").textContent = "0";
+          return;
+        }
+
+        lista.forEach(d => {
+          const status = (d.status || "pendente").toLowerCase();
+          if (status === "atrasado") qtdAtraso++;
+          else if (status === "concluido" || status === "concluído") qtdConcluido++;
+          else qtdPendente++;
+
+          const itensHtml = (d.itens || []).map(i => `
+            <div class="flex items-center justify-between text-xs py-1.5 px-2.5 bg-slate-900/60 rounded-xl border border-white/5 mb-1.5 last:mb-0">
+              <span class="text-white font-medium">• ${i.tipo}</span>
+              <span class="bg-amber-500/10 text-amber-400 font-black px-2.5 py-0.5 rounded-lg text-xs border border-amber-500/20">${i.qtd}x</span>
+            </div>
+          `).join("");
+
+          const dataFormatada = d.data_criacao ? new Date(d.data_criacao).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' }) : "Data recente";
+
+          // Passamos o objeto completo ou o ID para abrir a assinatura e vincular os dados do PDF
+          const botaoAssinaturaHtml = d.assinatura ? `
+            <button onclick='abrirModalAssinaturaPorId("${d.id}")' class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 text-xs font-bold py-2 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2">
+              <i class="fa-solid fa-signature"></i> Ver Assinatura do Vendedor
+            </button>
+          ` : '';
+
+          const cardHtml = `
+            <div class="card-container">
+              <div class="card-content bg-slate-900/90 border border-white/10 rounded-2xl p-5 shadow-2xl space-y-4 animate-fade-in hover:border-amber-500/40 transition-all">
+                
+                <!-- Cabeçalho do Card -->
+                <div class="flex justify-between items-start gap-2">
+                  <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 font-black px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-tie text-[10px]"></i> ${d.vendedor_nome || 'Vendedor'}
+                  </span>
+                  <span class="text-xs text-slate-400 font-mono font-medium bg-white/5 px-2.5 py-1 rounded-lg">${dataFormatada}</span>
+                </div>
+
+                <!-- Informações Principais (NF e Cliente) -->
+                <div class="space-y-1">
+                  <div class="text-lg font-black text-white tracking-wide">NF: ${d.nota_fiscal || 'S/N'}</div>
+                  <div class="text-sm font-bold text-amber-200/90 flex items-center gap-1.5">
+                    <i class="fa-solid fa-building text-amber-400 text-xs"></i> ${d.cliente || 'Cliente não informado'}
+                  </div>
+                </div>
+
+                <!-- Lista de Extintores -->
+                <div class="bg-slate-950/80 border border-white/5 p-3.5 rounded-xl space-y-1">
+                  <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Extintores da Carga
+                  </div>
+                  ${itensHtml}
+                </div>
+
+                ${d.observacao ? `
+                  <div class="text-xs text-slate-300 italic bg-white/5 p-2.5 rounded-xl border border-white/5">
+                    <span class="font-bold text-slate-400 uppercase text-[10px] block mb-0.5">Observação:</span> ${d.observacao}
+                  </div>
+                ` : ''}
+
+                <!-- Botão de Assinatura -->
+                ${botaoAssinaturaHtml}
+
+                <!-- Botões de Ação -->
+                <div class="space-y-2 pt-1">
+                  ${status !== 'concluido' && status !== 'concluído' ? `
+                    <button onclick="irParaProducao('${d.id}', '${d.nota_fiscal}')" class="w-full bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 text-xs font-black py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-950/20 active:scale-[0.98]">
+                      <i class="fa-solid fa-industry"></i> Ir para Produção
+                    </button>
+                    <button onclick="concluirCargaComHora('${d.id}')" class="w-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-black py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20 active:scale-[0.98]">
+                      <i class="fa-solid fa-check-circle"></i> Concluir Carga
+                    </button>
+                  ` : `
+                    <button onclick="atualizarStatus('${d.id}', 'pendente')" class="w-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-black py-3 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-950/20 active:scale-[0.98]">
+                      <i class="fa-solid fa-rotate-left"></i> Reabrir Carga
+                    </button>
+                  `}
+                </div>
+
+              </div>
+            </div>
+          `;
+
+          if (status === "atrasado") colAtraso.innerHTML += cardHtml;
+          else if (status === "concluido" || status === "concluído") colConcluido.innerHTML += cardHtml;
+          else colPendente.innerHTML += cardHtml;
+        });
+
+        document.getElementById("countAtraso").textContent = qtdAtraso;
+        document.getElementById("countPendente").textContent = qtdPendente;
+        document.getElementById("countConcluido").textContent = qtdConcluido;
+      }
+
+      function abrirModalAssinaturaPorId(idCarga) {
+        const d = todasDemandas.find(item => item.id === idCarga);
+        if (!d) return;
+        demandaAtualSelecionada = d;
+        document.getElementById("imgAssinaturaModal").src = d.assinatura;
+        document.getElementById("modalAssinatura").classList.remove("hidden");
+      }
+
+      function fecharModalAssinatura() {
+        document.getElementById("modalAssinatura").classList.add("hidden");
+        demandaAtualSelecionada = null;
+      }
+
+      // Função acionada quando o gerente clica em concluir a carga, contabilizando a data/hora exata da oficina
+      async function concluirCargaComHora(idCarga) {
+        const dataHoraAtual = new Date().toISOString();
+        try {
+          const { error } = await sb.from("cargas_demandas").update({ 
+            status: "concluido",
+            data_conclusao_oficina: dataHoraAtual 
+          }).eq("id", idCarga);
+          
+          if (error) throw error;
+          mostrarToast("Carga concluída! Horário da oficina registrado.");
+          await carregarDemandasDoSupabase();
+        } catch (err) {
+          console.error(err);
+          mostrarToast("Erro ao concluir carga.", "erro");
+        }
+      }
+
+      // Função que gera e baixa o PDF do pedido a partir do Modal de Assinatura
+
+function baixarPdfPedido() {
+    if (!demandaAtualSelecionada) {
+        return mostrarToast("Nenhum pedido selecionado.", "erro");
     }
 
-    function processarNotificacoes(demandas) {
-      const badge = document.getElementById("badgeNotificacao");
-      const listaNotif = document.getElementById("listaNotificacoes");
-      const concluidas = demandas.filter(d => d.status === 'concluido');
-      const lidasSalvas = JSON.parse(localStorage.getItem(`yase_notif_lidas_${vendedorLogado.id}`) || "[]");
-      const naoLidas = concluidas.filter(d => !lidasSalvas.includes(d.id));
+    const d = todasDemandas.find(item => item.id === demandaAtualSelecionada.id) || demandaAtualSelecionada;
 
-      if (naoLidas.length > 0) {
-        badge.textContent = naoLidas.length;
-        badge.classList.remove("hidden");
-        listaNotif.innerHTML = "";
-        naoLidas.forEach(d => {
-          listaNotif.innerHTML += `
-            <div class="p-2.5 bg-emerald-950/30 border border-emerald-500/20 rounded-xl space-y-1">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-white">NF: ${d.nota_fiscal} - ${d.cliente}</span>
-                <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">Concluído</span>
-              </div>
-              <p class="text-[11px] text-slate-400">Lote finalizado na oficina.</p>
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Cores padrão YaSe PRO (RGB)
+    const corPrimaria = [15, 23, 42];     // Azul Escuro / Slate 900
+    const corCinzaClaro = [241, 245, 249];// Slate 100
+    const corBorda = [203, 213, 225];     // Slate 300
+
+    let y = 15;
+
+    // --- CABEÇALHO COM FUNDO ESCURO ---
+    doc.setFillColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.rect(15, y, 180, 24, "F");
+
+    // Logo da Empresa (se houver, mantido no canto esquerdo de forma discreta dentro do bloco)
+    if (dadosEmpresaLogada && dadosEmpresaLogada.logo_base64) {
+        try {
+            doc.addImage(dadosEmpresaLogada.logo_base64, 'PNG', 18, y + 2, 20, 20);
+        } catch(e) { console.error("Erro ao inserir logo", e); }
+    }
+
+    // Nome da Empresa e Título do Relatório CENTRALIZADOS no cabeçalho
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text(dadosEmpresaLogada.nome_fantasia || dadosEmpresaLogada.razao_social || "NATIONAL JL LTDA", 105, y + 9, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("COMPROVANTE DE PEDIDO / CONTROLE DE CARGAS", 105, y + 17, { align: "center" });
+
+    y += 32;
+
+    // --- CAIXA DE DADOS DA CARGA ---
+    doc.setDrawColor(corBorda[0], corBorda[1], corBorda[2]);
+    doc.setFillColor(corCinzaClaro[0], corCinzaClaro[1], corCinzaClaro[2]);
+    doc.roundedRect(15, y, 180, 42, 2, 2, "FD");
+
+    doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("INFORMAÇÕES DA CARGA", 20, y + 7);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    
+    let linhaY = y + 15;
+    doc.text(`Número da NF:`, 20, linhaY);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${d.nota_fiscal || 'S/N'}`, 55, linhaY);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(`Cliente de Destino:`, 110, linhaY);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${d.cliente || 'Não informado'}`, 140, linhaY);
+
+    linhaY += 8;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Vendedor Resp.:`, 20, linhaY);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${d.vendedor_nome || 'Não informado'}`, 55, linhaY);
+
+    linhaY += 8;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Data Solicitação:`, 20, linhaY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${d.data_criacao ? new Date(d.data_criacao).toLocaleString("pt-BR") : 'N/A'}`, 55, linhaY);
+
+    doc.text(`Conclusão Oficina:`, 110, linhaY);
+    doc.setFont("helvetica", "bold");
+    const dataConclusaoTexto = d.data_conclusao_oficina ? new Date(d.data_conclusao_oficina).toLocaleString("pt-BR") : 'Pendente';
+    doc.text(`${dataConclusaoTexto}`, 140, linhaY);
+
+    y += 50;
+
+    // --- TABELA DE EXTINTORES ---
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.text("QUANTIDADE DE EXTINTORES POR MODELO", 15, y);
+    y += 4;
+
+    // Cabeçalho da Tabela
+    doc.setFillColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.rect(15, y, 180, 8, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.text("MODELO / ESPECIFICAÇÃO DO EXTINTOR", 20, y + 5.5);
+    doc.text("QUANTIDADE", 155, y + 5.5);
+
+    y += 8;
+
+    // Itens da Tabela
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(51, 65, 85);
+
+    if (d.itens && d.itens.length > 0) {
+        d.itens.forEach((item, index) => {
+            if (index % 2 === 0) {
+                doc.setFillColor(248, 250, 252);
+                doc.rect(15, y, 180, 8, "F");
+            }
+            doc.setDrawColor(226, 232, 240);
+            doc.rect(15, y, 180, 8, "S");
+
+            doc.text(`• ${item.tipo}`, 20, y + 5.5);
+            doc.setFont("helvetica", "bold");
+            doc.text(`${item.qtd} un.`, 160, y + 5.5);
+            doc.setFont("helvetica", "normal");
+
+            y += 8;
+        });
+    } else {
+        doc.rect(15, y, 180, 8, "S");
+        doc.text("Nenhum item registrado nesta carga.", 20, y + 5.5);
+        y += 8;
+    }
+
+    y += 15;
+
+    // --- SEÇÃO DE ASSINATURA ---
+    if (y > 230) {
+        doc.addPage();
+        y = 20;
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.text("ASSINATURA DO VENDEDOR", 15, y);
+    y += 6;
+
+    // Caixa para a Assinatura
+    doc.setDrawColor(corBorda[0], corBorda[1], corBorda[2]);
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(15, y, 80, 35, 2, 2, "FD");
+
+    if (d.assinatura) {
+        try {
+            const img = new Image();
+            img.src = d.assinatura;
+            img.onload = () => {
+                const canvasTemp = document.createElement("canvas");
+                canvasTemp.width = img.width;
+                canvasTemp.height = img.height;
+                const ctxTemp = canvasTemp.getContext("2d");
+                ctxTemp.fillStyle = "#FFFFFF";
+                ctxTemp.fillRect(0, 0, canvasTemp.width, canvasTemp.height);
+                ctxTemp.drawImage(img, 0, 0);
+
+                const imgData = ctxTemp.getImageData(0, 0, canvasTemp.width, canvasTemp.height);
+                for (let i = 0; i < imgData.data.length; i += 4) {
+                    if (imgData.data[i] < 220 || imgData.data[i+1] < 220 || imgData.data[i+2] < 220) {
+                        imgData.data[i] = 10;
+                        imgData.data[i+1] = 10;
+                        imgData.data[i+2] = 10;
+                    }
+                }
+                ctxTemp.putImageData(imgData, 0, 0);
+                const assinaturaLimpa = canvasTemp.toDataURL("image/png");
+
+                doc.addImage(assinaturaLimpa, 'PNG', 18, y + 2, 74, 30);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+                doc.text(`Vendedor: ${d.vendedor_nome || 'N/A'}`, 100, y + 20);
+                doc.text(`Emitido em: ${new Date().toLocaleString("pt-BR")}`, 100, y + 26);
+
+                doc.save(`Pedido_NF_${d.nota_fiscal || 'carga'}.pdf`);
+                mostrarToast("PDF baixado com sucesso!");
+            };
+            return;
+        } catch(e) {
+            console.error("Erro ao processar assinatura:", e);
+        }
+    } else {
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.text("Sem assinatura registrada", 25, y + 20);
+    }
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.text(`Vendedor: ${d.vendedor_nome || 'N/A'}`, 100, y + 20);
+    doc.text(`Emitido em: ${new Date().toLocaleString("pt-BR")}`, 100, y + 26);
+
+    doc.save(`Pedido_NF_${d.nota_fiscal || 'carga'}.pdf`);
+    mostrarToast("PDF baixado com sucesso!");
+}
+function irParaProducao(idCarga, nf) {
+        window.location.href = `Rastreio_Full.html?cargaId=${idCarga}&nf=${nf}`;
+      }
+
+      async function atualizarStatus(id, novoStatus) {
+        try {
+          const { error } = await sb.from("cargas_demandas").update({ status: novoStatus }).eq("id", id);
+          if (error) throw error;
+          mostrarToast("Status atualizado com sucesso!");
+          await carregarDemandasDoSupabase();
+        } catch (err) {
+          console.error(err);
+          mostrarToast("Erro ao atualizar status.", "erro");
+        }
+      }
+
+      function filtrarDemandas() {
+        const termo = document.getElementById("inputBusca").value.toLowerCase();
+        const filtradas = todasDemandas.filter(d => 
+          (d.cliente && d.cliente.toLowerCase().includes(termo)) ||
+          (d.nota_fiscal && d.nota_fiscal.toLowerCase().includes(termo)) ||
+          (d.vendedor_nome && d.vendedor_nome.toLowerCase().includes(termo))
+        );
+        renderizarKanban(filtradas);
+      }
+
+      function abrirModalCarga() { document.getElementById("modalCarga").classList.remove("hidden"); }
+      function fecharModalCarga() {
+        document.getElementById("modalCarga").classList.add("hidden");
+        itensModalTemp = [];
+        document.getElementById("containerResumoModal").classList.add("hidden");
+      }
+
+      async function carregarVendedoresModal() {
+        try {
+          const { data } = await sb.from("usu_arios").select("id, nome_completo").eq("empresa_id", empresaIdLogada);
+          const select = document.getElementById("selectVendedorModal");
+          select.innerHTML = '<option value="">Selecione o vendedor...</option>';
+          if (data) {
+            data.forEach(v => {
+              select.innerHTML += `<option value="${v.id}" data-nome="${v.nome_completo}">${v.nome_completo}</option>`;
+            });
+          }
+        } catch (err) { console.error(err); }
+      }
+
+      function adicionarItemTempModal() {
+        const tipo = document.getElementById("selectTipoExtintorModal").value;
+        const qtd = parseInt(document.getElementById("inputQtdItemModal").value);
+        if (!tipo || !qtd) return mostrarToast("Preencha o modelo e quantidade.", "erro");
+
+        itensModalTemp.push({ tipo, qtd });
+        renderizarResumoModal();
+        document.getElementById("selectTipoExtintorModal").value = "";
+        document.getElementById("inputQtdItemModal").value = "1";
+      }
+
+      function renderizarResumoModal() {
+        const container = document.getElementById("containerResumoModal");
+        const lista = document.getElementById("listaTemporariaModal");
+        lista.innerHTML = "";
+        if (itensModalTemp.length === 0) {
+          container.classList.add("hidden");
+          return;
+        }
+        container.classList.remove("hidden");
+        itensModalTemp.forEach((item, index) => {
+          lista.innerHTML += `
+            <div class="flex items-center justify-between bg-slate-900 border border-white/5 px-3 py-2 rounded-xl text-xs">
+              <span class="text-white font-medium">${item.qtd}x ${item.tipo}</span>
+              <button type="button" onclick="itensModalTemp.splice(${index},1);renderizarResumoModal();" class="text-red-400 hover:text-red-300 font-bold">Remover</button>
             </div>
           `;
         });
-      } else {
-        badge.classList.add("hidden");
-        listaNotif.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>`;
       }
-    }
 
-    function toggleModalNotificacoes() {
-      document.getElementById("modalNotificacoes").classList.toggle("hidden");
-    }
+      async function salvarNovaCargaOficina() {
+        const select = document.getElementById("selectVendedorModal");
+        const opt = select.options[select.selectedIndex];
+        const vendedorId = select.value;
+        const vendedorNome = opt ? opt.getAttribute("data-nome") : "Oficina / Interno";
+        const nf = document.getElementById("inputNFModal").value.trim();
+        const cliente = document.getElementById("inputLocalDestinoModal").value.trim();
 
-    function marcarTodasComoLidas() {
-      const concluidas = todasDemandasCache.filter(d => d.status === 'concluido');
-      const idsConcluidas = concluidas.map(d => d.id);
-      localStorage.setItem(`yase_notif_lidas_${vendedorLogado.id}`, JSON.stringify(idsConcluidas));
-      document.getElementById("badgeNotificacao").classList.add("hidden");
-      document.getElementById("listaNotificacoes").innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>`;
-    }
+        if (!nf || !cliente || itensModalTemp.length === 0) {
+          return mostrarToast("Preencha a NF, o cliente e adicione itens.", "erro");
+        }
 
-    function fazerLogout() {
-      localStorage.removeItem("yase_vendedor_logado");
-      localStorage.removeItem("yase_empresa_id");
-      window.location.href = "LoginVendedor.html";
-    }
+        try {
+          const { error } = await sb.from("cargas_demandas").insert([{
+            empresa_id: empresaIdLogada,
+            vendedor_id: vendedorId || null,
+            vendedor_nome: vendedorNome,
+            nota_fiscal: nf,
+            cliente: cliente,
+            itens: itensModalTemp,
+            status: "pendente",
+            data_criacao: new Date().toISOString()
+          }]);
 
-    function mostrarToast(mensagem, tipo = "sucesso") {
-      const container = document.getElementById("toastContainer");
-      if (!container) return;
-      const toast = document.createElement("div");
-      const corFundo = tipo === "sucesso" ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" : "bg-red-950/90 text-red-400 border-red-500/30";
-      toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-300 translate-x-10 opacity-0 ${corFundo}`;
-      toast.innerHTML = `<span class="text-xs font-black tracking-wide">${mensagem}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => toast.classList.remove("translate-x-10", "opacity-0"), 10);
-      setTimeout(() => {
-        toast.classList.add("translate-x-10", "opacity-0");
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
-    }
-  </script>
-</body>
+          if (error) throw error;
+          mostrarToast("Carga criada com sucesso!");
+          fecharModalCarga();
+          await carregarDemandasDoSupabase();
+        } catch (err) {
+          console.error(err);
+          mostrarToast("Erro ao criar carga.", "erro");
+        }
+      }
+
+      function mostrarToast(mensagem, tipo = "sucesso") {
+        const container = document.getElementById("toastContainer");
+        if (!container) return;
+        const toast = document.createElement("div");
+        const corFundo = tipo === "sucesso" ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" : "bg-red-950/90 text-red-400 border-red-500/30";
+        toast.className = `px-5 py-3 rounded-xl shadow-2xl text-xs font-black tracking-wide border backdrop-blur-md ${corFundo} animate-fade-in`;
+        toast.textContent = mensagem;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+      }
+    </script>
+  </body>
 </html>

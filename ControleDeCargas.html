@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- jsPDF CDN para geração do PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
       body { background-color: #0b0f19; color: #f8fafc; font-family: "Inter", sans-serif; }
@@ -50,18 +52,16 @@
         max-width: 380px;
       }
 
-
       #canvasAssinatura {
-      touch-action: none;
-      background-color: #ffffff; /* Fundo branco */
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 0.75rem;
-      width: 100%;
-      height: 140px;
-      cursor: crosshair;
+        touch-action: none;
+        background-color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0.75rem;
+        width: 100%;
+        height: 140px;
+        cursor: crosshair;
       }
 
-      /* Setas de Navegação Horizontal */
       .nav-arrow {
         position: absolute;
         top: 50%;
@@ -197,9 +197,16 @@
         <div class="bg-white p-4 rounded-2xl border border-white/10 flex items-center justify-center">
           <img id="imgAssinaturaModal" src="" alt="Assinatura" class="max-h-40 object-contain w-full" />
         </div>
-        <button onclick="fecharModalAssinatura()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider">
-          Fechar
-        </button>
+        
+        <!-- Botões do Modal: Baixar PDF e Fechar -->
+        <div class="space-y-2">
+          <button onclick="baixarPdfPedido()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20 transition-all">
+            <i class="fa-solid fa-file-pdf"></i> Baixar Pedido (PDF)
+          </button>
+          <button onclick="fecharModalAssinatura()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider">
+            Fechar
+          </button>
+        </div>
       </div>
     </div>
 
@@ -280,12 +287,24 @@
       
       let todasDemandas = [];
       let itensModalTemp = [];
+      let demandaAtualSelecionada = null; // Variável para armazenar a demanda ativa no modal de assinatura
+      let dadosEmpresaLogada = {}; // Para armazenar o logo e nome da empresa
 
       window.addEventListener("DOMContentLoaded", async () => {
         if (window.lucide) lucide.createIcons();
+        await carregarDadosEmpresa();
         await carregarDemandasDoSupabase();
         await carregarVendedoresModal();
       });
+
+      async function carregarDadosEmpresa() {
+        try {
+          const { data, error } = await sb.from("empresas").select("*").eq("id", empresaIdLogada).single();
+          if (data) dadosEmpresaLogada = data;
+        } catch (err) {
+          console.error("Erro ao carregar dados da empresa:", err);
+        }
+      }
 
       function rolarColuna(idColuna, direcao) {
         const coluna = document.getElementById(idColuna);
@@ -348,9 +367,9 @@
 
           const dataFormatada = d.data_criacao ? new Date(d.data_criacao).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' }) : "Data recente";
 
-          // Botão de assinatura condicional (só aparece se a demanda tiver assinatura salva)
+          // Passamos o objeto completo ou o ID para abrir a assinatura e vincular os dados do PDF
           const botaoAssinaturaHtml = d.assinatura ? `
-            <button onclick='abrirModalAssinatura("${d.assinatura}")' class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 text-xs font-bold py-2 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2">
+            <button onclick='abrirModalAssinaturaPorId("${d.id}")' class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 text-xs font-bold py-2 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2">
               <i class="fa-solid fa-signature"></i> Ver Assinatura do Vendedor
             </button>
           ` : '';
@@ -398,7 +417,7 @@
                     <button onclick="irParaProducao('${d.id}', '${d.nota_fiscal}')" class="w-full bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 text-xs font-black py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-950/20 active:scale-[0.98]">
                       <i class="fa-solid fa-industry"></i> Ir para Produção
                     </button>
-                    <button onclick="atualizarStatus('${d.id}', 'concluido')" class="w-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-black py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20 active:scale-[0.98]">
+                    <button onclick="concluirCargaComHora('${d.id}')" class="w-full bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-black py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20 active:scale-[0.98]">
                       <i class="fa-solid fa-check-circle"></i> Concluir Carga
                     </button>
                   ` : `
@@ -422,16 +441,238 @@
         document.getElementById("countConcluido").textContent = qtdConcluido;
       }
 
-      function abrirModalAssinatura(base64Url) {
-        document.getElementById("imgAssinaturaModal").src = base64Url;
+      function abrirModalAssinaturaPorId(idCarga) {
+        const d = todasDemandas.find(item => item.id === idCarga);
+        if (!d) return;
+        demandaAtualSelecionada = d;
+        document.getElementById("imgAssinaturaModal").src = d.assinatura;
         document.getElementById("modalAssinatura").classList.remove("hidden");
       }
 
       function fecharModalAssinatura() {
         document.getElementById("modalAssinatura").classList.add("hidden");
+        demandaAtualSelecionada = null;
       }
 
-      function irParaProducao(idCarga, nf) {
+      // Função acionada quando o gerente clica em concluir a carga, contabilizando a data/hora exata da oficina
+      async function concluirCargaComHora(idCarga) {
+        const dataHoraAtual = new Date().toISOString();
+        try {
+          const { error } = await sb.from("cargas_demandas").update({ 
+            status: "concluido",
+            data_conclusao_oficina: dataHoraAtual 
+          }).eq("id", idCarga);
+          
+          if (error) throw error;
+          mostrarToast("Carga concluída! Horário da oficina registrado.");
+          await carregarDemandasDoSupabase();
+        } catch (err) {
+          console.error(err);
+          mostrarToast("Erro ao concluir carga.", "erro");
+        }
+      }
+
+      // Função que gera e baixa o PDF do pedido a partir do Modal de Assinatura
+
+function baixarPdfPedido() {
+    if (!demandaAtualSelecionada) {
+        return mostrarToast("Nenhum pedido selecionado.", "erro");
+    }
+
+    const d = todasDemandas.find(item => item.id === demandaAtualSelecionada.id) || demandaAtualSelecionada;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Cores padrão YaSe PRO (RGB)
+    const corPrimaria = [15, 23, 42];     // Azul Escuro / Slate 900
+    const corCinzaClaro = [241, 245, 249];// Slate 100
+    const corBorda = [203, 213, 225];     // Slate 300
+
+    let y = 15;
+
+    // --- CABEÇALHO COM FUNDO ESCURO ---
+    doc.setFillColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.rect(15, y, 180, 24, "F");
+
+    // Logo da Empresa (se houver, mantido no canto esquerdo de forma discreta dentro do bloco)
+    if (dadosEmpresaLogada && dadosEmpresaLogada.logo_base64) {
+        try {
+            doc.addImage(dadosEmpresaLogada.logo_base64, 'PNG', 18, y + 2, 20, 20);
+        } catch(e) { console.error("Erro ao inserir logo", e); }
+    }
+
+    // Nome da Empresa e Título do Relatório CENTRALIZADOS no cabeçalho
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text(dadosEmpresaLogada.nome_fantasia || dadosEmpresaLogada.razao_social || "NATIONAL JL LTDA", 105, y + 9, { align: "center" });
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("COMPROVANTE DE PEDIDO / CONTROLE DE CARGAS", 105, y + 17, { align: "center" });
+
+    y += 32;
+
+    // --- CAIXA DE DADOS DA CARGA ---
+    doc.setDrawColor(corBorda[0], corBorda[1], corBorda[2]);
+    doc.setFillColor(corCinzaClaro[0], corCinzaClaro[1], corCinzaClaro[2]);
+    doc.roundedRect(15, y, 180, 42, 2, 2, "FD");
+
+    doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("INFORMAÇÕES DA CARGA", 20, y + 7);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    
+    let linhaY = y + 15;
+    doc.text(`Número da NF:`, 20, linhaY);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${d.nota_fiscal || 'S/N'}`, 55, linhaY);
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(`Cliente de Destino:`, 110, linhaY);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${d.cliente || 'Não informado'}`, 140, linhaY);
+
+    linhaY += 8;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Vendedor Resp.:`, 20, linhaY);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${d.vendedor_nome || 'Não informado'}`, 55, linhaY);
+
+    linhaY += 8;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Data Solicitação:`, 20, linhaY);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${d.data_criacao ? new Date(d.data_criacao).toLocaleString("pt-BR") : 'N/A'}`, 55, linhaY);
+
+    doc.text(`Conclusão Oficina:`, 110, linhaY);
+    doc.setFont("helvetica", "bold");
+    const dataConclusaoTexto = d.data_conclusao_oficina ? new Date(d.data_conclusao_oficina).toLocaleString("pt-BR") : 'Pendente';
+    doc.text(`${dataConclusaoTexto}`, 140, linhaY);
+
+    y += 50;
+
+    // --- TABELA DE EXTINTORES ---
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.text("QUANTIDADE DE EXTINTORES POR MODELO", 15, y);
+    y += 4;
+
+    // Cabeçalho da Tabela
+    doc.setFillColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.rect(15, y, 180, 8, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.text("MODELO / ESPECIFICAÇÃO DO EXTINTOR", 20, y + 5.5);
+    doc.text("QUANTIDADE", 155, y + 5.5);
+
+    y += 8;
+
+    // Itens da Tabela
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(51, 65, 85);
+
+    if (d.itens && d.itens.length > 0) {
+        d.itens.forEach((item, index) => {
+            if (index % 2 === 0) {
+                doc.setFillColor(248, 250, 252);
+                doc.rect(15, y, 180, 8, "F");
+            }
+            doc.setDrawColor(226, 232, 240);
+            doc.rect(15, y, 180, 8, "S");
+
+            doc.text(`• ${item.tipo}`, 20, y + 5.5);
+            doc.setFont("helvetica", "bold");
+            doc.text(`${item.qtd} un.`, 160, y + 5.5);
+            doc.setFont("helvetica", "normal");
+
+            y += 8;
+        });
+    } else {
+        doc.rect(15, y, 180, 8, "S");
+        doc.text("Nenhum item registrado nesta carga.", 20, y + 5.5);
+        y += 8;
+    }
+
+    y += 15;
+
+    // --- SEÇÃO DE ASSINATURA ---
+    if (y > 230) {
+        doc.addPage();
+        y = 20;
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.text("ASSINATURA DO VENDEDOR", 15, y);
+    y += 6;
+
+    // Caixa para a Assinatura
+    doc.setDrawColor(corBorda[0], corBorda[1], corBorda[2]);
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(15, y, 80, 35, 2, 2, "FD");
+
+    if (d.assinatura) {
+        try {
+            const img = new Image();
+            img.src = d.assinatura;
+            img.onload = () => {
+                const canvasTemp = document.createElement("canvas");
+                canvasTemp.width = img.width;
+                canvasTemp.height = img.height;
+                const ctxTemp = canvasTemp.getContext("2d");
+                ctxTemp.fillStyle = "#FFFFFF";
+                ctxTemp.fillRect(0, 0, canvasTemp.width, canvasTemp.height);
+                ctxTemp.drawImage(img, 0, 0);
+
+                const imgData = ctxTemp.getImageData(0, 0, canvasTemp.width, canvasTemp.height);
+                for (let i = 0; i < imgData.data.length; i += 4) {
+                    if (imgData.data[i] < 220 || imgData.data[i+1] < 220 || imgData.data[i+2] < 220) {
+                        imgData.data[i] = 10;
+                        imgData.data[i+1] = 10;
+                        imgData.data[i+2] = 10;
+                    }
+                }
+                ctxTemp.putImageData(imgData, 0, 0);
+                const assinaturaLimpa = canvasTemp.toDataURL("image/png");
+
+                doc.addImage(assinaturaLimpa, 'PNG', 18, y + 2, 74, 30);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+                doc.text(`Vendedor: ${d.vendedor_nome || 'N/A'}`, 100, y + 20);
+                doc.text(`Emitido em: ${new Date().toLocaleString("pt-BR")}`, 100, y + 26);
+
+                doc.save(`Pedido_NF_${d.nota_fiscal || 'carga'}.pdf`);
+                mostrarToast("PDF baixado com sucesso!");
+            };
+            return;
+        } catch(e) {
+            console.error("Erro ao processar assinatura:", e);
+        }
+    } else {
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.text("Sem assinatura registrada", 25, y + 20);
+    }
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(corPrimaria[0], corPrimaria[1], corPrimaria[2]);
+    doc.text(`Vendedor: ${d.vendedor_nome || 'N/A'}`, 100, y + 20);
+    doc.text(`Emitido em: ${new Date().toLocaleString("pt-BR")}`, 100, y + 26);
+
+    doc.save(`Pedido_NF_${d.nota_fiscal || 'carga'}.pdf`);
+    mostrarToast("PDF baixado com sucesso!");
+}
+function irParaProducao(idCarga, nf) {
         window.location.href = `Rastreio_Full.html?cargaId=${idCarga}&nf=${nf}`;
       }
 
@@ -540,8 +781,6 @@
           mostrarToast("Erro ao criar carga.", "erro");
         }
       }
-
-      
 
       function mostrarToast(mensagem, tipo = "sucesso") {
         const container = document.getElementById("toastContainer");

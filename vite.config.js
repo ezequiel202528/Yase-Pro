@@ -44,7 +44,7 @@ export default defineConfig({
         vendedores: "./Vendedores.html",
         loginVendedor: "./LoginVendedor.html",
         painelVendedor: "./PainelVendedor.html",
-        historicoDemandas: "./HistoricoDemandas.html",
+        historicoDemandas: "./historicoDemandas.html",
       },
     },
   },

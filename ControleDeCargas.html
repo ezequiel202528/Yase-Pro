@@ -104,8 +104,8 @@
   <body class="min-h-screen p-4 md:p-6">
     <div class="max-w-7xl mx-auto">
       
-      <!-- Header -->
-      <header class="glass-card mb-8 p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+<!-- Header -->
+      <header class="glass-card mb-8 p-6 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-2xl">
         <div class="flex items-center gap-4">
           <div class="w-12 h-12 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center text-amber-400">
             <i data-lucide="shield-check" class="w-6 h-6"></i>
@@ -116,14 +116,31 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="relative w-48 md:w-80">
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Campo de Busca por Texto (Cliente, NF, Vendedor) -->
+          <div class="relative w-full sm:w-64">
             <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
-            <input type="text" id="inputBusca" oninput="filtrarDemandas()" placeholder="Buscar Cliente, NF ou Vendedor..."
+            <input type="text" id="inputBusca" oninput="filtrarDemandas()" placeholder="Cliente, NF ou Vendedor..."
                    class="input-yase w-full pl-10 pr-4 py-3 rounded-xl text-sm" />
           </div>
 
-          <button onclick="abrirModalCarga()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-6 py-3 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all active:scale-95 uppercase tracking-wider">
+          <!-- Filtro de Data Inicial -->
+          <div class="flex items-center gap-2">
+            <input type="date" id="filtroDataInicio" onchange="filtrarDemandas()" title="Data Inicial"
+                   class="input-yase px-3 py-3 rounded-xl text-xs text-slate-300" />
+            <span class="text-slate-500 text-xs font-bold">até</span>
+            <!-- Filtro de Data Final -->
+            <input type="date" id="filtroDataFim" onchange="filtrarDemandas()" title="Data Final"
+                   class="input-yase px-3 py-3 rounded-xl text-xs text-slate-300" />
+          </div>
+
+          <!-- Botão Limpar Filtros -->
+          <button onclick="limparFiltrosData()" title="Limpar Filtros" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-3 rounded-xl text-xs font-bold transition-all border border-white/10 flex items-center justify-center">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+
+          <!-- Botão Nova Carga -->
+          <button onclick="abrirModalCarga()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-6 py-3 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all active:scale-95 uppercase tracking-wider whitespace-nowrap ml-auto lg:ml-0">
             <i data-lucide="plus-circle" class="w-4 h-4"></i> Nova Carga
           </button>
         </div>
@@ -741,16 +758,49 @@ function irParaProducao(idCarga, nf) {
         }
       }
 
-      function filtrarDemandas() {
-        const termo = document.getElementById("inputBusca").value.toLowerCase();
-        const filtradas = todasDemandas.filter(d => 
-          (d.cliente && d.cliente.toLowerCase().includes(termo)) ||
-          (d.nota_fiscal && d.nota_fiscal.toLowerCase().includes(termo)) ||
-          (d.vendedor_nome && d.vendedor_nome.toLowerCase().includes(termo))
-        );
+function filtrarDemandas() {
+        const termo = document.getElementById("inputBusca").value.toLowerCase().trim();
+        const dataInicioVal = document.getElementById("filtroDataInicio").value;
+        const dataFimVal = document.getElementById("filtroDataFim").value;
+
+        // Converte as datas dos inputs para objetos Date (ignorando fuso horário na comparação de dias)
+        let dataInicio = dataInicioVal ? new Date(dataInicioVal + "T00:00:00") : null;
+        let dataFim = dataFimVal ? new Date(dataFimVal + "T23:59:59") : null;
+
+        const filtradas = todasDemandas.filter(d => {
+            // 1. Filtro por Texto (Cliente, NF ou Vendedor)
+            const matchTexto = !termo || 
+              (d.cliente && d.cliente.toLowerCase().includes(termo)) ||
+              (d.nota_fiscal && d.nota_fiscal.toLowerCase().includes(termo)) ||
+              (d.vendedor_nome && d.vendedor_nome.toLowerCase().includes(termo));
+
+            if (!matchTexto) return false;
+
+            // 2. Filtro por Data Retroativa / Período
+            if (!d.data_criacao) return true; // Se não tiver data, exibe para não ocultar registros órfãos
+
+            const dataCarga = new Date(d.data_criacao);
+
+            if (dataInicio && dataCarga < dataInicio) {
+                return false;
+            }
+            if (dataFim && dataCarga > dataFim) {
+                return false;
+            }
+
+            return true;
+        });
+
         renderizarKanban(filtradas);
       }
 
+      function limparFiltrosData() {
+        document.getElementById("inputBusca").value = "";
+        document.getElementById("filtroDataInicio").value = "";
+        document.getElementById("filtroDataFim").value = "";
+        renderizarKanban(todasDemandas);
+        mostrarToast("Filtros limpos!");
+      }
       function abrirModalCarga() { document.getElementById("modalCarga").classList.remove("hidden"); }
       function fecharModalCarga() {
         document.getElementById("modalCarga").classList.add("hidden");

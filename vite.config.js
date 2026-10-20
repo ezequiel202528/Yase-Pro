@@ -44,7 +44,7 @@ export default defineConfig({
         vendedores: "./Vendedores.html",
         loginVendedor: "./LoginVendedor.html",
         painelVendedor: "./PainelVendedor.html",
-        historicoDemandas: "./historicoDemandas.html",
+        historicoDemandas: "./historicoDemandas.html", // <-- com 'h' minúsculo igual ao arquivo físico
       },
     },
   },

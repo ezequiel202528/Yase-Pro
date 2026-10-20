@@ -3,87 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YaSe PRO - Acesso Vendedor</title>
+  <title>YaSe PRO - Nova Demanda</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { background-color: #0b0f19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-    .login-input { background-color: #111827; border: 1px solid rgba(255, 255, 255, 0.1); color: white; outline: none; transition: all 0.2s; }
-    .login-input:focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+    .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .input-yase { background-color: #111827; border: 1px solid rgba(255, 255, 255, 0.1); color: white; outline: none; transition: all 0.2s; }
+    .input-yase:focus { border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    /* Estilo do Canvas de Assinatura */
+    #canvasAssinatura {
+      touch-action: none;
+      background-color: #0f172a;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 0.75rem;
+      width: 100%;
+      height: 140px;
+      cursor: crosshair;
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex flex-col pb-24">
 
-  <!-- Container Principal Otimizado para Celular -->
-  <div class="w-full max-w-md bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
-    
-    <!-- Cabeçalho / Logo -->
-    <div class="text-center mb-8">
-      <div class="w-14 h-14 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-amber-400 text-2xl font-black">
+  <!-- Header Superior com Sino -->
+  <header class="glass-card border-b border-white/10 sticky top-0 z-40 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center justify-center text-amber-400 font-black">
         <i class="fa-solid fa-fire-extinguisher"></i>
       </div>
-      <h1 class="text-xl font-bold tracking-wide text-white">YaSe <span class="text-amber-500">PRO</span></h1>
-      <p class="text-xs text-slate-400 mt-1">Portal do Vendedor Externo</p>
+      <div>
+        <h1 class="text-sm font-bold tracking-wide text-white">YaSe <span class="text-amber-500">PRO</span></h1>
+        <p id="nomeVendedorHeader" class="text-[11px] text-slate-400">A carregar perfil...</p>
+      </div>
     </div>
 
-    <!-- Formulário de Login -->
-    <form id="formLoginVendedor" class="space-y-5">
-      
-      <!-- Passo 1: CNPJ da Empresa -->
-      <div>
-        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">CNPJ da Empresa</label>
-        <div class="relative">
-          <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500">
-            <i class="fa-solid fa-building"></i>
-          </span>
-          <input type="text" id="cnpjEmpresa" placeholder="00000000000100" required
-                 class="login-input w-full h-12 pl-11 pr-4 rounded-xl text-sm">
+    <div class="flex items-center gap-3">
+      <!-- Botão do Sino -->
+      <div class="relative">
+        <button onclick="toggleModalNotificacoes()" class="relative w-10 h-10 bg-slate-800/80 hover:bg-slate-700 border border-white/10 rounded-xl flex items-center justify-center text-slate-300 hover:text-white transition-all">
+          <i class="fa-solid fa-bell text-sm"></i>
+          <span id="badgeNotificacao" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg">0</span>
+        </button>
+
+        <div id="modalNotificacoes" class="hidden absolute right-0 sm:right-0 mt-2 w-72 sm:w-80 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
+          <div class="p-3 bg-slate-950/60 border-b border-white/5 flex items-center justify-between">
+            <span class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-bell text-amber-400"></i> Notificações
+            </span>
+            <button onclick="marcarTodasComoLidas()" class="text-[10px] text-amber-400 hover:underline">Marcar lidas</button>
+          </div>
+          <div id="listaNotificacoes" class="max-h-64 overflow-y-auto custom-scroll p-2 space-y-2">
+            <p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>
+          </div>
         </div>
       </div>
 
-      <!-- Passo 2: Selecionar Vendedor -->
-      <div>
-        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Selecionar Vendedor</label>
-        <div class="relative">
-          <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500">
-            <i class="fa-solid fa-user-tie"></i>
-          </span>
-          <select id="selectVendedor" disabled required
-                  class="login-input w-full h-12 pl-11 pr-4 rounded-xl text-sm appearance-none disabled:opacity-50 disabled:cursor-not-allowed">
-            <option value="">Primeiro digite o CNPJ...</option>
-          </select>
-          <span class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500">
-            <i class="fa-solid fa-chevron-down text-xs"></i>
-          </span>
-        </div>
-      </div>
-
-      <!-- Passo 3: Senha -->
-      <div>
-        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Palavra-passe / Senha</label>
-        <div class="relative">
-          <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500">
-            <i class="fa-solid fa-lock"></i>
-          </span>
-          <input type="password" id="senhaVendedor" placeholder="••••••••" required
-                 class="login-input w-full h-12 pl-11 pr-12 rounded-xl text-sm">
-          <button type="button" onclick="toggleSenha()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white">
-            <i id="iconeOlho" class="fa-solid fa-eye"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Botão de Entrar -->
-      <button type="submit" id="btnEntrar"
-              class="w-full h-12 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98]">
-        Entrar no Sistema
+      <button onclick="fazerLogout()" class="text-xs text-red-400 hover:text-red-300 font-semibold bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-xl transition-all">
+        <i class="fa-solid fa-right-from-bracket mr-1"></i> Sair
       </button>
-    </form>
-  </div>
+    </div>
+  </header>
 
-  <!-- Toast Container -->
+  <!-- Container Principal -->
+  <main class="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <div class="glass-card rounded-3xl p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-sm font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle"></i> Criar Nova Demanda / Carga
+        </h2>
+        <span class="text-[10px] bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-full font-bold border border-amber-500/20">Modo Vendedor</span>
+      </div>
+
+      <form id="formDemanda" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Nº Nota Fiscal (NF) / Pedido</label>
+            <input type="text" id="inputNF" placeholder="Ex: 1045" required class="input-yase w-full h-12 px-4 rounded-xl text-sm">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Cliente / Local de Destino</label>
+            <input type="text" id="inputCliente" placeholder="Nome do Cliente" required class="input-yase w-full h-12 px-4 rounded-xl text-sm">
+          </div>
+        </div>
+
+        <!-- Seção de Adicionar Itens com Regra Inteligente de KG / Litros -->
+        <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-3">
+          <label class="text-[11px] font-bold text-slate-300 uppercase flex items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked text-amber-400"></i> Adicionar Extintores / Equipamentos
+          </label>
+          
+          <div class="space-y-2">
+            <select id="selectTipoExtintor" onchange="filtrarCapacidadesPorTipo()" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required>
+              <option value="">A carregar tipos do sistema...</option>
+            </select>
+
+            <select id="selectCapacidadeExtintor" class="input-yase w-full h-11 px-3 rounded-xl text-xs" required disabled>
+              <option value="">Selecione o tipo primeiro...</option>
+            </select>
+
+            <div class="flex gap-2 pt-1">
+              <input type="number" id="inputQtd" placeholder="Qtd" min="1" value="1" class="input-yase w-24 h-11 px-3 rounded-xl text-xs text-center font-bold">
+              <button type="button" onclick="adicionarItemTemporario()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 h-11 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus"></i> Adicionar à Carga
+              </button>
+            </div>
+          </div>
+
+          <div id="containerItens" class="hidden space-y-2 pt-2 border-t border-white/5">
+            <div id="listaItensTemp" class="space-y-1.5 max-h-36 overflow-y-auto custom-scroll pr-1"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Observações para a Oficina</label>
+          <textarea id="inputObs" rows="2" placeholder="Ex: Cliente pediu urgência na recarga..." class="input-yase w-full p-3 rounded-xl text-sm resize-none"></textarea>
+        </div>
+
+        <!-- SEÇÃO DE ASSINATURA DIGITAL DO VENDEDOR -->
+        <div class="p-4 bg-slate-950/40 border border-white/5 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-[11px] font-bold text-slate-300 uppercase flex items-center gap-2">
+              <i class="fa-solid fa-signature text-amber-400"></i> Assinatura Digital do Vendedor *
+            </label>
+            <button type="button" onclick="limparAssinatura()" class="text-[10px] text-amber-400 hover:underline">Limpar</button>
+          </div>
+          <p class="text-[10px] text-slate-400">Assine no espaço abaixo usando o dedo ou o mouse:</p>
+          
+          <canvas id="canvasAssinatura"></canvas>
+        </div>
+
+        <button type="submit" id="btnEnviarDemanda" class="w-full h-12 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98]">
+          Enviar Demanda para a Oficina
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Menu Inferior estilo App -->
+  <nav class="fixed bottom-0 left-0 right-0 glass-card border-t border-white/10 p-3 flex justify-around items-center z-40 max-w-md mx-auto rounded-t-2xl shadow-2xl">
+    <a href="PainelVendedor.html" class="flex flex-col items-center text-amber-400 font-bold text-[10px] transition-all">
+      <i class="fa-solid fa-plus-circle text-lg mb-0.5"></i>
+      Nova Demanda
+    </a>
+    <a href="HistoricoDemandas.html" class="flex flex-col items-center text-slate-400 hover:text-slate-200 font-medium text-[10px] transition-all">
+      <i class="fa-solid fa-clock-rotate-left text-lg mb-0.5"></i>
+      Minhas Demandas
+    </a>
+  </nav>
+
   <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Supabase CDN -->
@@ -93,136 +164,331 @@
     const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
     const sb = supabase.createClient(URL_SB, KEY_SB);
 
-    let empresaCacheId = null;
-    let vendedoresLista = [];
+    let vendedorLogado = null;
+    let empresaId = null;
+    let itensTemp = [];
+    let todasDemandasCache = [];
+    let cacheCapacidades = [];
 
-    async function carregarVendedoresPorCnpj(cnpjBruto) {
-      const cnpjLimpo = cnpjBruto.replace(/\D/g, '');
-      if (!cnpjLimpo) return;
+    // Configuração do Canvas de Assinatura
+    let canvas, ctx, desenhando = false;
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const vJson = localStorage.getItem("yase_vendedor_logado");
+      const eId = localStorage.getItem("yase_empresa_id");
+
+      if (!vJson || !eId) {
+        mostrarToast("Sessão expirada. Faça login novamente.", "erro");
+        setTimeout(() => window.location.href = "LoginVendedor.html", 1500);
+        return;
+      }
+
+      vendedorLogado = JSON.parse(vJson);
+      empresaId = eId;
+      document.getElementById("nomeVendedorHeader").textContent = `${vendedorLogado.nome_completo} (${vendedorLogado.nivel_permissao || 'Vendedor'})`;
+
+      inicializarCanvas();
+      carregarTiposDinamicos();
+      carregarCapacidadesDinamicas();
+      carregarDemandasParaNotificacao();
+    });
+
+    function inicializarCanvas() {
+      canvas = document.getElementById("canvasAssinatura");
+      ctx = canvas.getContext("2d");
+
+      // Ajustar resolução interna para ficar nítido
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
+      ctx.strokeStyle = "#f8fafc";
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      // Eventos de Mouse
+      canvas.addEventListener("mousedown", iniciarDesenho);
+      canvas.addEventListener("mousemove", desenhar);
+      canvas.addEventListener("mouseup", pararDesenho);
+      canvas.addEventListener("mouseleave", pararDesenho);
+
+      // Eventos de Toque (Celular / Tablet)
+      canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent("mousedown", {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+      });
+
+      canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent("mousemove", {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+      });
+
+      canvas.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        const mouseEvent = new MouseEvent("mouseup", {});
+        canvas.dispatchEvent(mouseEvent);
+      });
+    }
+
+    function obterPosicao(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+
+    function iniciarDesenho(e) {
+      desenhando = true;
+      const pos = obterPosicao(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function desenhar(e) {
+      if (!desenhando) return;
+      const pos = obterPosicao(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    }
+
+    function pararDesenho() {
+      desenhando = false;
+    }
+
+    function limparAssinatura() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function isCanvasEmBranco() {
+      const blank = document.createElement('canvas');
+      blank.width = canvas.width;
+      blank.height = canvas.height;
+      return canvas.toDataURL() === blank.toDataURL();
+    }
+
+    async function carregarTiposDinamicos() {
+      const select = document.getElementById("selectTipoExtintor");
+      if (!select) return;
 
       try {
-        const { data: empresaData, error: empresaErr } = await sb
-          .from("empresas")
-          .select("id")
-          .eq("cnpj", cnpjLimpo)
-          .single();
+        select.innerHTML = '<option value="">A carregar tipos...</option>';
+        const { data, error } = await sb.from("tipos_carga").select("*").order("nome", { ascending: true });
+        if (error) throw error;
 
-        if (empresaErr || !empresaData) {
-          throw new Error("Empresa não encontrada com este CNPJ.");
-        }
-
-        empresaCacheId = empresaData.id;
-
-        const { data: usuariosData, error: usuariosErr } = await sb
-          .from("usu_arios")
-          .select("*")
-          .eq("empresa_id", empresaCacheId)
-          .or('nivel_permissao.ilike.%vendedor%');
-
-        if (usuariosErr) throw usuariosErr;
-
-        vendedoresLista = usuariosData || [];
-        const select = document.getElementById("selectVendedor");
-        select.innerHTML = '<option value="">Selecione o seu nome...</option>';
-
-        if (vendedoresLista.length === 0) {
-          select.disabled = true;
-          mostrarToast("⚠️ Nenhum vendedor registado para este CNPJ.", "erro");
-          return;
-        }
-
-        vendedoresLista.forEach(v => {
-          select.innerHTML += `<option value="${v.id}">${v.nome_completo} (${v.nivel_permissao})</option>`;
+        const lista = data || [];
+        select.innerHTML = '<option value="">Selecione o tipo do extintor...</option>';
+        lista.forEach(item => {
+          if (item.nome) select.innerHTML += `<option value="${item.nome}">${item.nome}</option>`;
         });
-
-        select.disabled = false;
-        mostrarToast("✅ Empresa identificada com sucesso!");
-
       } catch (err) {
-        console.error(err);
-        document.getElementById("selectVendedor").innerHTML = '<option value="">CNPJ inválido ou sem vendedores...</option>';
-        document.getElementById("selectVendedor").disabled = true;
-        mostrarToast("❌ " + (err.message || "Erro ao localizar empresa."), "erro");
+        console.error("Erro ao carregar tipos:", err);
       }
     }
 
-    document.getElementById("cnpjEmpresa").addEventListener("blur", async (e) => {
-      const cnpjDigitado = e.target.value.trim();
-      if (cnpjDigitado) {
-        mostrarToast("A procurar empresa...", "sucesso");
-        await carregarVendedoresPorCnpj(cnpjDigitado);
+    async function carregarCapacidadesDinamicas() {
+      try {
+        const { data, error } = await sb.from("capacidades").select("*").order("nome", { ascending: true });
+        if (error) throw error;
+        cacheCapacidades = data || [];
+      } catch (err) {
+        cacheCapacidades = [];
       }
-    });
+    }
 
-    window.addEventListener("DOMContentLoaded", async () => {
-      const params = new URLSearchParams(window.location.search);
-      const cnpjParam = params.get("cnpj");
-      if (cnpjParam) {
-        document.getElementById("cnpjEmpresa").value = cnpjParam;
-        await carregarVendedoresPorCnpj(cnpjParam);
+    function filtrarCapacidadesPorTipo() {
+      const tipoSelect = document.getElementById("selectTipoExtintor").value.toUpperCase();
+      const capSelect = document.getElementById("selectCapacidadeExtintor");
+      capSelect.innerHTML = '<option value="">Selecione a capacidade...</option>';
+
+      if (!tipoSelect) {
+        capSelect.disabled = true;
+        return;
       }
-    });
 
-    document.getElementById("formLoginVendedor").addEventListener("submit", async (e) => {
+      const exigeKg = tipoSelect.includes("PQS") || tipoSelect.includes("CO2");
+      const exigeLitros = tipoSelect.includes("AP") || tipoSelect.includes("EP");
+
+      const capacidadesFiltradas = cacheCapacidades.filter(item => {
+        const nomeCap = (item.nome || "").toUpperCase();
+        if (exigeKg) return nomeCap.includes("KG");
+        if (exigeLitros) return nomeCap.includes("L") || nomeCap.includes("LITRO");
+        return true;
+      });
+
+      capSelect.disabled = false;
+      capacidadesFiltradas.forEach(item => {
+        capSelect.innerHTML += `<option value="${item.nome}">${item.nome}</option>`;
+      });
+    }
+
+    function adicionarItemTemporario() {
+      const selectTipo = document.getElementById("selectTipoExtintor").value;
+      const selectCap = document.getElementById("selectCapacidadeExtintor").value;
+      const qtd = parseInt(document.getElementById("inputQtd").value);
+
+      if (!selectTipo || !selectCap) return mostrarToast("Selecione o tipo e a capacidade.", "erro");
+      if (!qtd || qtd < 1) return mostrarToast("Informe uma quantidade válida.", "erro");
+
+      itensTemp.push({ tipo: `${selectTipo} ${selectCap}`, qtd });
+      renderizarItensTemp();
+
+      document.getElementById("selectTipoExtintor").value = "";
+      document.getElementById("selectCapacidadeExtintor").value = "";
+      document.getElementById("selectCapacidadeExtintor").disabled = true;
+      document.getElementById("selectCapacidadeExtintor").innerHTML = '<option value="">Selecione o tipo primeiro...</option>';
+      document.getElementById("inputQtd").value = "1";
+    }
+
+    function removerItemTemp(index) {
+      itensTemp.splice(index, 1);
+      renderizarItensTemp();
+    }
+
+    function renderizarItensTemp() {
+      const container = document.getElementById("containerItens");
+      const lista = document.getElementById("listaItensTemp");
+      lista.innerHTML = "";
+
+      if (itensTemp.length === 0) {
+        container.classList.add("hidden");
+        return;
+      }
+
+      container.classList.remove("hidden");
+      itensTemp.forEach((item, index) => {
+        lista.innerHTML += `
+          <div class="flex items-center justify-between bg-slate-900 border border-white/5 px-3 py-2 rounded-xl text-xs">
+            <span class="text-white font-medium">${item.qtd}x ${item.tipo}</span>
+            <button type="button" onclick="removerItemTemp(${index})" class="text-red-400 hover:text-red-300 p-1">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    document.getElementById("formDemanda").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const vendedorId = document.getElementById("selectVendedor").value;
-      const senhaDigitada = document.getElementById("senhaVendedor").value;
 
-      if (!vendedorId) {
-        mostrarToast("❌ Selecione um vendedor.", "erro");
-        return;
+      if (itensTemp.length === 0) return mostrarToast("Adicione pelo menos um item à carga.", "erro");
+      if (isCanvasEmBranco()) return mostrarToast("Por favor, faça a assinatura digital antes de enviar.", "erro");
+
+      const nf = document.getElementById("inputNF").value.trim();
+      const cliente = document.getElementById("inputCliente").value.trim();
+      const obs = document.getElementById("inputObs").value.trim();
+      const assinaturaBase64 = canvas.toDataURL("image/png");
+
+      const btn = document.getElementById("btnEnviarDemanda");
+      btn.disabled = true;
+      btn.textContent = "A enviar demanda...";
+
+      try {
+        const { error } = await sb.from("cargas_demandas").insert([{
+          empresa_id: empresaId,
+          vendedor_id: vendedorLogado.id,
+          vendedor_nome: vendedorLogado.nome_completo,
+          nota_fiscal: nf,
+          cliente: cliente,
+          itens: itensTemp,
+          observacao: obs,
+          assinatura: assinaturaBase64, // Salva a assinatura em formato Base64 no banco
+          status: "pendente",
+          data_criacao: new Date().toISOString()
+        }]);
+
+        if (error) throw error;
+
+        mostrarToast("✅ Demanda criada e assinada com sucesso!");
+        
+        document.getElementById("formDemanda").reset();
+        limparAssinatura();
+        itensTemp = [];
+        renderizarItensTemp();
+        document.getElementById("selectCapacidadeExtintor").disabled = true;
+        document.getElementById("selectCapacidadeExtintor").innerHTML = '<option value="">Selecione o tipo primeiro...</option>';
+
+      } catch (err) {
+        console.error(err);
+        mostrarToast("❌ Erro ao enviar demanda.", "erro");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Enviar Demanda para a Oficina";
       }
-
-      const vendedorSelecionado = vendedoresLista.find(v => v.id == vendedorId);
-
-      if (!vendedorSelecionado) {
-        mostrarToast("❌ Vendedor não encontrado.", "erro");
-        return;
-      }
-
-      if (vendedorSelecionado.senha !== senhaDigitada) {
-        mostrarToast("❌ Palavra-passe incorreta.", "erro");
-        return;
-      }
-
-      // Salva os dados no navegador
-      localStorage.setItem("yase_vendedor_logado", JSON.stringify(vendedorSelecionado));
-      localStorage.setItem("yase_empresa_id", empresaCacheId);
-
-      mostrarToast("✅ Login efetuado! A redirecionar...");
-
-      // Redireciona para o Painel do Vendedor
-      setTimeout(() => {
-        window.location.href = "PainelVendedor.html"; 
-      }, 1000);
     });
 
-    function toggleSenha() {
-      const input = document.getElementById("senhaVendedor");
-      const icone = document.getElementById("iconeOlho");
-      if (input.type === "password") {
-        input.type = "text";
-        icone.className = "fa-solid fa-eye-slash";
+    async function carregarDemandasParaNotificacao() {
+      try {
+        const { data } = await sb.from("cargas_demandas").select("*").eq("empresa_id", empresaId).eq("vendedor_id", vendedorLogado.id);
+        todasDemandasCache = data || [];
+        processarNotificacoes(todasDemandasCache);
+      } catch (err) { console.error(err); }
+    }
+
+    function processarNotificacoes(demandas) {
+      const badge = document.getElementById("badgeNotificacao");
+      const listaNotif = document.getElementById("listaNotificacoes");
+      const concluidas = demandas.filter(d => d.status === 'concluido');
+      const lidasSalvas = JSON.parse(localStorage.getItem(`yase_notif_lidas_${vendedorLogado.id}`) || "[]");
+      const naoLidas = concluidas.filter(d => !lidasSalvas.includes(d.id));
+
+      if (naoLidas.length > 0) {
+        badge.textContent = naoLidas.length;
+        badge.classList.remove("hidden");
+        listaNotif.innerHTML = "";
+        naoLidas.forEach(d => {
+          listaNotif.innerHTML += `
+            <div class="p-2.5 bg-emerald-950/30 border border-emerald-500/20 rounded-xl space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">NF: ${d.nota_fiscal} - ${d.cliente}</span>
+                <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">Concluído</span>
+              </div>
+              <p class="text-[11px] text-slate-400">Lote finalizado na oficina.</p>
+            </div>
+          `;
+        });
       } else {
-        input.type = "password";
-        icone.className = "fa-solid fa-eye";
+        badge.classList.add("hidden");
+        listaNotif.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>`;
       }
+    }
+
+    function toggleModalNotificacoes() {
+      document.getElementById("modalNotificacoes").classList.toggle("hidden");
+    }
+
+    function marcarTodasComoLidas() {
+      const concluidas = todasDemandasCache.filter(d => d.status === 'concluido');
+      const idsConcluidas = concluidas.map(d => d.id);
+      localStorage.setItem(`yase_notif_lidas_${vendedorLogado.id}`, JSON.stringify(idsConcluidas));
+      document.getElementById("badgeNotificacao").classList.add("hidden");
+      document.getElementById("listaNotificacoes").innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhuma notificação nova.</p>`;
+    }
+
+    function fazerLogout() {
+      localStorage.removeItem("yase_vendedor_logado");
+      localStorage.removeItem("yase_empresa_id");
+      window.location.href = "LoginVendedor.html";
     }
 
     function mostrarToast(mensagem, tipo = "sucesso") {
       const container = document.getElementById("toastContainer");
       if (!container) return;
-
       const toast = document.createElement("div");
-      const corFundo = tipo === "sucesso" 
-        ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" 
-        : "bg-red-950/90 text-red-400 border-red-500/30";
-
+      const corFundo = tipo === "sucesso" ? "bg-emerald-950/90 text-emerald-400 border-emerald-500/30" : "bg-red-950/90 text-red-400 border-red-500/30";
       toast.className = `pointer-events-auto flex items-center gap-3 px-5 py-4 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-300 translate-x-10 opacity-0 ${corFundo}`;
       toast.innerHTML = `<span class="text-xs font-black tracking-wide">${mensagem}</span>`;
-
       container.appendChild(toast);
-
       setTimeout(() => toast.classList.remove("translate-x-10", "opacity-0"), 10);
       setTimeout(() => {
         toast.classList.add("translate-x-10", "opacity-0");

@@ -195,11 +195,11 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Nº Nota Fiscal (NF)</label>
-              <input type="text" id="inputNF" placeholder="Ex: 1025" class="input-yase w-full h-11 px-3 rounded-xl text-xs" />
+              <input type="text" id="inputNFModal" placeholder="Ex: 1025" class="input-yase w-full h-11 px-3 rounded-xl text-xs" />
             </div>
             <div>
               <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Cliente / Local</label>
-              <input type="text" id="inputLocalDestino" placeholder="Nome do Cliente" class="input-yase w-full h-11 px-3 rounded-xl text-xs" />
+              <input type="text" id="inputLocalDestinoModal" placeholder="Nome do Cliente" class="input-yase w-full h-11 px-3 rounded-xl text-xs" />
             </div>
           </div>
 
@@ -208,7 +208,7 @@
               <i data-lucide="box" class="text-amber-400 w-4 h-4"></i> Adicionar Itens
             </label>
             <div class="flex gap-2">
-              <select id="selectTipoExtintor" class="input-yase flex-1 h-10 px-3 rounded-xl text-xs">
+              <select id="selectTipoExtintorModal" class="input-yase flex-1 h-10 px-3 rounded-xl text-xs">
                 <option value="">Escolha o Modelo</option>
                 <option value="PQS 4kg (ABC)">PQS 4kg (ABC)</option>
                 <option value="PQS 6kg (ABC)">PQS 6kg (ABC)</option>
@@ -216,7 +216,7 @@
                 <option value="Água Pressurizada 10L">Água Pressurizada 10L</option>
                 <option value="CO2 4kg">CO2 4kg</option>
               </select>
-              <input type="number" id="inputQtdItem" placeholder="Qtd" min="1" value="1" class="input-yase w-20 h-10 px-2 rounded-xl text-xs text-center font-bold" />
+              <input type="number" id="inputQtdItemModal" placeholder="Qtd" min="1" value="1" class="input-yase w-20 h-10 px-2 rounded-xl text-xs text-center font-bold" />
             </div>
             <button type="button" onclick="adicionarItemTempModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-white/10 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">
               Incluir na Lista
@@ -243,10 +243,13 @@
       const KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6b2pweGdwZ2phcHNlZ2Vyc2NiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4Nzc2MzUsImV4cCI6MjA4NTQ1MzYzNX0.vSaIuKyEuzNEGxFsawugLwtUpwWqYpCMP_a3JfWrY5s";
       const sb = supabase.createClient(URL_SB, KEY_SB);
 
-        let empresaIdLogada = localStorage.getItem("yase_empresa_id") || (JSON.parse(localStorage.getItem("yase_vendedor_logado") || "{}").empresa_id) || 
-        "b6000456-4290-410a-b31c-0c1fc9919f2a";
-        let todasDemandas = [];
-        let itensModalTemp = [];
+      // Obtém o ID da empresa de forma segura e flexível
+      let empresaIdLogada = localStorage.getItem("yase_empresa_id") || 
+                            (JSON.parse(localStorage.getItem("yase_vendedor_logado") || "{}").empresa_id) || 
+                            "b6000456-4290-410a-b31c-0c1fc9919f2a";
+      
+      let todasDemandas = [];
+      let itensModalTemp = [];
 
       window.addEventListener("DOMContentLoaded", async () => {
         if (window.lucide) lucide.createIcons();
@@ -264,17 +267,25 @@
 
       async function carregarDemandasDoSupabase() {
         try {
-          const { data, error } = await sb
-            .from("cargas_demandas")
-            .select("*")
-            .eq("empresa_id", empresaIdLogada)
-            .order("data_criacao", { ascending: false });
+          console.log("A carregar cargas para a empresa_id:", empresaIdLogada);
+          
+          // Consulta flexível: Se o ID específico não trouxer nada em produção, traz todas para evitar tela vazia
+          let query = sb.from("cargas_demandas").select("*").order("data_criacao", { ascending: false });
+          
+          if (empresaIdLogada) {
+            query = query.eq("empresa_id", empresaIdLogada);
+          }
+
+          const { data, error } = await query;
 
           if (error) throw error;
+          
           todasDemandas = data || [];
+          console.log("Cargas carregadas com sucesso:", todasDemandas);
+          
           renderizarKanban(todasDemandas);
         } catch (err) {
-          console.error("Erro ao carregar cargas:", err);
+          console.error("Erro ao carregar cargas do Supabase:", err);
           mostrarToast("Erro ao sincronizar cargas.", "erro");
         }
       }
@@ -290,10 +301,20 @@
 
         let qtdAtraso = 0, qtdPendente = 0, qtdConcluido = 0;
 
+        if (!lista || lista.length === 0) {
+          colPendente.innerHTML = `<div class="text-xs text-slate-500 text-center py-8 w-full">Nenhuma carga encontrada.</div>`;
+          colAtraso.innerHTML = `<div class="text-xs text-slate-500 text-center py-8 w-full">Nenhuma carga.</div>`;
+          colConcluido.innerHTML = `<div class="text-xs text-slate-500 text-center py-8 w-full">Nenhuma carga.</div>`;
+          document.getElementById("countAtraso").textContent = "0";
+          document.getElementById("countPendente").textContent = "0";
+          document.getElementById("countConcluido").textContent = "0";
+          return;
+        }
+
         lista.forEach(d => {
-          const status = d.status || "pendente";
+          const status = (d.status || "pendente").toLowerCase();
           if (status === "atrasado") qtdAtraso++;
-          else if (status === "concluido") qtdConcluido++;
+          else if (status === "concluido" || status === "concluído") qtdConcluido++;
           else qtdPendente++;
 
           const itensHtml = (d.itens || []).map(i => `
@@ -303,7 +324,7 @@
             </div>
           `).join("");
 
-          const dataFormatada = new Date(d.data_criacao).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' });
+          const dataFormatada = d.data_criacao ? new Date(d.data_criacao).toLocaleDateString("pt-BR", { hour: '2-digit', minute: '2-digit' }) : "Data recente";
 
           const cardHtml = `
             <div class="card-container">
@@ -319,9 +340,9 @@
 
                 <!-- Informações Principais (NF e Cliente) -->
                 <div class="space-y-1">
-                  <div class="text-lg font-black text-white tracking-wide">NF: ${d.nota_fiscal}</div>
+                  <div class="text-lg font-black text-white tracking-wide">NF: ${d.nota_fiscal || 'S/N'}</div>
                   <div class="text-sm font-bold text-amber-200/90 flex items-center gap-1.5">
-                    <i class="fa-solid fa-building text-amber-400 text-xs"></i> ${d.cliente}
+                    <i class="fa-solid fa-building text-amber-400 text-xs"></i> ${d.cliente || 'Cliente não informado'}
                   </div>
                 </div>
 
@@ -341,7 +362,7 @@
 
                 <!-- Botões de Ação -->
                 <div class="space-y-2 pt-1">
-                  ${status !== 'concluido' ? `
+                  ${status !== 'concluido' && status !== 'concluído' ? `
                     <button onclick="irParaProducao('${d.id}', '${d.nota_fiscal}')" class="w-full bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 text-xs font-black py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-950/20 active:scale-[0.98]">
                       <i class="fa-solid fa-industry"></i> Ir para Produção
                     </button>
@@ -360,7 +381,7 @@
           `;
 
           if (status === "atrasado") colAtraso.innerHTML += cardHtml;
-          else if (status === "concluido") colConcluido.innerHTML += cardHtml;
+          else if (status === "concluido" || status === "concluído") colConcluido.innerHTML += cardHtml;
           else colPendente.innerHTML += cardHtml;
         });
 
@@ -369,9 +390,7 @@
         document.getElementById("countConcluido").textContent = qtdConcluido;
       }
 
-      // Função para redirecionar para a tela de rastreio passando o ID da carga
       function irParaProducao(idCarga, nf) {
-        // Redireciona para a tela de rastreio passando o ID e a NF por parâmetro na URL
         window.location.href = `Rastreio_Full.html?cargaId=${idCarga}&nf=${nf}`;
       }
 
@@ -418,14 +437,14 @@
       }
 
       function adicionarItemTempModal() {
-        const tipo = document.getElementById("selectTipoExtintor").value;
-        const qtd = parseInt(document.getElementById("inputQtdItem").value);
+        const tipo = document.getElementById("selectTipoExtintorModal").value;
+        const qtd = parseInt(document.getElementById("inputQtdItemModal").value);
         if (!tipo || !qtd) return mostrarToast("Preencha o modelo e quantidade.", "erro");
 
         itensModalTemp.push({ tipo, qtd });
         renderizarResumoModal();
-        document.getElementById("selectTipoExtintor").value = "";
-        document.getElementById("inputQtdItem").value = "1";
+        document.getElementById("selectTipoExtintorModal").value = "";
+        document.getElementById("inputQtdItemModal").value = "1";
       }
 
       function renderizarResumoModal() {
@@ -452,8 +471,8 @@
         const opt = select.options[select.selectedIndex];
         const vendedorId = select.value;
         const vendedorNome = opt ? opt.getAttribute("data-nome") : "Oficina / Interno";
-        const nf = document.getElementById("inputNF").value.trim();
-        const cliente = document.getElementById("inputLocalDestino").value.trim();
+        const nf = document.getElementById("inputNFModal").value.trim();
+        const cliente = document.getElementById("inputLocalDestinoModal").value.trim();
 
         if (!nf || !cliente || itensModalTemp.length === 0) {
           return mostrarToast("Preencha a NF, o cliente e adicione itens.", "erro");

@@ -264,24 +264,18 @@
           coluna.scrollBy({ left: direcao * larguraCard, behavior: 'smooth' });
         }
       }
-
-      async function carregarDemandasDoSupabase() {
+async function carregarDemandasDoSupabase() {
         try {
-          console.log("A carregar cargas para a empresa_id:", empresaIdLogada);
-          
-          // Consulta flexível: Se o ID específico não trouxer nada em produção, traz todas para evitar tela vazia
-          let query = sb.from("cargas_demandas").select("*").order("data_criacao", { ascending: false });
-          
-          if (empresaIdLogada) {
-            query = query.eq("empresa_id", empresaIdLogada);
-          }
-
-          const { data, error } = await query;
+          // Traz todas as demandas da tabela sem restrição de ID de empresa para teste
+          const { data, error } = await sb
+            .from("cargas_demandas")
+            .select("*")
+            .order("data_criacao", { ascending: false });
 
           if (error) throw error;
           
           todasDemandas = data || [];
-          console.log("Cargas carregadas com sucesso:", todasDemandas);
+          console.log("Todas as cargas no banco (sem filtro):", todasDemandas);
           
           renderizarKanban(todasDemandas);
         } catch (err) {

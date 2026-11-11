@@ -338,9 +338,9 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-/**
- * Registra um novo item ou salva as alterações de um item em edição no banco de dados.
- */
+
+
+
 async function registrarItem() {
   console.log("🚀 Iniciando processo de registro...");
 
@@ -369,7 +369,7 @@ async function registrarItem() {
         el.classList.add("input-error-shake");
         setTimeout(() => el.classList.remove("input-error-shake"), 2000);
       }
-      return; // Interrompe o processo de registro aqui
+      return;
     }
   }
 
@@ -388,12 +388,9 @@ async function registrarItem() {
 
   if (typeof validarAnoReteste === "function" && !validarAnoReteste()) return;
 
-  // Recupera empresa_id com fallback para evitar falha em colunas obrigatórias do banco
   let empresaIdLogada = localStorage.getItem("empresa_id");
   if (!empresaIdLogada) {
-    console.warn(
-      "⚠️ empresa_id não encontrado no localStorage. Usando fallback '1'.",
-    );
+    console.warn("⚠️ empresa_id não encontrado no localStorage. Usando fallback '1'.");
     empresaIdLogada = "1";
   }
 
@@ -402,9 +399,7 @@ async function registrarItem() {
 
   if (!osAtiva) {
     if (typeof window.exibirAlertaErro === "function") {
-      window.exibirAlertaErro(
-        "Número da OS não identificado. Recarregue a página.",
-      );
+      window.exibirAlertaErro("Número da OS não identificado. Recarregue a página.");
     } else {
       alert("⚠️ Erro: Número da OS não identificado.");
     }
@@ -414,6 +409,78 @@ async function registrarItem() {
   try {
     const _supabase = window._supabase;
     if (!_supabase) throw new Error("Cliente Supabase não inicializado.");
+
+    // ==========================================
+    // 🔒 CADEADO E CONTAGEM PRECISA POR MODELO
+    // ==========================================
+    const switchElement = document.getElementById("switchModoBalcao");
+    const modoBalcaoAtivo = switchElement ? switchElement.checked : (localStorage.getItem("modo_balcao_ativo") === "true");
+    const activeCargaId = localStorage.getItem("active_carga_id");
+
+    if (modoBalcaoAtivo) {
+        console.log("🛒 Modo Balcão ativado: Lançamento avulso (não afeta nenhuma carga).");
+    } else if (activeCargaId && !window.editandoID) {
+        const tipoSel = (document.getElementById("tipo_carga")?.value || "").toUpperCase().trim();
+        const capSel = (document.getElementById("capacidade")?.value || "").toUpperCase().trim();
+        
+        const normalizarTexto = (str) => (str || "").toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const tentativaNormalizada = `${normalizarTexto(tipoSel)}${normalizarTexto(capSel)}`;
+
+        const { data: cargaAtiva } = await _supabase
+            .from('cargas_demandas')
+            .select('*')
+            .eq('id', activeCargaId)
+            .maybeSingle();
+
+        if (cargaAtiva && cargaAtiva.itens) {
+            let itemPermitido = false;
+            let temSaldo = false;
+
+            const { data: jaLancados } = await _supabase
+                .from('itens_os')
+                .select('tipo_carga, capacidade')
+                .eq('empresa_id', empresaIdLogada)
+                .eq('carga_id', activeCargaId);
+
+            for (const itemDemanda of cargaAtiva.itens) {
+                const demandaNormalizada = normalizarTexto(itemDemanda.tipo);
+
+                if (demandaNormalizada.includes(tentativaNormalizada) || tentativaNormalizada.includes(demandaNormalizada)) {
+                    itemPermitido = true;
+
+                    const feitosDeste = (jaLancados || []).filter(l => {
+                        const tReg = normalizarTexto(l.tipo_carga);
+                        const cReg = normalizarTexto(l.capacidade);
+                        return `${tReg}${cReg}` === tentativaNormalizada;
+                    }).length;
+
+                    if (feitosDeste < (itemDemanda.qtd || 0)) {
+                        temSaldo = true;
+                    }
+                    break;
+                }
+            }
+
+            if (!itemPermitido) {
+                if (typeof window.exibirAlertaErro === "function") {
+                    window.exibirAlertaErro(`⚠️ BLOQUEADO: O item "${tipoSel} ${capSel}" não faz parte da demanda desta carga! (Ative o Modo Balcão se for avulso)`);
+                } else {
+                    alert(`⚠️ BLOQUEADO: Este item não faz parte da demanda desta carga.`);
+                }
+                return;
+            }
+
+            if (!temSaldo) {
+                if (typeof window.exibirAlertaErro === "function") {
+                    window.exibirAlertaErro(`⚠️ BLOQUEADO: A cota para o modelo "${tipoSel} ${capSel}" já foi totalmente atingida nesta carga!`);
+                } else {
+                    alert(`⚠️ BLOQUEADO: Cota esgotada para este modelo.`);
+                }
+                return;
+            }
+        }
+    }
+    // ==========================================
 
     if (typeof window.sincronizarPainelSelos === "function") {
       await window.sincronizarPainelSelos();
@@ -427,19 +494,16 @@ async function registrarItem() {
       return tipo === "num" ? parseFloat(val.replace(",", ".")) : val;
     };
 
-    const textoReteste = document.getElementById(
-      "display_prox_reteste",
-    )?.innerText;
-    const textoRecarga = document.getElementById(
-      "display_prox_recarga",
-    )?.innerText;
+    const textoReteste = document.getElementById("display_prox_reteste")?.innerText;
+    const textoRecarga = document.getElementById("display_prox_recarga")?.innerText;
+    const activeNf = localStorage.getItem("active_nf");
 
     const dados = {
       os_number: osAtiva,
       empresa_id: empresaIdLogada,
-      usuario_lancamento: window.editandoID
-        ? undefined
-        : nomeOperadorLogado || "Sistema",
+      carga_id: modoBalcaoAtivo ? null : (activeCargaId || null),
+      nota_fiscal: modoBalcaoAtivo ? null : (activeNf || null),           
+      usuario_lancamento: window.editandoID ? undefined : nomeOperadorLogado || "Sistema",
       usuario_alteracao: nomeOperadorLogado || "Sistema",
       updated_at: new Date().toISOString(),
       nr_cilindro: limpar("nr_cilindro"),
@@ -450,12 +514,8 @@ async function registrarItem() {
       capacidade: limpar("capacidade"),
       ano_fab: limpar("ano_fab", "num"),
       ult_reteste: limpar("ult_reteste", "num"),
-      prox_reteste:
-        textoReteste && textoReteste !== "----" ? parseInt(textoReteste) : null,
-      prox_recarga:
-        typeof converterDataBRparaISO === "function"
-          ? converterDataBRparaISO(textoRecarga)
-          : null,
+      prox_reteste: textoReteste && textoReteste !== "----" ? parseInt(textoReteste) : null,
+      prox_recarga: typeof converterDataBRparaISO === "function" ? converterDataBRparaISO(textoRecarga) : null,
       p_vazio_valvula: limpar("p_vazio_valvula", "num"),
       p_cheio_valvula: limpar("p_cheio_valvula", "num"),
       p_atual: limpar("p_atual", "num"),
@@ -465,15 +525,13 @@ async function registrarItem() {
       dvm_et: limpar("dvm_et", "num"),
       dvp_ep: limpar("dvp_ep", "num"),
       nivel_manutencao: window.selectedLevel || 2,
-      status_servico:
-        document.getElementById("resultado_valor")?.value || "APROVADO",
+      status_servico: document.getElementById("resultado_valor")?.value || "APROVADO",
       lote_nitrogenio: limpar("lote_nitrogenio"),
       ampola_vinculada: limpar("ampola_vinculada"),
       deposito_galpao: limpar("deposito_galpao"),
       local_extintor: limpar("local_extintor"),
     };
 
-    // Lógica de Selo: Apenas para NOVOS registros
     if (!window.editandoID) {
       if (!window.proximoSeloCalculado) {
         if (typeof window.exibirAlertaErro === "function") {
@@ -487,34 +545,16 @@ async function registrarItem() {
       dados.selo_inmetro = window.proximoSeloCalculado;
       dados.prefixo_selo = window.prefixoAtualSelo;
 
-      // Garante que o código de barras seja gerado sem erro de toString()
       const seloStr = String(window.proximoSeloCalculado).padStart(6, "0");
       dados.cod_barras = "21" + seloStr;
     }
 
     const listaComp = [
-      "pistola",
-      "valvula",
-      "bucha",
-      "sifao",
-      "punho_pino",
-      "quebra_jato",
-      "manometro",
-      "mangueira",
-      "cord_plastico",
-      "saia_plastica",
-      "conj_apague",
-      "difusor",
-      "pera_ved",
-      "mola_rosca",
-      "conj_miolo",
-      "conj_haste",
-      "anel_oring",
-      "sifao_aluminio",
-      "conj_seguranca",
-      "haste_valvula",
-      "gancho_sup",
-      "trava_corrente",
+      "pistola", "valvula", "bucha", "sifao", "punho_pino", "quebra_jato",
+      "manometro", "mangueira", "cord_plastico", "saia_plastica", "conj_apague",
+      "difusor", "pera_ved", "mola_rosca", "conj_miolo", "conj_haste",
+      "anel_oring", "sifao_aluminio", "conj_seguranca", "haste_valvula",
+      "gancho_sup", "trava_corrente",
     ];
 
     listaComp.forEach((item) => {
@@ -536,47 +576,66 @@ async function registrarItem() {
 
     if (resultado.error) throw resultado.error;
 
-    // const deveImprimir = document.getElementById("switchEtiqueta")?.checked;
-    // if (deveImprimir) {
-    //   const itemSalvo = resultado.data ? resultado.data[0] : dados;
-      
-    //   // Se a função de fila existir, adiciona nela de forma silenciosa
-    //   if (typeof adicionarFilaEtiqueta === "function") {
-    //     adicionarFilaEtiqueta(itemSalvo);
-    //     console.log("🏷️ Etiqueta adicionada à fila de impressão em lote.");
-    //   } else if (typeof prepararModalEtiqueta === "function" && itemSalvo) {
-    //     // Fallback caso a fila não esteja carregada no escopo
-    //     prepararModalEtiqueta(itemSalvo);
-    //   }
-    // }
+    // ⚡ VERIFICA E CONCLUI A CARGA AUTOMATICAMENTE AO BATER 100%
+    if (activeCargaId && !modoBalcaoAtivo && !window.editandoID) {
+        const { data: cargaAtual } = await _supabase.from('cargas_demandas').select('*').eq('id', activeCargaId).maybeSingle();
+        if (cargaAtual && cargaAtual.status !== 'concluido' && cargaAtual.status !== 'concluído') {
+            const { data: todosLancados } = await _supabase
+                .from('itens_os')
+                .select('tipo_carga, capacidade')
+                .eq('empresa_id', empresaIdLogada)
+                .eq('carga_id', activeCargaId);
 
-    // No final, logo após o insert/update bem-sucedido no Supabase:
-    if (resultado.error) throw resultado.error;
+            let totalMeta = 0;
+            let totalRealizado = 0;
 
-    // VERIFICAÇÃO DO MODO DE IMPRESSÃO
-    const switchAvulsaAtivo = document.getElementById("switchEtiqueta")?.checked; // Ajuste o ID se necessário para o seu switch avulso
+            (cargaAtual.itens || []).forEach(itemDemanda => {
+                const demandaNorma = (itemDemanda.tipo || "").toUpperCase().replace(/[^A-Z0-9]/g, '');
+                const realizados = (todosLancados || []).filter(l => {
+                    const reg = `${(l.tipo_carga || "")}${(l.capacidade || "")}`.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    return reg === demandaNorma;
+                }).length;
+
+                totalMeta += (itemDemanda.qtd || 0);
+                totalRealizado += realizados;
+            });
+
+            if (totalMeta > 0 && totalRealizado >= totalMeta) {
+                await _supabase.from('cargas_demandas').update({
+                    status: 'concluido',
+                    data_conclusao_oficina: new Date().toISOString()
+                }).eq('id', activeCargaId);
+
+                console.log("🎉 Meta de 100% atingida! Carga marcada como concluída no banco.");
+            }
+        }
+    }
+
+    const switchAvulsaAtivo = document.getElementById("switchEtiqueta")?.checked;
 
     if (switchAvulsaAtivo) {
-        // FLUXO AVULSO: Imprime imediatamente o item recém-criado
         const itemSalvo = resultado.data ? resultado.data[0] : dados;
         if (typeof prepararModalEtiqueta === "function" && itemSalvo) {
             prepararModalEtiqueta(itemSalvo);
             console.log("🏷️ Impressão avulsa acionada para o item.");
         }
     } else {
-        // FLUXO POR LOTE: Não faz nada na hora do registro individual.
-        // O sistema apenas grava em 'itens_os' e o operador gerencia o lote pelo modal de pendentes quando atingir a quantidade (ex: 10).
-        console.log("📦 Modo lote ativo: Item registrado e guardado para o próximo lote em massa.");
+        console.log("📦 Modo lote ativo: Item registrado.");
     }
 
-   
+    if (modoBalcaoAtivo) {
+        if (switchElement) switchElement.checked = false;
+        localStorage.removeItem('modo_balcao_ativo');
+        console.log("🛒 Balcão registrado com sucesso. Retornando para a demanda ativa.");
+    }
+
     if (typeof window.atualizarEspelhoProducao === "function") {
         window.atualizarEspelhoProducao();
     }
 
-    await carregarItens();
-    focarUltimoRegistro();
-    limparCamposAposRegistro();
+    if (typeof renderizarCardDemandaAtivaAside === "function") {
+        renderizarCardDemandaAtivaAside();
+    }
 
     await carregarItens();
     focarUltimoRegistro();
@@ -592,15 +651,150 @@ async function registrarItem() {
   } catch (err) {
     console.error("Erro no salvamento:", err);
     if (typeof window.exibirAlertaErro === "function") {
-      window.exibirAlertaErro(
-        "Erro ao salvar: " + (err.message || "Erro desconhecido."),
-      );
+      window.exibirAlertaErro("Erro ao salvar: " + (err.message || "Erro desconhecido."));
     } else {
       alert("Erro ao salvar: " + (err.message || "Erro desconhecido."));
     }
   }
-
 }
+
+
+
+
+
+// 1. Captura a carga e a NF vinda do Controle de Cargas
+window.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const cargaIdUrl = urlParams.get('cargaId');
+    const nfUrl = urlParams.get('nf');
+
+    if (cargaIdUrl) {
+        localStorage.setItem('active_carga_id', cargaIdUrl);
+        localStorage.setItem('active_nf', nfUrl || '');
+    }
+
+    // Carrega o card ativo no menu lateral assim que a página abre
+    renderizarCardDemandaAtivaAside();
+});
+
+
+
+
+
+
+async function renderizarCardDemandaAtivaAside() {
+    const activeCargaId = localStorage.getItem('active_carga_id');
+    const container = document.getElementById('containerPedidoAtivo');
+    const modoBalcaoAtivo = localStorage.getItem('modo_balcao_ativo') === 'true';
+    
+    if (!container) return;
+
+    // Se o Modo Balcão estiver ligado, mostra o aviso amigável, mas NÃO apaga o ID da carga do navegador!
+    if (modoBalcaoAtivo) {
+        container.innerHTML = `
+            <div class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-2xl text-center shadow-inner">
+                <span class="text-[9px] text-amber-400 uppercase font-black tracking-widest block">🛒 MODO BALCÃO ATIVO</span>
+                <span class="text-[10px] text-slate-300 font-medium block mt-1">Lançamento avulso (A demanda principal está pausada).</span>
+            </div>
+        `;
+        return;
+    }
+
+    if (!activeCargaId) {
+        container.innerHTML = `
+            <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-center">
+                <span class="text-[9px] text-slate-500 uppercase font-bold">Nenhuma carga vinculada.</span>
+            </div>
+        `;
+        return;
+    }
+
+    // Se o balcão estiver desligado, renderiza normalmente a demanda com o saldo restante!
+    try {
+        const _supabase = window._supabase;
+        if (!_supabase) return;
+
+        const { data: carga, error } = await _supabase.from('cargas_demandas').select('*').eq('id', activeCargaId).maybeSingle();
+        if (error || !carga) throw error;
+
+        const { data: itensLancados, error: errItens } = await _supabase
+            .from('itens_os')
+            .select('tipo_carga, capacidade, carga_id')
+            .eq('empresa_id', localStorage.getItem('empresa_id') || '1')
+            .eq('carga_id', activeCargaId);
+
+        if (errItens) throw errItens;
+
+        let htmlItensUnificados = '';
+        let totalGeralMeta = 0;
+        let totalGeralRealizado = 0;
+
+        (carga.itens || []).forEach(itemDemanda => {
+            const demandaTipoNorma = (itemDemanda.tipo || "").toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+            const realizadosDesteTipo = (itensLancados || []).filter(lancado => {
+                const tipoReg = (lancado.tipo_carga || "").toUpperCase();
+                const capReg = (lancado.capacidade || "").toUpperCase();
+                const chaveLancada = `${tipoReg}${capReg}`.replace(/[^A-Z0-9]/g, '');
+                return chaveLancada === demandaTipoNorma;
+            }).length;
+
+            const metaDesteTipo = itemDemanda.qtd || 0;
+            totalGeralMeta += metaDesteTipo;
+            totalGeralRealizado += realizadosDesteTipo;
+
+            const restam = Math.max(0, metaDesteTipo - realizadosDesteTipo);
+            const completo = realizadosDesteTipo >= metaDesteTipo;
+
+            htmlItensUnificados += `
+                <div class="flex items-center justify-between text-[11px] py-2 px-2.5 bg-slate-950/80 rounded-xl border ${completo ? 'border-emerald-500/20 bg-emerald-950/10' : 'border-white/5'} mb-1.5 last:mb-0">
+                    <span class="text-white font-bold tracking-tight pr-2 flex-1 break-words">• ${itemDemanda.tipo}</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span class="text-[10px] font-black ${completo ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' : 'text-amber-400 bg-amber-500/10 border border-amber-500/20'} px-2 py-0.5 rounded-lg">
+                            ${realizadosDesteTipo}/${metaDesteTipo}x
+                        </span>
+                        ${!completo ? `
+                            <span class="text-[9px] font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20">
+                                Falta: ${restam}
+                            </span>
+                        ` : `
+                            <span class="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">✓</span>
+                        `}
+                    </div>
+                </div>
+            `;
+        });
+
+        const progressoGeral = totalGeralMeta > 0 ? Math.min(Math.round((totalGeralRealizado / totalGeralMeta) * 100), 100) : 0;
+        const isCargaConcluida = totalGeralRealizado >= totalGeralMeta || carga.status === 'concluido';
+
+        container.innerHTML = `
+            <div class="bg-slate-900 border ${isCargaConcluida ? 'border-emerald-500/30' : 'border-amber-500/30'} p-3.5 rounded-2xl shadow-inner space-y-2.5">
+                <div class="flex justify-between items-center">
+                    <span class="text-[8px] font-black ${isCargaConcluida ? 'text-emerald-400 bg-emerald-500/10' : 'text-amber-400 bg-amber-500/10'} px-2 py-0.5 rounded uppercase tracking-wider">
+                        ${isCargaConcluida ? 'CONCLUÍDO' : 'EM ANDAMENTO'}
+                    </span>
+                    <span class="text-[9px] text-slate-400 font-mono font-bold">${progressoGeral}%</span>
+                </div>
+
+                <div>
+                    <div class="text-xs font-black text-white tracking-tight">NF: ${carga.nota_fiscal}</div>
+                    <div class="text-[10px] text-amber-500 font-medium truncate">${carga.cliente}</div>
+                </div>
+
+                <div class="space-y-1 pt-1 border-t border-slate-800">
+                    <div class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Espelho de Produção (Andamento)</div>
+                    ${htmlItensUnificados}
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        console.error("Erro ao renderizar card lateral da carga:", err);
+    }
+}
+
+
+
 
 /**
  * Converte uma data no formato brasileiro (DD/MM/AAAA) para o formato ISO (AAAA-MM-DD).
@@ -931,6 +1125,35 @@ window.addEventListener("DOMContentLoaded", async () => {
   function abrirModalDetalhesCarga() {
     console.log("Abrir modal de detalhes da carga...");
   }
+
+function toggleModoBalcao(checkbox) {
+    if (checkbox.checked) {
+        localStorage.setItem('modo_balcao_ativo', 'true');
+        console.log("🛒 Modo Balcão ATIVADO: Lançamento avulso permitido.");
+    } else {
+        localStorage.removeItem('modo_balcao_ativo');
+        console.log("🔒 Modo Balcão DESATIVADO: Retornando à demanda original.");
+    }
+    
+    // Atualiza o aside imediatamente
+    if (typeof renderizarCardDemandaAtivaAside === "function") {
+        renderizarCardDemandaAtivaAside();
+    }
+}
+
+// Garante que o switch venha marcado ao abrir a página se já estiver ativo
+window.addEventListener("DOMContentLoaded", () => {
+    const isBalcao = localStorage.getItem('modo_balcao_ativo') === 'true';
+    const switchEl = document.getElementById('switchModoBalcao');
+    if (switchEl) switchEl.checked = isBalcao;
+});
+
+// Ao carregar a página, já deixa o checkbox marcado se o modo balcão estiver ativo
+window.addEventListener("DOMContentLoaded", () => {
+    const isBalcao = localStorage.getItem('modo_balcao_ativo') === 'true';
+    const switchEl = document.getElementById('switchModoBalcao');
+    if (switchEl) switchEl.checked = isBalcao;
+});
   
 window.fixData = fixData;
 window.carregarItens = carregarItens;

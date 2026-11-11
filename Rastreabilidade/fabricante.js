@@ -33,9 +33,7 @@ async function carregarFabricantes() {
 
   try {
     const { data, error } = await supabase
-      .from("fabricantes")
-      .select("id, nome")
-      .order("id", { ascending: true });
+      .from("fabricantes").select("id, nome").order("id", { ascending: true });
 
     if (error) throw error;
     renderizarListaFabricantes(data);

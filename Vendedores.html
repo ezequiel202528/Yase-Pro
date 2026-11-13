@@ -367,28 +367,40 @@
         //     }
         // };
         
-   window.dispararWhatsApp = function(id) {
-    const vendedor = todosVendedores.find(u => u.id === id);
-    const inputLinha = document.querySelector(`input[data-id="${id}"]`);
-    const numeroZap = inputLinha ? inputLinha.value.replace(/\D/g, '') : (vendedor ? vendedor.whatsapp : '');
+window.dispararWhatsApp = async function(id) {
+            const vendedor = todosVendedores.find(u => u.id === id);
+            const inputLinha = document.querySelector(`input[data-id="${id}"]`);
+            const numeroZap = inputLinha ? inputLinha.value.replace(/\D/g, '') : (vendedor ? vendedor.whatsapp : '');
 
-    if (vendedor && numeroZap) {
-        mostrarToast(`A iniciar chat com ${vendedor.nome}...`);
+            if (vendedor && numeroZap) {
+                mostrarToast(`A iniciar chat com ${vendedor.nome}...`);
 
-        // Pega o CNPJ salvo na sessão da empresa logada e limpa os caracteres especiais
-        const cnpjEmpresaLogada = (localStorage.getItem('user_cnpj') || '').replace(/\D/g, '');
-        
-        // Monta o link passando o CNPJ por parâmetro na URL
-        const linkPortal = `${window.location.origin}/LoginVendedor.html?cnpj=${cnpjEmpresaLogada}`;
+                try {
+                    // Busca o CNPJ da empresa logada diretamente no Supabase
+                    const { data: empresaData, error: empresaErr } = await sb
+                        .from("empresas")
+                        .select("cnpj")
+                        .eq("id", empresaId)
+                        .single();
 
-        const textoMensagem = `Olá *${vendedor.nome}*, aqui está o link de acesso ao seu Portal do Vendedor Externo no YaSe PRO:\n\n🔗 ${linkPortal}\n\nAceda com as suas credenciais para gerenciar os seus pedidos.`;
+                    if (empresaErr) throw empresaErr;
 
-        window.open(`https://wa.me/55${numeroZap}?text=${encodeURIComponent(textoMensagem)}`, '_blank');
-    } else {
-        mostrarToast(`⚠️ Insira e salve um número de WhatsApp válido para este vendedor!`, "erro");
-    }
-};     
-        
+                    const cnpjEmpresa = (empresaData?.cnpj || '').replace(/\D/g, '');
+                    
+                    // Monta o link passando o CNPJ por parâmetro na URL
+                    const linkPortal = `${window.location.origin}/LoginVendedor.html?cnpj=${cnpjEmpresa}`;
+
+                    const textoMensagem = `Olá *${vendedor.nome}*, aqui está o link de acesso ao seu Portal do Vendedor Externo no YaSe PRO:\n\n🔗 ${linkPortal}\n\nAceda com as suas credenciais para gerenciar os seus pedidos.`;
+
+                    window.open(`https://wa.me/55${numeroZap}?text=${encodeURIComponent(textoMensagem)}`, '_blank');
+                } catch (err) {
+                    console.error("Erro ao buscar CNPJ da empresa:", err);
+                    mostrarToast("❌ Erro ao obter o CNPJ para o link.", "erro");
+                }
+            } else {
+                mostrarToast(`⚠️ Insira e salve um número de WhatsApp válido para este vendedor!`, "erro");
+            }
+        };     
         
         
         // Evento de pesquisa em tempo real

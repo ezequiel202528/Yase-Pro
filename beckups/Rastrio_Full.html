@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1\" />
+    <title>YaSe PRO - Rastreabilidade de Itens</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+    <link rel="stylesheet" href="Rastreabilidade/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    </head>
+  <body>
+
+    <div class="app-container">
+<!-- <aside class="p-5 flex flex-col h-full"> <div class="mb-8 flex items-center gap-3">
+    <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
+      <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
+    </div>
+    <h1 class="text-xl font-extrabold tracking-tight">YaSe <span class="text-amber-500">PRO</span></h1>
+  </div>
+
+  
+  
+
+
+  <nav class="space-y-4 flex-1 flex flex-col"> <a href="GestaoOS.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 text-slate-300 hover:text-white transition-all font-bold text-xs border border-slate-700/50">
+      <i class="fa-solid fa-arrow-left"></i> Voltar para Gestão
+    </a>
+
+    <div class="space-y-2 pt-2">
+      <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest px-1">Monitorização</div>
+      <div class="grid grid-cols-2 gap-2">
+        <div id="osBadge" class="bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 p-2 rounded-xl text-center">
+          <div class="text-[8px] uppercase font-bold opacity-70">OS Atual</div>
+          <div id="osBadgeNumber" class="text-[11px] font-black tracking-wider">---</div>
+        </div>
+        <div class="bg-slate-800/60 border border-slate-700 p-2 rounded-xl text-center">
+          <div class="text-[8px] uppercase font-bold opacity-70">Rastreios</div>
+          <div class="text-[11px] font-black text-amber-500"><span id="itemCounter">0</span></div>
+        </div>
+      </div>
+
+<div id="status-selo-container" class="bg-slate-900 border border-slate-700 p-3 rounded-xl shadow-inner">
+  <div class="flex justify-between items-center mb-2">
+    <div class="flex items-center gap-2">
+      <i class="fa-solid fa-stamp text-amber-500 text-[10px]"></i>
+      <span id="lote_documento" class="text-[10px] font-black text-white uppercase tracking-tighter">LOTE PREFIXO: ---</span>
+    </div>
+    <span id="proximo_selo_num" class="hidden"></span> 
+  </div>
+  <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-1">
+    <div id="barra_progresso_selo" class="bg-amber-500 h-full w-[0%] transition-all duration-700"></div>
+  </div>
+<div class="flex justify-between items-center text-slate-500 uppercase mt-1">
+  <span id="label_disponibilidade" class="text-[9px] font-bold tracking-wider">Selos Disponiveis:</span>
+  <span id="qtd_restante_texto" class="bg-amber-500 text-slate-950 px-3 py-0.5 rounded-lg text-lg font-black shadow-lg shadow-amber-500/20 min-w-[45px] text-center">
+    ---
+  </span>
+</div>
+  
+</div>
+
+    <button onclick="gerarRelatorioSaida()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white p-3 rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-900/20">
+      <i class="fa-solid fa-print"></i> Relatório Técnico
+    </button>
+
+    <div class="flex-1"></div>
+
+
+
+  </nav>
+ <div class="flex flex-col gap-1 border-l-2 border-amber-500 pl-3 py-1">
+    <span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Operador Ativo</span>
+    <button onclick="abrirModalTrocaUsuario()" class="text-slate-500 hover:text-amber-500 transition-colors cursor-pointer" title="Trocar Usuário">
+            <i class="fa-solid fa-right-left text-[10px]"></i>
+        </button>
+    <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+        <span id="nome-operador-logado" class="text-sm font-black text-slate-100 tracking-tight">
+            EZEQUIEL
+        </span>
+    </div>
+    <span id="nome-unidade" class="text-[9px] text-amber-500/80 font-medium italic">
+        Unidade: Empresa Demonstração
+    </span>
+</div>
+
+  <div class="text-center pt-2">
+    <div id="displayOS" class="hidden">---</div>
+    <p class="text-[8px] text-slate-600 font-bold uppercase tracking-widest">YaSe PRO v2.0</p>
+  </div>
+</aside> -->
+
+<aside class="p-5 flex flex-col h-full"> 
+  <div class="mb-8 flex items-center gap-3">
+    <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
+      <i class="fa-solid fa-fire-extinguisher text-xl text-slate-900"></i>
+    </div>
+    <h1 class="text-xl font-extrabold tracking-tight">YaSe <span class="text-amber-500">PRO</span></h1>
+  </div>
+
+  <nav class="space-y-4 flex-1 flex flex-col"> 
+    <a href="GestaoOS.html" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 text-slate-300 hover:text-white transition-all font-bold text-xs border border-slate-700/50">
+      <i class="fa-solid fa-arrow-left"></i> Voltar para Gestão
+    </a>
+
+    <div class="space-y-2 pt-2">
+      <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest px-1">Monitorização</div>
+      <div class="grid grid-cols-2 gap-2">
+        <div id="osBadge" class="bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 p-2 rounded-xl text-center">
+          <div class="text-[8px] uppercase font-bold opacity-70">OS Atual</div>
+          <div id="osBadgeNumber" class="text-[11px] font-black tracking-wider">---</div>
+        </div>
+        <div class="bg-slate-800/60 border border-slate-700 p-2 rounded-xl text-center">
+          <div class="text-[8px] uppercase font-bold opacity-70">Rastreios</div>
+          <div class="text-[11px] font-black text-amber-500"><span id="itemCounter">0</span></div>
+        </div>
+      </div>
+
+      <div id="status-selo-container" class="bg-slate-900 border border-slate-700 p-3 rounded-xl shadow-inner">
+        <div class="flex justify-between items-center mb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-stamp text-amber-500 text-[10px]"></i>
+            <span id="lote_documento" class="text-[10px] font-black text-white uppercase tracking-tighter">LOTE PREFIXO: ---</span>
+          </div>
+          <span id="proximo_selo_num" class="hidden"></span> 
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-1">
+          <div id="barra_progresso_selo" class="bg-amber-500 h-full w-[0%] transition-all duration-700"></div>
+        </div>
+        <div class="flex justify-between items-center text-slate-500 uppercase mt-1">
+          <span id="label_disponibilidade" class="text-[9px] font-bold tracking-wider">Selos Disponiveis:</span>
+          <span id="qtd_restante_texto" class="bg-amber-500 text-slate-950 px-3 py-0.5 rounded-lg text-lg font-black shadow-lg shadow-amber-500/20 min-w-[45px] text-center">
+            ---
+          </span>
+        </div>
+      </div>
+
+      <button onclick="gerarRelatorioSaida()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white p-3 rounded-xl text-[10px] font-black uppercase flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-900/20">
+        <i class="fa-solid fa-print"></i> Relatório Técnico
+      </button>
+
+      <!-- CARD DO PEDIDO ATIVO DA PRODUÇÃO -->
+      <div id="containerPedidoAtivo" class="mt-3">
+        <!-- O card renderizado via JavaScript vai aparecer aqui -->
+      </div>
+
+      <!-- BOTÃO PARA ABRIR O MODAL DE CONFIGURAÇÕES DE REGISTRO -->
+<div id="btnConfigRegistro" class="mt-3 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between cursor-pointer hover:border-amber-500/50 transition-all group">
+  <div class="flex items-center gap-2">
+    <i class="fa-solid fa-sliders text-amber-500 text-xs group-hover:rotate-90 transition-transform"></i>
+    <span class="text-[10px] font-black text-slate-300 uppercase tracking-wider group-hover:text-white transition-colors">Configurar modo de registro</span>
+  </div>
+  <i class="fa-solid fa-chevron-right text-[10px] text-slate-500 group-hover:text-amber-500 transition-colors"></i>
+</div>
+
+<!-- INDICADOR VISUAL DO MODO ATIVO -->
+<div class="mt-3 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between shadow-inner">
+    <div class="flex flex-col">
+        <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest">Modo</span>
+        <span class="text-[10px] font-black text-slate-200 uppercase tracking-tight">Ativo:</span>
+    </div>
+    <div id="badgeModoAtivo" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-indigo-950/60 text-indigo-400 border border-indigo-500/30 flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-box text-[9px]"></i> <span id="textoModoAtivo">Modo Demanda</span>
+    </div>
+</div>
+
+      <!-- CHECKBOX DE VENDA DE BALCÃO / AVULSO NO ASIDE -->
+      <!-- <div class="mt-3 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-store text-amber-500 text-xs"></i>
+          <span class="text-[10px] font-black text-slate-300 uppercase tracking-wider">Modo Balcão / Avulso</span>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="switchModoBalcao" class="sr-only peer" onchange="toggleModoBalcao(this)">
+          <div class="w-7 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-500"></div>
+        </label>
+      </div> -->
+
+    </div>
+
+    <div class="flex-1"></div>
+  </nav>
+
+  <div class="flex flex-col gap-1 border-l-2 border-amber-500 pl-3 py-1">
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Operador Ativo</span>
+      <button onclick="abrirModalTrocaUsuario()" class="text-slate-500 hover:text-amber-500 transition-colors cursor-pointer" title="Trocar Usuário">
+        <i class="fa-solid fa-right-left text-[10px]"></i>
+      </button>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+      <span id="nome-operador-logado" class="text-sm font-black text-slate-100 tracking-tight">
+        EZEQUIEL
+      </span>
+    </div>
+    <span id="nome-unidade" class="text-[9px] text-amber-500/80 font-medium italic">
+      Unidade: Empresa Demonstração
+    </span>
+  </div>
+
+  <div class="text-center pt-2">
+    <div id="displayOS" class="hidden">---</div>
+    <p class="text-[8px] text-slate-600 font-bold uppercase tracking-widest">YaSe PRO v2.0</p>
+  </div>
+</aside>
+
+
+      <main class="relative flex-1 flex flex-col overflow-hidden">
+<div class="relative z-[50]">
+
+                
+</div>
+
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 mb-3">
+    <div class="card p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-700">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-fingerprint text-indigo-500"></i> Identificação
+        </h3>
+        <div class="space-y-2">
+            <input type="text" id="cod_barras" class="w-full h-8 px-2 text-[10px] border rounded-lg focus:ring-2 ring-indigo-500/20 outline-none" placeholder="Cód. de Barras">
+            
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex gap-1">
+         <div class="flex-1 relative flex items-center bg-slate-800 rounded-lg border border-slate-700 focus-within:ring-2 ring-indigo-500/20">
+   <!-- Honeypots aprimorados para desviar o autofill -->
+   <input type="text" name="fake_user" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;" tabindex="-1">
+   <input type="password" name="fake_pass" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;" tabindex="-1">
+   
+   <input type="text" id="X_input_id" 
+    inputmode="numeric" pattern="[0-9]*"
+    class="w-full h-8 pl-2 pr-2 text-[10px] bg-transparent outline-none text-white font-bold" 
+    placeholder="Fab." name="fabricante_field_secure_v2" autocomplete="off"
+    readonly onfocus="this.removeAttribute('readonly');"
+    oninput="this.value = this.value.replace(/[^0-9]/g, ''); buscarNomeFabricante(this.value)"
+    onkeydown="if(event.key === 'Enter') validarFabricanteAntesDeSeguir(event)">
+    
+    <span id="nome_fabricante_preview" 
+        class="absolute pointer-events-none text-[9px] font-black text-red-500 uppercase italic"
+        style="left: 45px;"> 
+    </span>
+</div>
+                    <button onclick="abrirModalFabricante()" class="w-8 h-8 shrink-0 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-amber-500 transition-colors">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i>
+                    </button>
+                </div>
+<div class="flex gap-1">
+    <input type="text" id="nr_cilindro" class="flex-1 h-8 px-2 text-[10px] border rounded-lg" placeholder="Nº Cilindro">
+   <button onclick="abrirModalBusca()" class="w-8 h-8 shrink-0 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-indigo-500 hover:text-indigo-400 transition-colors">
+    <i class="fa-solid fa-magnifying-glass text-[9px]"></i>
+</button>
+</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="ano_fab" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Ano Fab.">
+              <input type="text" id="ult_reteste" 
+       class="w-full h-8 px-2 text-[10px] border rounded-lg" 
+       placeholder="Últ. Reteste" 
+       oninput="definirNivelPeloReteste(); calcularDatasAutomaticas()">
+       </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="flex gap-1">
+                    <select id="tipo_carga" class="flex-1 h-8 text-[10px] border rounded-lg px-1" onchange="definirNivelPeloReteste()">
+                        <option value="">Tipo</option>
+                    </select>
+                    <button onclick="X_ABRIR_TIPO()" class="w-8 h-8 shrink-0 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-amber-500 transition-colors">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i>
+                    </button>
+                </div>
+
+                <div class="flex gap-1">
+                    <select id="capacidade" class="flex-1 h-8 text-[10px] border rounded-lg px-1">
+                        <option value="">Cap.</option>
+                    </select>
+                    <button type="button" onclick="abrirModalCapacidade()" class="w-8 h-8 shrink-0 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-amber-500 transition-colors">
+                        <i class="fa-solid fa-magnifying-glass text-[9px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex gap-1">
+                <select id="nbr_select" class="flex-1 h-8 text-[10px] border rounded-lg px-1"><option value="">Norma NBR</option></select>
+                <button onclick="X_ABRIR_NBR()" class="w-8 h-8 shrink-0 bg-slate-800 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-amber-500">
+                    <i class="fa-solid fa-magnifying-glass text-[9px]"></i>
+                </button>
+            </div>
+
+            <!-- <div class="flex items-center justify-between p-2 bg-slate-800/30 rounded-xl mb-3 border border-slate-700/50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-print text-slate-500 text-[10px]"></i>
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Imprimir Etiqueta Avulsa</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="switchEtiqueta" class="sr-only peer" checked>
+                    <div class="w-7 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
+                </label>
+            </div>
+
+         <div class="mt-4 p-3 bg-slate-800/40 rounded-xl border border-slate-700/50">
+                BLOCO: IMPRESSÃO POR LOTE (Alinhado exatamente igual ao avulso)
+                <div class="flex items-center justify-between p-2 bg-slate-800/30 rounded-xl mb-3 border border-slate-700/50"> -->
+                    <!-- <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-slate-500 text-[10px]"></i>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Impressão por Lote</span>
+                    </div>
+                    
+                    <input type="number" id="inputQtdLote" min="1" value="10" style="width: 60px;" class="bg-slate-900 border border-slate-700 text-white text-xs font-bold rounded-lg py-1 px-2 text-center focus:outline-none focus:border-indigo-500">
+                </div>
+                    
+                    <button onclick="abrirModalLotes()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 px-4 rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors">
+                        <i class="fa-solid fa-list-check"></i> Gerenciar Lotes / Pendentes
+                    </button>
+                </div> --> 
+
+
+            <button onclick="registrarItem()" class="w-max mx-auto bg-indigo-600 text-white font-bold py-1.5 px-6 rounded-lg text-[10px] uppercase shadow-md hover:bg-indigo-700 transition-all flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i> REGISTRAR
+            </button>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+        <div class="card p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-700">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-microchip text-indigo-500"></i> Dados Técnicos
+            </h3>
+            <div class="space-y-2">
+                <input type="text" id="lote_nitrogenio" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Lote Nitro.">
+                <input type="text" id="ampola_vinculada" class="w-full h-8 px-2 text-[10px] border rounded-lg" placeholder="Ampola Vinc.">
+                <input type="date" id="data_selagem" class="w-full h-8 px-2 text-[10px] border rounded-lg" onchange="calcularDatasAutomaticas()">
+            </div>
+        </div>
+        <div class="card p-3 rounded-xl border border-slate-700 shadow-sm">
+            <div class="flex justify-between mb-1"><span class="text-[9px] font-black text-slate-500">PROX. RECARGA</span><span id="display_prox_recarga" class="text-[10px] font-bold text-indigo-400">--/--/----</span></div>
+            <div class="flex justify-between"><span class="text-[9px] font-black text-slate-500">PROX. RETESTE</span><span id="display_prox_reteste" class="text-[10px] font-bold text-red-400">----</span></div>
+            <textarea id="obs_ensaio" rows="1" class="w-full mt-2 text-[10px] border border-slate-700 rounded-lg p-2 outline-none" placeholder="Observações..."></textarea>
+        </div>
+    </div>
+
+    <div class="card p-4 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-700">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-truck-ramp-box text-indigo-500"></i> Manutenção
+        </h3>
+        <div class="flex gap-1 mb-2">
+            <div class="flex-1 btn-level cursor-pointer px-1 py-1 rounded-md text-[9px] font-bold text-center" data-level="1" onclick="setLevel(1)">NV 1</div>
+            <div class="flex-1 btn-level active cursor-pointer px-1 py-1 rounded-md text-[9px] font-bold text-center" data-level="2" onclick="setLevel(2)">NV 2</div>
+            <div class="flex-1 btn-level cursor-pointer px-1 py-1 rounded-md text-[9px] font-bold text-center" data-level="3" onclick="setLevel(3)">NV 3</div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mb-2">
+            <input type="text" id="selo_anterior" class="w-full h-8 text-[10px] border border-slate-700 rounded-lg px-2" placeholder="Selo Ant.">
+            <input type="text" id="N-Patrimonio" class="w-full h-8 text-[10px] border border-slate-700 rounded-lg px-2" placeholder="Nº Patrimonio">
+            <input type="text" id="deposito_galpao" class="w-full h-8 text-[10px] border border-slate-700 rounded-lg px-2" placeholder="Setor">
+            <input type="text" id="local_extintor" class="w-full h-8 text-[10px] border border-slate-700 rounded-lg px-2" placeholder="Local">
+        </div>
+        <div class="flex gap-2 mb-2">
+            <div class="flex-1 opacity-40 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-amber-900/20 text-amber-500 border-amber-500/30" onclick="setStatus('NOVO', this)">NOVO</div>
+            <div class="flex-1 opacity-100 text-center border-2 px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-emerald-900/20 text-emerald-400 border-emerald-500/30" onclick="setStatus('APROVADO', this)">APR</div>
+            <div class="flex-1 opacity-40 text-center border px-2 py-1 rounded-lg text-[9px] font-black cursor-pointer bg-red-900/20 text-red-500 border-red-500/30" onclick="setStatus('REPROVADO', this)">REP</div>
+            <input type="hidden" id="resultado_valor" value="APROVADO">
+        </div>
+        <!-- <button onclick="openAcessoriosModal()" class="w-full bg-slate-800 border-2 border-dashed border-slate-700 text-amber-500/70 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-slate-700 transition-colors mb-3">Componentes</button> -->
+        <div class="mt-4">
+    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Peças e Acessórios</label>
+    <button type="button" onclick="abrirModalComponentes()" class="w-full py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-[11px] font-bold uppercase hover:bg-slate-700 transition-all flex items-center justify-center gap-3 shadow-lg">
+        <i class="fa-solid fa-toolbox text-amber-500"></i>
+        Selecionar Componentes Substituídos
+        <span id="badge-comp" class="bg-indigo-600 text-[9px] px-2 py-0.5 rounded-full hidden">0</span>
+    </button>
+</div>
+        <div class="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3">
+    <div class="text-[8px] font-black text-slate-500 uppercase mb-2 tracking-widest border-b border-slate-700/30 pb-1">Checklist de Inspeção</div>
+    <div class="bg-slate-900/50 border border-slate-700/50 rounded-xl p-3 mt-2">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+                <div class="text-[7px] font-black text-slate-500 uppercase mb-2 tracking-widest border-b border-slate-700/30 pb-1">Inspeção e Ensaio</div>
+                <label class="flex items-center gap-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-[9px] text-slate-400 group-hover:text-slate-200">Ens. Pneum. Manômetro</span></label>
+                <label class="flex items-center gap-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-[9px] text-slate-400 group-hover:text-slate-200">Ens. Pneum. Válvula</span></label>
+                <label class="flex items-center gap-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-[9px] text-slate-400 group-hover:text-slate-200">Reg. Válvula Alívio</span></label>
+                <label class="flex items-center gap-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-[9px] text-slate-400 group-hover:text-slate-200">Ens. Cond. Elétrica</span></label>
+            </div>
+
+            <div class="space-y-1.5">
+                <div class="text-[7px] font-black text-amber-500/70 uppercase mb-2 tracking-widest border-b border-slate-700/30 pb-1">Ensaio Hidrostático</div>
+                <label class="flex items-center gap-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-[9px] text-slate-400 group-hover:text-slate-200">Ens. Hidrost. Válvula</span></label>
+                <label class="flex items-center gap-2 cursor-pointer group"><input type="checkbox" class="custom-checkbox"><span class="text-[9px] text-slate-400 group-hover:text-slate-200">Ens. Hidrost. Mangueira</span></label>
+                
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" id="comp_pintura" class="custom-checkbox">
+                    <span class="text-[9px] text-slate-400 group-hover:text-slate-200">Pintura</span>
+                </label>         
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+
+    <div class="card p-4 border-t-4 border-indigo-500 shadow-sm border border-slate-700">
+        <h3 class="text-[10px] font-black text-slate-400 uppercase mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-gauge-high text-indigo-500"></i> Ensaios Técnicos
+        </h3>
+        <div class="ensaios-group-yellow">
+            <div class="text-[8px] font-black text-amber-500/80 uppercase mb-1 tracking-wider" id="titulo_pesagem">Pesagem ABC</div>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="p_vazio_valvula" placeholder="P.Vazio com Válvula">
+                <input type="number" id="p_cheio_valvula" placeholder="P.Cheio com Válvula">
+                <input type="number" id="p_atual" placeholder="P.Atual">
+                <input type="text" id="porcent_dif" placeholder="% Diferença"  class="font-bold text-amber-500">
+            </div>
+        </div>
+        <div class="ensaios-group-green">
+            <div class="text-[8px] font-black text-emerald-500/80 uppercase mb-1 tracking-wider">Perda de Massa</div>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="tara_cilindro" placeholder="Tara">
+                <input type="number" id="p_cil_vazio_kg" placeholder="P. Cilindro Vazio - Kg">
+                <input type="text" id="perda_massa_porcent" placeholder="% Perda de Massa"  class="col-span-2 font-bold text-emerald-500">
+            </div>
+        </div>
+        <div class="ensaios-group-blue">
+            <div class="text-[8px] font-black text-blue-400/80 uppercase mb-1 tracking-wider">Cub. (Volume Int.)</div>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="vol_litros" placeholder="Vol.">
+                <input type="number" id="dvm_et" placeholder="DVH">
+                <input type="number" id="dvp_ep" placeholder="DVP">
+                <input type="text" id="ee_resultado" placeholder="EE"  class="font-bold text-blue-400">
+            </div>
+        </div>
+        <div class="ensaios-group-red">
+            <div class="text-[8px] font-black text-red-500/80 uppercase mb-1 tracking-wider">Teste Hidrostático</div>
+            <div class="grid grid-cols-2 gap-1">
+                <input type="number" id="et_ensaio" placeholder="DVM = ET">
+                <input type="number" id="ep_ensaio" placeholder="DVP = EP">
+                <input type="number" id="ee_calculado" placeholder="DVM - DVP = EE">
+                <input type="text" id="ep_porcent_final" placeholder="DVP/DVM EP(%)"  class="font-bold text-red-500">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="flex-1 flex flex-col min-h-0 overflow-hidden">
+    <div class="table-wrapper">
+<div class="overflow-x-auto overflow-y-auto max-h-[600px] relative">
+    <table class="w-full text-left border-separate border-spacing-0" style="min-width: 3500px;">        
+        <thead class="bg-slate-900 sticky top-0 z-[100]">
+               <tr class="text-[10px] uppercase font-black text-slate-500 border-b border-slate-800">
+        <th class="p-3 sticky left-0 top-0 z-[110] bg-slate-900 border-r border-slate-800">ID</th>
+                <th class="p-4 bg-slate-900 text-amber-500 font-black">Nº Selo</th>
+                
+                
+                
+                <th class="p-4 bg-slate-900">Nº Cilindro</th>
+                <th class="p-4 bg-slate-900">NBR</th>
+                <th class="p-4 bg-slate-900">Fabricante</th>
+                <th class="p-4 bg-slate-900">Ano Fab.</th>
+                <th class="p-4 bg-slate-900">Últ. Reteste</th>
+                <th class="p-4 bg-slate-900 text-red-400 font-bold">Prox. Reteste</th>
+                <th class="p-4 bg-slate-900 text-amber-500 font-bold">Prox. Recarga</th>
+                
+                <th class="p-4 bg-slate-900 border-r border-slate-700 text-indigo-400">
+                    Tipo / Capacidade
+                </th>
+
+                <th class="p-4 bg-slate-900">Operador</th>
+                <th class="p-4 bg-slate-900 text-center">Nível</th>
+                <th class="p-4 bg-slate-900">Status</th>
+
+                <th class="p-4 bg-orange-500/10 text-orange-400 border-l border-slate-800">P. Vazio</th>
+                <th class="p-4 bg-orange-500/10 text-orange-400">P. Cheio</th>
+                <th class="p-4 bg-orange-500/10 text-orange-400">P. Atual</th>
+                <th class="p-4 bg-orange-500/10 text-orange-400">% Dif</th>
+
+                <th class="p-4 bg-emerald-500/10 text-emerald-400 border-l border-slate-800">Tara</th>
+                <th class="p-4 bg-emerald-500/10 text-emerald-400">P. Cil Vazio</th>
+                <th class="p-4 bg-emerald-500/10 text-emerald-400">% Perda</th>
+
+                <th class="p-4 bg-blue-500/10 text-blue-400 border-l border-slate-800">Vol.</th>
+                <th class="p-4 bg-blue-500/10 text-blue-400">DVH</th>
+                <th class="p-4 bg-blue-500/10 text-blue-400">DVP</th>
+                <th class="p-4 bg-blue-500/10 text-blue-400">EE</th>
+
+                <th class="p-4 bg-red-500/10 text-red-400 border-l border-slate-800">DVM=ET</th>
+                <th class="p-4 bg-red-500/10 text-red-400">DVP=EP</th>
+                <th class="p-4 bg-red-500/10 text-red-400">EE Calc</th>
+                <th class="p-4 bg-red-500/10 text-red-400">EP (%)</th>
+
+                <th class="p-4 text-slate-500 bg-slate-900">Data Lanç. (+Hora)</th>
+                <th class="p-4 bg-slate-900">Cód. Barras</th>
+                <th class="p-4 bg-slate-900">Lote N2</th>            
+                <th class="p-4 bg-slate-900">Ampola</th>
+                <th class="p-4 bg-slate-900">Depósito</th>
+                
+                
+
+                <th class="p-4 text-indigo-400 font-bold bg-indigo-500/5">Nº Patrimônio</th>
+                <th class="p-4 bg-slate-900">Local Espec.</th>
+                <th class="p-4 text-slate-500 italic bg-slate-900">Data Alt. (+Hora)</th>
+                <th class="p-4 text-amber-600 italic bg-slate-900">Usuário Alt.</th>
+
+           <th class="sticky right-0 top-0 z-[110] bg-slate-900 p-3 text-right pr-4 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 border-l">
+                Ações
+            </th>
+            </tr>
+        </thead>
+        <tbody id="itensList" class="divide-y divide-slate-800">
+            </tbody>
+    </table>
+</div>
+    </div>
+</div>
+</div>
+      </main>
+    </div>
+
+
+    <div id="modalInutilizar" class="fixed inset-0 z-[10001] hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-red-500/30 w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden">
+        <div class="p-8 text-center">
+            <div class="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-red-500/20">
+                <i class="fa-solid fa-ban"></i>
+            </div>
+            <h3 class="text-lg font-black text-white uppercase mb-2">Inutilizar Extintor</h3>
+            <p class="text-slate-400 text-xs mb-6">Selecione o motivo técnico para a reprovação definitiva deste cilindro.</p>
+
+            <select id="motivoReprovacao" class="w-full bg-slate-800 border border-slate-700 rounded-xl py-3 px-4 text-white text-sm mb-6 outline-none focus:ring-2 focus:ring-red-500">
+                <option value="">Selecione um motivo...</option>
+                <option value="Corrosão Acentuada">Corrosão Acentuada</option>
+                <option value="Defeito na Rosca">Defeito na Rosca</option>
+                <option value="Reprovado no Ensaio Hidrostático">Reprovado no Ensaio Hidrostático</option>
+                <option value="Vencimento da Vida Útil (20 anos)">Vencimento da Vida Útil (20 anos)</option>
+                <option value="Dano Mecânico Visível">Dano Mecânico Visível</option>
+                <option value="Outros">Outros (Informar em observações)</option>
+            </select>
+
+            <div class="flex gap-3">
+                <button onclick="fecharModalInutilizar()" class="flex-1 py-3 text-[10px] font-black uppercase text-slate-500">Voltar</button>
+                <button onclick="confirmarInutilizacao()" class="flex-[2] py-3 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase hover:bg-red-700 transition-all shadow-lg shadow-red-900/40">
+                    Confirmar Reprovação
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <div id="modalErroReteste" class="fixed inset-0 z-[10000] hidden flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div class="p-8 text-center">
+            <div class="w-20 h-20 bg-red-500/10 text-red-500 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-6 border border-red-500/20">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            
+            <h3 class="text-xl font-black text-white mb-2 uppercase tracking-tight">Reteste Inválido!</h3>
+            
+            <p class="text-slate-400 text-sm leading-relaxed mb-8">
+                O último reteste informado (<span id="anoInvalidoDestaque" class="text-red-400 font-bold">----</span>) está vencido há mais de 5 anos. 
+                <br><br>
+                <span class="text-[10px] uppercase font-black text-slate-500 tracking-widest">Mínimo Exigido:</span>
+                <span class="block text-lg text-emerald-400 font-black" id="anoMinimoDestaque">2021</span>
+            </p>
+
+            <button onclick="fecharModalErroReteste()" class="w-full bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] transition-all border border-slate-700 shadow-lg">
+                Entendido
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tipo de Carga (Cadastro/Edição/Exclusão) -->
+<div id="modalTipo" class="fixed inset-0 z-[10005] hidden flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <i class="fa-solid fa-flask text-amber-500"></i>
+                <h3 class="text-white font-black uppercase text-sm tracking-widest">Tipos de Carga Registrados</h3>
+            </div>
+            
+            <div class="flex gap-2 mb-6 bg-slate-800/50 p-2 rounded-2xl border border-slate-700/50">
+                <input type="text" id="novoTipoNome" class="flex-1 bg-transparent px-3 text-white text-xs outline-none uppercase" placeholder="Novo Tipo (Ex: PQS-ABC)...">
+                <button id="btnSalvarTipo" onclick="salvarTipo()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-xl font-black text-[10px] hover:bg-amber-400 transition-all">
+                    ADICIONAR
+                </button>
+            </div>
+
+            <div class="relative mb-4">
+                <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-slate-500 text-[10px]"></i>
+                </div>
+                <input type="text" id="filtroTipo" onkeyup="filtrarTipos()" 
+                    class="w-full bg-slate-800 border border-slate-700 rounded-xl py-2 pl-9 pr-4 text-white text-[11px] focus:ring-1 focus:ring-amber-500 outline-none transition-all placeholder:text-slate-600" 
+                    placeholder="Pesquisar tipo de carga...">
+            </div>
+
+            <div id="listaTipos" class="custom-scroll-fab space-y-2 pr-2">
+                <!-- Lista renderizada via JS -->
+            </div>
+
+            <div class="mt-6">
+                <button onclick="fecharModalTipo()" class="w-full py-3 bg-slate-800 text-slate-400 rounded-xl text-[10px] font-black uppercase border border-slate-700 hover:bg-slate-700 transition-all">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div id="modalComponentes" class="fixed inset-0 z-[110] hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-gears text-indigo-500"></i>
+                <h3 class="text-white font-black uppercase text-xs tracking-tighter">Componentes e Peças Substituídas</h3>
+            </div>
+            <button onclick="fecharModalComponentes()" class="text-slate-400 hover:text-white transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="p-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[60vh] overflow-y-auto" id="container_checks_componentes">
+            <label class="comp-item"><input type="checkbox" id="comp_pistola"><span>Pistola</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_valvula"><span>Válvula</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_bucha"><span>Bucha</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_sifao"><span>Sifão</span></label>           
+            <label class="comp-item"><input type="checkbox" id="comp_punho_pino"><span>Punho/Pino</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_quebra_jato"><span>Quebra Jato</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_manometro"><span>Manômetro</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_mangueira"><span>Mangueira</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_cord_plastico"><span>Cord. Plástico</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_saia_plastica"><span>Saia Plástica</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_conj_apague"><span>Conj. Apague</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_difusor"><span>Difusor</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_pera_ved"><span>Pera/Ved</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_mola_rosca"><span>Mola/Rosca</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_conj_miolo"><span>Conj. Miolo</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_conj_haste"><span>Conj. Haste</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_anel_oring"><span>Anel Oring</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_sifao_aluminio"><span>Sifão Alumínio</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_conj_seguranca"><span>Conj. Seguran.</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_haste_valvula"><span>Haste Válv.</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_gancho_sup"><span>Gancho/Sup.</span></label>
+            <label class="comp-item"><input type="checkbox" id="comp_trava_corrente"><span>Trava Corr.</span></label>
+        </div>
+
+        <div class="p-4 bg-slate-800/30 border-t border-slate-800 flex justify-end">
+            <button onclick="salvarComponentesNoModal()" class="px-8 py-2 bg-indigo-600 text-white rounded-lg text-[10px] font-black uppercase shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition-all">
+                Salvar e Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+
+    
+    <div id="confirmacaoGeral" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/40 backdrop-blur-md">
+        <div class="bg-white w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl text-center border border-slate-200">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-6">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 id="tituloConfirmacao" class="text-lg font-black text-slate-800 mb-2">Excluir?</h3>
+            <p id="msgConfirmacao" class="text-slate-500 text-[10px] mb-6 px-4">Esta operação é irreversível.</p>
+            <div class="flex gap-2">
+                <button onclick="fecharConfirmacao()" class="flex-1 bg-slate-100 py-3 rounded-xl text-[10px] font-black text-slate-400">CANCELAR</button>
+                <button id="btnConfirmarAcaoGeral" class="flex-[1.5] bg-red-500 text-white py-3 rounded-xl text-[10px] font-black">CONFIRMAR</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal NBR -->
+<div id="modalNBR" class="fixed inset-0 z-[10005] hidden flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <i class="fa-solid fa-file-contract text-amber-500"></i>
+                <h3 class="text-white font-black uppercase text-sm tracking-widest">Normas NBR Registradas</h3>
+            </div>
+            
+            <div class="flex gap-2 mb-6 bg-slate-800/50 p-2 rounded-2xl border border-slate-700/50">
+                <input type="text" id="novoNBRNome" class="flex-1 bg-transparent px-3 text-white text-xs outline-none uppercase" placeholder="Nome da Norma (Ex: NBR 15808)...">
+                <button id="btnSalvarNBR" onclick="salvarNBR()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-xl font-black text-[10px] hover:bg-amber-400 transition-all">
+                    ADICIONAR
+                </button>
+            </div>
+
+            <div class="relative mb-4">
+                <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-slate-500 text-[10px]"></i>
+                </div>
+                <input type="text" id="filtroNBR" onkeyup="filtrarNBRs()" 
+                    class="w-full bg-slate-800 border border-slate-700 rounded-xl py-2 pl-9 pr-4 text-white text-[11px] focus:ring-1 focus:ring-amber-500 outline-none transition-all placeholder:text-slate-600" 
+                    placeholder="Pesquisar norma...">
+            </div>
+
+            <div id="listaNBRs" class="custom-scroll-fab space-y-2 pr-2">
+                <!-- Lista renderizada via JS -->
+            </div>
+
+            <div class="mt-6">
+                <button onclick="fecharModalNBR()" class="w-full py-3 bg-slate-800 text-slate-400 rounded-xl text-[10px] font-black uppercase border border-slate-700 hover:bg-slate-700 transition-all">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Capacidade -->
+<div id="modalCapacidade" class="fixed inset-0 z-[10005] hidden flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <i class="fa-solid fa-weight-scale text-amber-500"></i>
+                <h3 class="text-white font-black uppercase text-sm tracking-widest">Capacidades Registradas</h3>
+            </div>
+            
+            <div class="flex gap-2 mb-6 bg-slate-800/50 p-2 rounded-2xl border border-slate-700/50">
+                <input type="text" id="novoCapacidadeNome" class="flex-1 bg-transparent px-3 text-white text-xs outline-none uppercase" placeholder="Nova Capacidade (Ex: 6KG)...">
+                <button id="btnSalvarCapacidade" onclick="salvarCapacidade()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-xl font-black text-[10px] hover:bg-amber-400 transition-all">
+                    ADICIONAR
+                </button>
+            </div>
+
+            <div class="relative mb-4">
+                <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-magnifying-glass text-slate-500 text-[10px]"></i>
+                </div>
+                <input type="text" id="filtroCapacidade" onkeyup="filtrarCapacidades()" 
+                    class="w-full bg-slate-800 border border-slate-700 rounded-xl py-2 pl-9 pr-4 text-white text-[11px] focus:ring-1 focus:ring-amber-500 outline-none transition-all placeholder:text-slate-600" 
+                    placeholder="Pesquisar capacidade...">
+            </div>
+
+            <div id="listaCapacidades" class="custom-scroll-fab space-y-2 pr-2">
+                <!-- Lista renderizada via JS -->
+            </div>
+
+            <div class="mt-6">
+                <button onclick="fecharModalCapacidade()" class="w-full py-3 bg-slate-800 text-slate-400 rounded-xl text-[10px] font-black uppercase border border-slate-700 hover:bg-slate-700 transition-all">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalBuscaCilindro" class="fixed inset-0 z-[10000] hidden flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div class="p-8">
+            <div class="w-16 h-16 bg-indigo-500/10 text-indigo-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-6 border border-indigo-500/20">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            
+            <h3 class="text-xl font-black text-white text-center mb-2 uppercase tracking-tight">Localizar Extintor</h3>
+            <p class="text-slate-400 text-center text-xs mb-6">Busca por número de cilindro no banco de dados</p>
+
+            <div class="relative mb-6">
+                <input type="text" id="inputBuscaModal" 
+                    class="w-full bg-slate-800 border border-slate-700 rounded-xl py-4 px-5 text-white text-lg font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-600" autocomplete="new-password"
+                    placeholder="Nº do Cilindro..."
+                    onkeydown="if(event.key === 'Enter') { event.preventDefault(); executarBuscaModal(); }">
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="fecharModalBusca()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-400 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+                    Cancelar
+                </button>
+                <button onclick="executarBuscaModal()" class="flex-[2] bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-900/40">
+                    Buscar Agora
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="modalFabricante" class="fixed inset-0 z-[10005] hidden flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <i class="fa-solid fa-industry text-amber-500"></i>
+                <h3 class="text-white font-black uppercase text-sm tracking-widest">Fabricantes Registrados</h3>
+            </div>
+            
+            <div class="flex gap-2 mb-6 bg-slate-800/50 p-2 rounded-2xl border border-slate-700/50">
+                <input type="text" id="novoFabricanteNome" class="flex-1 bg-transparent px-3 text-white text-xs outline-none" placeholder="Digitar nome do novo fabricante...">
+                <button onclick="cadastrarFabricante()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-xl font-black text-[10px] hover:bg-amber-400 transition-all">
+                    ADICIONAR
+                </button>
+            </div>
+            <div class="relative mb-4">
+    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+        <i class="fa-solid fa-magnifying-glass text-slate-500 text-[10px]"></i>
+    </div>
+    <input type="text" id="filtroFabricante" 
+        onkeyup="filtrarFabricantes()" 
+        class="w-full bg-slate-800 border border-slate-700 rounded-xl py-2 pl-9 pr-4 text-white text-[11px] focus:ring-1 focus:ring-amber-500 outline-none transition-all placeholder:text-slate-600" 
+        placeholder="Pesquisar fabricante pelo nome...">
+</div>
+
+            <div id="listaFabricantes" class="custom-scroll-fab space-y-2 pr-2">
+                </div>
+
+            <div class="mt-6 flex flex-col gap-2">
+                <p class="text-[9px] text-slate-500 uppercase font-bold text-center">Dica: Digite o ID no campo do formulário para buscar</p>
+                <button onclick="fecharModalFabricante()" class="w-full py-3 bg-slate-800 text-slate-400 rounded-xl text-[10px] font-black uppercase border border-slate-700 hover:bg-slate-700 transition-all">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="modalTrocaUsuario" class="fixed inset-0 z-[10002] hidden flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
+    <div class="glass-card w-full max-w-[400px] p-8 rounded-[2.5rem] relative overflow-hidden">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4 border border-amber-500/20 shadow-lg shadow-amber-500/10">
+                <i class="fa-solid fa-user-lock"></i>
+            </div>
+            <h3 class="text-lg font-black text-white uppercase tracking-tight">Alternar Operador</h3>
+        </div>
+        
+       <div class="space-y-6"> <div>
+        <label class="block text-sm font-medium mb-1 text-slate-300">CÓDIGO (ID)</label>
+<select id="troca_codigo" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white">
+  <option value="">Carregando operadores...</option>
+</select>
+    </div>
+    <div>
+        <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1 mb-2 block">Senha de Acesso</label>
+        <input type="password" id="troca_senha" 
+            class="w-full h-[52px] px-5 rounded-2xl text-white text-[13px] font-medium outline-none transition-all border border-white/10"
+            style="background: rgba(15, 23, 42, 0.8); font-family: 'Plus Jakarta Sans', sans-serif;"
+            onfocus="this.style.borderColor='#fbbf24'; this.style.boxShadow='0 0 0 1px #fbbf24';"
+            onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.boxShadow='none';">
+    </div>
+</div>
+
+        <div id="msgErroTroca" class="hidden text-red-400 text-[10px] font-bold mt-4 text-center bg-red-500/10 py-3 rounded-xl border border-red-500/20"></div>
+
+        <div class="flex gap-4 mt-8">
+            <button onclick="fecharModalTrocaUsuario()" class="flex-1 py-3 text-[10px] font-black uppercase text-slate-500 hover:text-slate-300 transition-colors">
+                Cancelar
+            </button>
+            <button onclick="confirmarTrocaUsuario()" id="btnConfirmarTroca" class="flex-[2] h-12 bg-amber-500 text-slate-900 rounded-xl text-[11px] font-black uppercase hover:bg-amber-400 transition-all shadow-xl shadow-amber-900/40">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<div id="modalEtiqueta" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-300 text-black">
+        
+        <!-- Cabeçalho do Modal -->
+        <div class="bg-slate-100 px-4 py-2 border-b flex justify-between items-center">
+            <span class="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">Visualização de Etiqueta - YaSe PRO</span>
+            <button onclick="fecharModalEtiqueta()" class="text-slate-400 hover:text-red-500 text-lg">&times;</button>
+        </div>
+
+        <!-- Corpo com a Etiqueta -->
+        <div class="p-6 flex justify-center">
+
+            <div id="areaImpressaoEtiqueta" class="bg-white border-[1.5px] border-black p-2 flex flex-col justify-between relative overflow-hidden" style="width: 100mm; height: 50mm; font-family: Arial, sans-serif; box-sizing: border-box;">
+    
+    <!-- CONTEÚDO PRINCIPAL DIVIDIDO EM DUAS COLUNAS (Esquerda: Dados / Direita: Selo) -->
+    <div style="display: flex; justify-content: space-between; align-items: stretch; flex: 1; overflow: hidden;">
+        
+        <!-- COLUNA ESQUERDA -->
+        <div style="display: flex; flex-direction: column; justify-content: space-between; flex: 1; padding-right: 6px; box-sizing: border-box;">
+            
+            <!-- Cabeçalho: Logo + Dados da Empresa -->
+            <div style="display: flex; align-items: center; border-bottom: 1.5px solid black; padding-bottom: 2px; margin-bottom: 2px;">
+                <div style="width: 20mm; height: 9mm; display: flex; align-items: center; justify-content: center; margin-right: 4px; flex-shrink: 0;">
+                    <img id="logo_central_etiqueta" src="" alt="Logo" style="max-width: 20mm; max-height: 9mm; object-fit: contain; display: none; mix-blend-mode: multiply;">
+                </div>
+                <div style="text-align: left; flex: 1; overflow: hidden;">
+                    <div id="etiqueta_empresa_nome" style="font-size: 8px; font-weight: 900; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">NOME DA EMPRESA LTDA</div>
+                    <div id="etiqueta_empresa_endereco" style="font-size: 5.5px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">ENDEREÇO COMPLETO - CIDADE/UF</div>
+                    <div style="font-size: 5.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">CNPJ: <span id="etiqueta_empresa_cnpj">00.000.000/0000-00</span> | Tel: <span id="etiqueta_empresa_fone">(00) 0000-0000</span></div>
+                </div>
+            </div>
+
+            <!-- Aviso Legal Inmetro -->
+            <div style="font-size: 4.5px; text-align: center; font-weight: bold; text-transform: uppercase; line-height: 1.1; margin-bottom: 2px;">
+                PARA CONCESSÃO DE GARANTIA ESTE EXTINTOR DEVE SER VERIFICADO MENSALMENTE, GARANTIA DE 1 ANO, CONTRA A DESPRESSURIZAÇÃO. A VIOLAÇÃO DO LACRE INTERROMPE A GARANTIA.
+            </div>
+
+            <!-- Tabela de Prazos (3 colunas) -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); border: 1.5px solid black; margin-bottom: 2px; background: rgba(255,255,255,0.8);">
+                <div style="border-right: 1.5px solid black; text-align: center; padding: 1px;">
+                    <div style="font-size: 4.8px; font-weight: 900; text-transform: uppercase;">Próx. Manut. 2º Nível</div>
+                    <div id="etiqueta_val_manut" style="font-size: 8px; font-weight: bold;">---</div>
+                </div>
+                <div style="border-right: 1.5px solid black; text-align: center; padding: 1px;">
+                    <div style="font-size: 4.8px; font-weight: 900; text-transform: uppercase;">Próx. Manut. 3º Nível</div>
+                    <div id="etiqueta_val_reteste" style="font-size: 8px; font-weight: bold;">---</div>
+                </div>
+                <div style="text-align: center; padding: 1px; background: black; color: white;">
+                    <div style="font-size: 4.8px; font-weight: 900; text-transform: uppercase; color: white;">Manut. Realizada</div>
+                    <div id="etiqueta_nivel" style="font-size: 8px; font-weight: bold; font-style: italic;">NÍVEL 2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA: Selo Inmetro na vertical -->
+        <div style="width: 26px; border-left: 2px dashed black; display: flex; align-items: center; justify-content: center; background: #f8fafc; flex-shrink: 0;">
+            <span id="etiqueta_selo" style="font-weight: 900; font-size: 10px; letter-spacing: 1px; writing-mode: vertical-rl; transform: rotate(180deg); text-align: center;">
+                ---
+            </span>
+        </div>
+    </div>
+
+    <!-- RODAPÉ COMPLETO: Tipo/Capacidade/Cilindro à esquerda + Código de Barras à direita -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #ccc; padding-top: 2px; margin-top: 2px;">
+        <div style="font-size: 6px; font-weight: bold; font-style: italic; line-height: 1.2;">
+            Tipo: <span id="etiqueta_tipo">---</span> | Cap: <span id="etiqueta_cap">---</span><br>
+            Nº Cilindro: <span id="etiqueta_cilindro" style="font-weight: 900;">---</span>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <svg id="barcode_preview" style="height: 18px; max-width: 45mm;"></svg>
+            <span id="barcode_text_manual" style="font-size: 7px; font-weight: bold; letter-spacing: 0.5px; margin-top: -2px;">---</span>
+        </div>
+    </div>
+</div>
+
+
+
+            <!-- FIM DA ETIQUETA -->
+        </div>
+
+        <!-- RODAPÉ APENAS COM O BOTÃO DE IMPRESSÃO DIRETA -->
+        <div style="padding: 15px 20px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <button onclick="fecharModalEtiqueta()" style="padding: 8px 16px; background-color: #e2e8f0; color: #334155; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                Fechar
+            </button>
+            <button onclick="validarEImprimir()" style="padding: 10px 24px; background-color: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                🖨️ Imprimir Etiqueta
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+
+<!-- MODAL DE LOTES E EXTINTORES PENDENTES -->
+<div id="modalLotesEtiquetas" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-[10000] p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        
+        <!-- Cabeçalho do Modal -->
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-800/50">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-print text-indigo-400"></i>
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Impressão de Etiquetas por Lote - Pendentes</h3>
+            </div>
+            <button onclick="fecharModalLotes()" class="text-slate-400 hover:text-white text-sm px-2 py-1 rounded-lg bg-slate-800">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Corpo do Modal com a Tabela -->
+        <div class="p-4 flex-1 overflow-y-auto">
+            <p class="text-xs text-slate-400 mb-3">Selecione abaixo os extintores que deseja incluir no lote de impressão:</p>
+            
+            <div class="w-full overflow-x-auto rounded-lg border border-slate-800 bg-slate-950/40">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-800 text-slate-300 font-semibold border-b border-slate-700">
+                            <th class="p-3 w-10 text-center"><input type="checkbox" id="selecionarTodos" onclick="toggleSelecionarTodos(this)"></th>
+                            <th class="p-3">ID</th>
+                            <th class="p-3">Nº Selo</th>
+                            <th class="p-3">Nº Cilindro</th>
+                            <th class="p-3">NBR</th>
+                            <th class="p-3">Fabricante</th>
+                            <th class="p-3">Tipo / Capacidade</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaExtintoresPendentesBody" class="divide-y divide-slate-800 text-slate-300">
+                        <tr>
+                            <td colspan="7" class="p-4 text-center text-slate-500">Carregando extintores pendentes...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Rodapé do Modal -->
+        <div class="p-4 border-t border-slate-800 bg-slate-800/50 flex items-center justify-between">
+            <span id="contadorSelecionados" class="text-xs text-slate-400">0 extintores selecionados</span>
+            <div class="flex gap-2">
+                <button onclick="fecharModalLotes()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg uppercase">Cancelar</button>
+                <button onclick="gerarLoteEImprimir()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg uppercase shadow-lg shadow-indigo-600/20 flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Gerar Lote e Imprimir
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    </div> <!-- Fim do modalLotesEtiquetas -->
+
+<!-- MODAL DE CONFIGURAÇÕES DE REGISTRO (ATUALIZADO COM OS DOIS MODOS) -->
+<div id="modalConfiguracoes" class="fixed inset-0 z-[99999] hidden items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 md:p-8">
+    <div class="bg-slate-900 border-2 border-slate-700 w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+        
+        <!-- Cabeçalho do Modal -->
+        <div class="px-8 py-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/60">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center text-2xl border border-amber-500/30 shadow-inner">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                    <h3 class="text-white font-black text-lg md:text-xl uppercase tracking-wider">Configurações do Sistema</h3>
+                    <p class="text-xs md:text-sm text-slate-400 mt-0.5">Selecione o modo de operação e gerencie as preferências de etiquetas.</p>
+                </div>
+            </div>
+            <button id="fecharModalConfigBtn" class="text-slate-400 hover:text-white transition-colors text-2xl p-3 rounded-xl hover:bg-slate-800"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- Barra de Abas -->
+        <div class="flex border-b border-slate-800 bg-slate-950/60 px-8 gap-3 pt-4">
+            <button onclick="mudarAbaModal('modo')" id="tabBtnModo" class="px-6 py-3.5 text-sm md:text-base font-black uppercase tracking-wider rounded-t-2xl border-t-2 border-x-2 border-amber-500/50 bg-slate-900 text-amber-400 transition-all flex items-center gap-3 shadow-lg">
+                <i class="fa-solid fa-store text-base"></i> Modo de Registro
+            </button>
+            <button onclick="mudarAbaModal('geral')" id="tabBtnGeral" class="px-6 py-3.5 text-sm md:text-base font-black uppercase tracking-wider rounded-t-2xl border-t-2 border-x-2 border-transparent text-slate-400 hover:text-white hover:bg-slate-800/40 transition-all flex items-center gap-3">
+                <i class="fa-solid fa-print text-base"></i> Geral / Impressão
+            </button>
+        </div>
+
+        <!-- Conteúdo das Abas -->
+        <div class="p-8 space-y-6 overflow-y-auto flex-1">
+            
+            <!-- ABA 1: MODO DE REGISTRO -->
+            <div id="abaConteudoModo" class="space-y-6">
+                
+                <!-- CARD 1: MODO BALCÃO / AVULSO -->
+                <div id="cardBalcaoContainer" class="p-6 bg-slate-800/50 border-2 border-slate-700/80 rounded-3xl flex items-center justify-between shadow-md transition-all">
+                    <div class="flex items-center gap-4.5">
+                        <div id="iconBalcaoBg" class="w-12 h-12 bg-amber-500/15 rounded-2xl flex items-center justify-center text-amber-400 text-xl shrink-0 border border-amber-500/20">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm md:text-base font-black text-white uppercase tracking-wide">Modo Balcão / Avulso</div>
+                            <div class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed">Ativa o registro rápido de extintores sem vínculo estrito com OS de produção ou cargas de rota.</div>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                        <input type="checkbox" id="switchModoBalcao" class="sr-only peer" onchange="selecionarModoRegistro('balcao', this.checked)">
+                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-amber-500 shadow-inner"></div>
+                    </label>
+                </div>
+
+                <!-- CARD 2: MODO DEMANDA (CARGA ATIVA) -->
+                <div id="cardDemandaContainer" class="p-6 bg-slate-800/50 border-2 border-slate-700/80 rounded-3xl flex items-center justify-between shadow-md transition-all">
+                    <div class="flex items-center gap-4.5 flex-1 pr-4">
+                        <div id="iconDemandaBg" class="w-12 h-12 bg-indigo-500/15 rounded-2xl flex items-center justify-center text-indigo-400 text-xl shrink-0 border border-indigo-500/20">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm md:text-base font-black text-white uppercase tracking-wide">Modo Demanda (Carga Ativa)</div>
+                            <div id="modalInfoDemanda" class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed">
+                                Carregando detalhes da demanda...
+                            </div>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                        <input type="checkbox" id="switchModoDemanda" class="sr-only peer" onchange="selecionarModoRegistro('demanda', this.checked)">
+                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+                    </label>
+                </div>
+
+            </div>
+
+            <!-- ABA 2: GERAL / IMPRESSÃO -->
+            <div id="abaConteudoGeral" class="hidden space-y-6">
+                <!-- Imprimir Etiqueta Avulsa -->
+                <div class="p-6 bg-slate-800/50 border border-slate-700/80 rounded-3xl flex items-center justify-between shadow-md">
+                    <div class="flex items-center gap-4.5">
+                        <div class="w-12 h-12 bg-indigo-500/15 rounded-2xl flex items-center justify-center text-indigo-400 text-xl shrink-0 border border-indigo-500/20">
+                            <i class="fa-solid fa-print"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm md:text-base font-black text-white uppercase tracking-wide">Imprimir Etiqueta Avulsa</div>
+                            <div class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed">Habilita a geração e impressão imediata de etiquetas avulsas.</div>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                        <input type="checkbox" id="switchEtiqueta" class="sr-only peer" checked>
+                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-500 shadow-inner"></div>
+                    </label>
+                </div>
+
+                <!-- Impressão por Lote -->
+                <div class="p-6 bg-slate-800/50 border border-slate-700/80 rounded-3xl space-y-5 shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4.5">
+                            <div class="w-12 h-12 bg-indigo-500/15 rounded-2xl flex items-center justify-center text-indigo-400 text-xl shrink-0 border border-indigo-500/20">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm md:text-base font-black text-white uppercase tracking-wide">Impressão por Lote</div>
+                                <div class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed">Define a quantidade padrão de itens por bloco de lote.</div>
+                            </div>
+                        </div>
+                        <input type="number" id="inputQtdLote" min="1" value="10" class="w-24 bg-slate-900 border-2 border-slate-700 text-white text-base md:text-lg font-black rounded-xl py-2.5 px-3 text-center focus:outline-none focus:border-indigo-500 shadow-inner">
+                    </div>
+
+                    <button onclick="abrirModalLotes()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-6 rounded-2xl text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all shadow-xl shadow-indigo-600/20">
+                        <i class="fa-solid fa-list-check text-lg"></i> Gerenciar Lotes / Pendentes
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Rodapé do Modal -->
+        <div class="px-8 py-5 bg-slate-800/40 border-t border-slate-800 flex justify-end">
+            <button id="concluirModalConfigBtn" class="px-8 py-3.5 bg-amber-500 text-slate-950 rounded-2xl text-xs md:text-sm font-black uppercase tracking-wider hover:bg-amber-400 transition-all shadow-xl shadow-amber-500/20">
+                Concluído
+            </button>
+        </div>
+    </div>
+</div>
+ 
+</div>
+
+
+        <script type="module" src="/Rastreabilidade/entry.js"></script>
+
+    </body>
+</html>

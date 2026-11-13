@@ -14,3 +14,4 @@ import "./inutilizar.js";
 import "./nbr.js";
 import "./tipos.js";
 import "./capacidade.js";
+import "./modoDeProucao.js"

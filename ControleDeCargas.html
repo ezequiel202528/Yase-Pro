@@ -141,7 +141,8 @@
         }
       }
       #modalCarga,
-      #modalAssinatura {
+      #modalAssinatura,
+      #modalDetalhesCarga {
         background-color: rgba(11, 15, 25, 0.8);
         backdrop-filter: blur(12px);
       }
@@ -341,6 +342,67 @@
               <i class="fa-solid fa-chevron-right text-xs"></i>
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE DETALHES / ITENS LANÇADOS (AMARRAÇÃO COM RASTREIO FULL) -->
+    <div
+      id="modalDetalhesCarga"
+      class="fixed inset-0 z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="glass-card w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden animate-fade-in border border-white/10 flex flex-col max-h-[90vh]"
+      >
+        <div
+          class="px-6 py-5 border-b border-white/10 flex justify-between items-center bg-slate-900/90 shrink-0"
+        >
+          <div>
+            <h2
+              class="font-bold text-sm uppercase tracking-wider text-amber-400 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-clipboard-list w-5 h-5"></i> Extintores Lançados - NF: <span id="modalDetalhesNF" class="text-white"></span>
+            </h2>
+            <p id="modalDetalhesCliente" class="text-xs text-slate-400 mt-0.5"></p>
+          </div>
+          <button
+            onclick="fecharModalDetalhesCarga()"
+            class="text-slate-400 hover:text-white p-1"
+          >
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto custom-scroll flex-1">
+          <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/60">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-[10px] uppercase font-black text-slate-400 border-b border-slate-800 tracking-wider">
+                <tr>
+                  <th class="p-3">#</th>
+                  <th class="p-3">Selo Inmetro</th>
+                  <th class="p-3">Nº Cilindro</th>
+                  <th class="p-3">Tipo / Capacidade</th>
+                  <th class="p-3">Ano Fab</th>
+                  <th class="p-3">Últ. Reteste</th>
+                  <th class="p-3">Próx. Reteste</th>
+                  <th class="p-3">Operador</th>
+                  <th class="p-3 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaDetalhesItens" class="divide-y divide-slate-800">
+                <!-- Preenchido dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-900/80 border-t border-white/10 flex justify-end shrink-0">
+          <button
+            onclick="fecharModalDetalhesCarga()"
+            class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all"
+          >
+            Fechar
+          </button>
         </div>
       </div>
     </div>
@@ -557,6 +619,9 @@
         await carregarDadosEmpresa();
         await carregarDemandasDoSupabase();
         await carregarVendedoresModal();
+
+        // ⚡ ATIVA O TEMPO REAL AQUI
+        configurarRealtimeCargas();
       });
 
       async function carregarDadosEmpresa() {
@@ -713,6 +778,11 @@
                 <!-- Botão de Assinatura -->
                 ${botaoAssinaturaHtml}
 
+                <!-- ⚡ BOTÃO DE AMARRAÇÃO PARA VER ITENS LANÇADOS (RASTREIO FULL) -->
+                <button onclick='abrirDetalhesCarga("${d.id}")' class="w-full bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs font-black py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-950/20 active:scale-[0.98]">
+                  <i class="fa-solid fa-list-check"></i> Ver Extintores Lançados
+                </button>
+
                 <!-- Botões de Ação -->
                 <div class="space-y-2 pt-1">
                   ${
@@ -784,6 +854,82 @@
         document.getElementById("countPendente").textContent = qtdPendente;
         document.getElementById("countConcluido").textContent = qtdConcluido;
       }
+
+      // ⚡ FUNÇÃO PARA ABRIR O MODAL E BUSCAR OS ITENS DA RASTREIO FULL
+      async function abrirDetalhesCarga(idCarga) {
+        const carga = todasDemandas.find(d => d.id === idCarga);
+        if (!carga) return;
+
+        document.getElementById("modalDetalhesNF").textContent = carga.nota_fiscal || "S/N";
+        document.getElementById("modalDetalhesCliente").textContent = `Cliente: ${carga.cliente || "Não informado"} | Vendedor: ${carga.vendedor_nome || "N/A"}`;
+        
+        const tbody = document.getElementById("tabelaDetalhesItens");
+        tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-500 italic"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Carregando itens lançados...</td></tr>`;
+        
+        document.getElementById("modalDetalhesCarga").classList.remove("hidden");
+
+        try {
+          let itens = [];
+          // Tenta buscar com relacionamento de fabricante
+          let { data, error } = await sb
+            .from("itens_os")
+            .select("*, fabricantes:fabricante_id ( nome )")
+            .eq("carga_id", idCarga)
+            .order("created_at", { ascending: true });
+
+          if (error) {
+            console.warn("⚠️ Relacionamento indisponível, usando busca simples:", error.message);
+            const simples = await sb
+              .from("itens_os")
+              .select("*")
+              .eq("carga_id", idCarga)
+              .order("created_at", { ascending: true });
+
+            if (simples.error) throw simples.error;
+            itens = simples.data || [];
+          } else {
+            itens = data || [];
+          }
+
+          if (!itens || itens.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-500 italic">Nenhum extintor lançado para esta carga ainda.</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = itens.map((item, index) => {
+            const s = (item.status_servico || item.status || "APROVADO").toUpperCase();
+            let classesStatus = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+            if (s === "REPROVADO" || s === "REP" || s === "INUTILIZADO") {
+              classesStatus = "bg-red-500/10 text-red-400 border-red-500/20";
+            } else if (s === "NOVO") {
+              classesStatus = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+            }
+
+            return `
+              <tr class="hover:bg-slate-900/50 transition-colors">
+                <td class="p-3 font-bold text-slate-500">${index + 1}</td>
+                <td class="p-3 font-black text-amber-500">${item.prefixo_selo ? item.prefixo_selo + "-" : ""}${item.selo_inmetro ?? "-"}</td>
+                <td class="p-3 font-bold text-white">${item.nr_cilindro || "S/N"}</td>
+                <td class="p-3 font-bold text-indigo-400">${item.tipo_carga || "-"} / ${item.capacidade || "-"}</td>
+                <td class="p-3">${item.ano_fab || "-"}</td>
+                <td class="p-3">${item.ult_reteste || "-"}</td>
+                <td class="p-3 text-orange-400 font-bold">${item.prox_reteste || "-"}</td>
+                <td class="p-3 text-slate-400">${item.usuario_lancamento || "-"}</td>
+                <td class="p-3 text-center"><span class="px-2 py-0.5 rounded border font-bold text-[9px] ${classesStatus}">${s}</span></td>
+              </tr>
+            `;
+          }).join("");
+
+        } catch (err) {
+          console.error("Erro ao carregar itens da carga:", err);
+          tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-red-400 italic">Erro ao carregar os itens lançados: ${err.message || "Erro desconhecido"}</td></tr>`;
+        }
+      }
+
+      function fecharModalDetalhesCarga() {
+        document.getElementById("modalDetalhesCarga").classList.add("hidden");
+      }
+
       function abrirModalAssinaturaPorId(idCarga) {
         const d = todasDemandas.find((item) => item.id === idCarga);
         if (!d) return;
@@ -819,7 +965,6 @@
       }
 
       // Função que gera e baixa o PDF do pedido a partir do Modal de Assinatura
-
       function baixarPdfPedido() {
         if (!demandaAtualSelecionada) {
           return mostrarToast("Nenhum pedido selecionado.", "erro");
@@ -1062,6 +1207,7 @@
         doc.save(`Pedido_NF_${d.nota_fiscal || "carga"}.pdf`);
         mostrarToast("PDF baixado com sucesso!");
       }
+
       function irParaProducao(idCarga, nf) {
         window.location.href = `Rastreio_Full.html?cargaId=${idCarga}&nf=${nf}`;
       }
@@ -1089,14 +1235,12 @@
         const dataInicioVal = document.getElementById("filtroDataInicio").value;
         const dataFimVal = document.getElementById("filtroDataFim").value;
 
-        // Converte as datas dos inputs para objetos Date (ignorando fuso horário na comparação de dias)
         let dataInicio = dataInicioVal
           ? new Date(dataInicioVal + "T00:00:00")
           : null;
         let dataFim = dataFimVal ? new Date(dataFimVal + "T23:59:59") : null;
 
         const filtradas = todasDemandas.filter((d) => {
-          // 1. Filtro por Texto (Cliente, NF ou Vendedor)
           const matchTexto =
             !termo ||
             (d.cliente && d.cliente.toLowerCase().includes(termo)) ||
@@ -1105,8 +1249,7 @@
 
           if (!matchTexto) return false;
 
-          // 2. Filtro por Data Retroativa / Período
-          if (!d.data_criacao) return true; // Se não tiver data, exibe para não ocultar registros órfãos
+          if (!d.data_criacao) return true;
 
           const dataCarga = new Date(d.data_criacao);
 
@@ -1130,9 +1273,11 @@
         renderizarKanban(todasDemandas);
         mostrarToast("Filtros limpos!");
       }
+
       function abrirModalCarga() {
         document.getElementById("modalCarga").classList.remove("hidden");
       }
+
       function fecharModalCarga() {
         document.getElementById("modalCarga").classList.add("hidden");
         itensModalTemp = [];
@@ -1248,16 +1393,6 @@
         setTimeout(() => toast.remove(), 3500);
       }
 
-      window.addEventListener("DOMContentLoaded", async () => {
-        if (window.lucide) lucide.createIcons();
-        await carregarDadosEmpresa();
-        await carregarDemandasDoSupabase();
-        await carregarVendedoresModal();
-
-        // ⚡ ATIVA O TEMPO REAL AQUI
-        configurarRealtimeCargas();
-      });
-
       // ESCUTA ALTERAÇÕES EM TEMPO REAL NO KANBAN
       function configurarRealtimeCargas() {
         sb.channel("public:cargas_demandas")
@@ -1269,15 +1404,11 @@
                 "⚡ Mudança detectada nas cargas em tempo real:",
                 payload,
               );
-              carregarDemandasDoSupabase(); // Recarrega o Kanban automaticamente!
+              carregarDemandasDoSupabase();
             },
           )
           .subscribe();
       }
-
-
-
-      
     </script>
   </body>
 </html>

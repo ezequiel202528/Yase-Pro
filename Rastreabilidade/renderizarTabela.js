@@ -623,11 +623,11 @@ async function registrarItem() {
         console.log("📦 Modo lote ativo: Item registrado.");
     }
 
-    if (modoBalcaoAtivo) {
-        if (switchElement) switchElement.checked = false;
-        localStorage.removeItem('modo_balcao_ativo');
-        console.log("🛒 Balcão registrado com sucesso. Retornando para a demanda ativa.");
-    }
+    // if (modoBalcaoAtivo) {
+    //     if (switchElement) switchElement.checked = false;
+    //     localStorage.removeItem('modo_balcao_ativo');
+    //     console.log("🛒 Balcão registrado com sucesso. Retornando para a demanda ativa.");
+    // }
 
     if (typeof window.atualizarEspelhoProducao === "function") {
         window.atualizarEspelhoProducao();
@@ -868,12 +868,21 @@ function limparCamposAposRegistro() {
   if (displayFabricante) {
     displayFabricante.innerText = "";
   }
+
   const checkboxes = document.querySelectorAll('input[type="checkbox"]');
   checkboxes.forEach((cb) => {
-    if (cb.id !== "switchEtiqueta") {
+    // Protege o switch de etiqueta e os switches de modo para não serem limpos pelo reset
+    if (cb.id !== "switchEtiqueta" && cb.id !== "switchModoBalcao" && cb.id !== "switchModoDemanda") {
       cb.checked = false;
     }
   });
+
+  // const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  // checkboxes.forEach((cb) => {
+  //   if (cb.id !== "switchEtiqueta") {
+  //     cb.checked = false;
+  //   }
+  // });
   const badgeComp = document.getElementById("badge-comp");
   if (badgeComp) {
     badgeComp.innerText = "0";
@@ -1148,12 +1157,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (switchEl) switchEl.checked = isBalcao;
 });
 
-// Ao carregar a página, já deixa o checkbox marcado se o modo balcão estiver ativo
-window.addEventListener("DOMContentLoaded", () => {
-    const isBalcao = localStorage.getItem('modo_balcao_ativo') === 'true';
-    const switchEl = document.getElementById('switchModoBalcao');
-    if (switchEl) switchEl.checked = isBalcao;
-});
+
   
 window.fixData = fixData;
 window.carregarItens = carregarItens;

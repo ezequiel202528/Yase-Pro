@@ -150,8 +150,28 @@
         <!-- O card renderizado via JavaScript vai aparecer aqui -->
       </div>
 
+      <!-- BOTÃO PARA ABRIR O MODAL DE CONFIGURAÇÕES DE REGISTRO -->
+<div id="btnConfigRegistro" class="mt-3 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between cursor-pointer hover:border-amber-500/50 transition-all group">
+  <div class="flex items-center gap-2">
+    <i class="fa-solid fa-sliders text-amber-500 text-xs group-hover:rotate-90 transition-transform"></i>
+    <span class="text-[10px] font-black text-slate-300 uppercase tracking-wider group-hover:text-white transition-colors">Configurar modo de registro</span>
+  </div>
+  <i class="fa-solid fa-chevron-right text-[10px] text-slate-500 group-hover:text-amber-500 transition-colors"></i>
+</div>
+
+<!-- INDICADOR VISUAL DO MODO ATIVO -->
+<div class="mt-3 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between shadow-inner">
+    <div class="flex flex-col">
+        <span class="text-[8px] text-slate-500 font-black uppercase tracking-widest">Modo</span>
+        <span class="text-[10px] font-black text-slate-200 uppercase tracking-tight">Ativo:</span>
+    </div>
+    <div id="badgeModoAtivo" class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-indigo-950/60 text-indigo-400 border border-indigo-500/30 flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-box text-[9px]"></i> <span id="textoModoAtivo">Modo Demanda</span>
+    </div>
+</div>
+
       <!-- CHECKBOX DE VENDA DE BALCÃO / AVULSO NO ASIDE -->
-      <div class="mt-3 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between">
+      <!-- <div class="mt-3 p-3 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between">
         <div class="flex items-center gap-2">
           <i class="fa-solid fa-store text-amber-500 text-xs"></i>
           <span class="text-[10px] font-black text-slate-300 uppercase tracking-wider">Modo Balcão / Avulso</span>
@@ -160,7 +180,7 @@
           <input type="checkbox" id="switchModoBalcao" class="sr-only peer" onchange="toggleModoBalcao(this)">
           <div class="w-7 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-500"></div>
         </label>
-      </div>
+      </div> -->
 
     </div>
 
@@ -273,7 +293,7 @@
                 </button>
             </div>
 
-            <div class="flex items-center justify-between p-2 bg-slate-800/30 rounded-xl mb-3 border border-slate-700/50">
+            <!-- <div class="flex items-center justify-between p-2 bg-slate-800/30 rounded-xl mb-3 border border-slate-700/50">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-print text-slate-500 text-[10px]"></i>
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Imprimir Etiqueta Avulsa</span>
@@ -285,9 +305,9 @@
             </div>
 
          <div class="mt-4 p-3 bg-slate-800/40 rounded-xl border border-slate-700/50">
-                <!-- BLOCO: IMPRESSÃO POR LOTE (Alinhado exatamente igual ao avulso) -->
-                <div class="flex items-center justify-between p-2 bg-slate-800/30 rounded-xl mb-3 border border-slate-700/50">
-                    <div class="flex items-center gap-2">
+                BLOCO: IMPRESSÃO POR LOTE (Alinhado exatamente igual ao avulso)
+                <div class="flex items-center justify-between p-2 bg-slate-800/30 rounded-xl mb-3 border border-slate-700/50"> -->
+                    <!-- <div class="flex items-center gap-2">
                         <i class="fa-solid fa-layer-group text-slate-500 text-[10px]"></i>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Impressão por Lote</span>
                     </div>
@@ -298,7 +318,7 @@
                     <button onclick="abrirModalLotes()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-1.5 px-4 rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors">
                         <i class="fa-solid fa-list-check"></i> Gerenciar Lotes / Pendentes
                     </button>
-                </div>
+                </div> --> 
 
 
             <button onclick="registrarItem()" class="w-max mx-auto bg-indigo-600 text-white font-bold py-1.5 px-6 rounded-lg text-[10px] uppercase shadow-md hover:bg-indigo-700 transition-all flex items-center gap-2">
@@ -824,6 +844,11 @@
     </div>
 </div>
 
+
+
+
+
+
 <div id="modalEtiqueta" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-300 text-black">
         
@@ -917,6 +942,8 @@
     </div>
 </div>
 
+
+
 <!-- MODAL DE LOTES E EXTINTORES PENDENTES -->
 <div id="modalLotesEtiquetas" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-[10000] p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
@@ -970,11 +997,136 @@
         </div>
 
     </div>
+
+    </div> <!-- Fim do modalLotesEtiquetas -->
+
+<!-- MODAL DE CONFIGURAÇÕES DE REGISTRO (ATUALIZADO COM OS DOIS MODOS) -->
+<div id="modalConfiguracoes" class="fixed inset-0 z-[99999] hidden items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 md:p-8">
+    <div class="bg-slate-900 border-2 border-slate-700 w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+        
+        <!-- Cabeçalho do Modal -->
+        <div class="px-8 py-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/60">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-amber-500/10 text-amber-500 rounded-2xl flex items-center justify-center text-2xl border border-amber-500/30 shadow-inner">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                    <h3 class="text-white font-black text-lg md:text-xl uppercase tracking-wider">Configurações do Sistema</h3>
+                    <p class="text-xs md:text-sm text-slate-400 mt-0.5">Selecione o modo de operação e gerencie as preferências de etiquetas.</p>
+                </div>
+            </div>
+            <button id="fecharModalConfigBtn" class="text-slate-400 hover:text-white transition-colors text-2xl p-3 rounded-xl hover:bg-slate-800"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- Barra de Abas -->
+        <div class="flex border-b border-slate-800 bg-slate-950/60 px-8 gap-3 pt-4">
+            <button onclick="mudarAbaModal('modo')" id="tabBtnModo" class="px-6 py-3.5 text-sm md:text-base font-black uppercase tracking-wider rounded-t-2xl border-t-2 border-x-2 border-amber-500/50 bg-slate-900 text-amber-400 transition-all flex items-center gap-3 shadow-lg">
+                <i class="fa-solid fa-store text-base"></i> Modo de Registro
+            </button>
+            <button onclick="mudarAbaModal('geral')" id="tabBtnGeral" class="px-6 py-3.5 text-sm md:text-base font-black uppercase tracking-wider rounded-t-2xl border-t-2 border-x-2 border-transparent text-slate-400 hover:text-white hover:bg-slate-800/40 transition-all flex items-center gap-3">
+                <i class="fa-solid fa-print text-base"></i> Geral / Impressão
+            </button>
+        </div>
+
+        <!-- Conteúdo das Abas -->
+        <div class="p-8 space-y-6 overflow-y-auto flex-1">
+            
+            <!-- ABA 1: MODO DE REGISTRO -->
+            <div id="abaConteudoModo" class="space-y-6">
+                
+                <!-- CARD 1: MODO BALCÃO / AVULSO -->
+                <div id="cardBalcaoContainer" class="p-6 bg-slate-800/50 border-2 border-slate-700/80 rounded-3xl flex items-center justify-between shadow-md transition-all">
+                    <div class="flex items-center gap-4.5">
+                        <div id="iconBalcaoBg" class="w-12 h-12 bg-amber-500/15 rounded-2xl flex items-center justify-center text-amber-400 text-xl shrink-0 border border-amber-500/20">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm md:text-base font-black text-white uppercase tracking-wide">Modo Balcão / Avulso</div>
+                            <div class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed">Ativa o registro rápido de extintores sem vínculo estrito com OS de produção ou cargas de rota.</div>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                        <input type="checkbox" id="switchModoBalcao" class="sr-only peer" onchange="selecionarModoRegistro('balcao', this.checked)">
+                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-amber-500 shadow-inner"></div>
+                    </label>
+                </div>
+
+                <!-- CARD 2: MODO DEMANDA (CARGA ATIVA) -->
+                <div id="cardDemandaContainer" class="p-6 bg-slate-800/50 border-2 border-slate-700/80 rounded-3xl flex items-center justify-between shadow-md transition-all">
+                    <div class="flex items-center gap-4.5 flex-1 pr-4">
+                        <div id="iconDemandaBg" class="w-12 h-12 bg-indigo-500/15 rounded-2xl flex items-center justify-center text-indigo-400 text-xl shrink-0 border border-indigo-500/20">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm md:text-base font-black text-white uppercase tracking-wide">Modo Demanda (Carga Ativa)</div>
+                            <div id="modalInfoDemanda" class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed">
+                                Carregando detalhes da demanda...
+                            </div>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                        <input type="checkbox" id="switchModoDemanda" class="sr-only peer" onchange="selecionarModoRegistro('demanda', this.checked)">
+                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+                    </label>
+                </div>
+
+            </div>
+
+            <!-- ABA 2: GERAL / IMPRESSÃO -->
+            <div id="abaConteudoGeral" class="hidden space-y-6">
+                <!-- Imprimir Etiqueta Avulsa -->
+                <div class="p-6 bg-slate-800/50 border border-slate-700/80 rounded-3xl flex items-center justify-between shadow-md">
+                    <div class="flex items-center gap-4.5">
+                        <div class="w-12 h-12 bg-indigo-500/15 rounded-2xl flex items-center justify-center text-indigo-400 text-xl shrink-0 border border-indigo-500/20">
+                            <i class="fa-solid fa-print"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm md:text-base font-black text-white uppercase tracking-wide">Imprimir Etiqueta Avulsa</div>
+                            <div class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed">Habilita a geração e impressão imediata de etiquetas avulsas.</div>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                        <input type="checkbox" id="switchEtiqueta" class="sr-only peer" checked>
+                        <div class="w-14 h-7 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-500 shadow-inner"></div>
+                    </label>
+                </div>
+
+                <!-- Impressão por Lote -->
+                <div class="p-6 bg-slate-800/50 border border-slate-700/80 rounded-3xl space-y-5 shadow-md">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4.5">
+                            <div class="w-12 h-12 bg-indigo-500/15 rounded-2xl flex items-center justify-center text-indigo-400 text-xl shrink-0 border border-indigo-500/20">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm md:text-base font-black text-white uppercase tracking-wide">Impressão por Lote</div>
+                                <div class="text-xs md:text-sm text-slate-300 mt-1 leading-relaxed">Define a quantidade padrão de itens por bloco de lote.</div>
+                            </div>
+                        </div>
+                        <input type="number" id="inputQtdLote" min="1" value="10" class="w-24 bg-slate-900 border-2 border-slate-700 text-white text-base md:text-lg font-black rounded-xl py-2.5 px-3 text-center focus:outline-none focus:border-indigo-500 shadow-inner">
+                    </div>
+
+                    <button onclick="abrirModalLotes()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-6 rounded-2xl text-xs md:text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all shadow-xl shadow-indigo-600/20">
+                        <i class="fa-solid fa-list-check text-lg"></i> Gerenciar Lotes / Pendentes
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Rodapé do Modal -->
+        <div class="px-8 py-5 bg-slate-800/40 border-t border-slate-800 flex justify-end">
+            <button id="concluirModalConfigBtn" class="px-8 py-3.5 bg-amber-500 text-slate-950 rounded-2xl text-xs md:text-sm font-black uppercase tracking-wider hover:bg-amber-400 transition-all shadow-xl shadow-amber-500/20">
+                Concluído
+            </button>
+        </div>
+    </div>
+</div>
+ 
 </div>
 
 
+        <script type="module" src="/Rastreabilidade/entry.js"></script>
 
-<script type="module" src="/Rastreabilidade/entry.js"></script>
-
-  </body>
+    </body>
 </html>
